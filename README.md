@@ -181,6 +181,15 @@ Skip this section if email login is enough. The Google button stays disabled unt
 
 If a Google account uses an email that already has a password account, sign in with the password first, then use **Connect or sign in with Google** from the account dialog. The game will not silently merge those two accounts.
 
+## Deploy to Vercel + Supabase
+
+For a public deployment (Vercel hosting, Supabase PostgreSQL instead of a
+local database), see **[DEPLOYMENT.md](DEPLOYMENT.md)**. In short: run
+[`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor (or
+`npm run db:push` with `DIRECT_URL` set), set `DATABASE_URL` (transaction
+pooler, port 6543), `DIRECT_URL` (session/direct, port 5432) and `APP_URL`
+in Vercel, then deploy. Verify at `https://<your-domain>/api/health`.
+
 ## Run the production build
 
 Development mode is enough for playing and editing. For the optimized version:
