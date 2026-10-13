@@ -64,6 +64,25 @@ Postgres connection keeps working. Don't add permissive policies.
 
 ## 2. Vercel: deploy
 
+### Option 0 — GitHub Actions (automated, what this repo is set up for)
+
+`.github/workflows/deploy.yml` does everything on a GitHub runner:
+applies `supabase/schema.sql`, creates/links the Vercel project, sets
+`DATABASE_URL` / `DIRECT_URL` / `APP_URL`, deploys, and verifies
+`/api/health`. It needs three repository secrets
+(**Settings → Secrets and variables → Actions**):
+
+| Secret | Value |
+|---|---|
+| `SUPABASE_DATABASE_URL` | Transaction pooler (`:6543`) connection string |
+| `SUPABASE_SESSION_URL` | Session pooler (`:5432`) connection string |
+| `VERCEL_TOKEN` | Token from vercel.com/account/tokens |
+
+Then merge to `main` (pushes to `main` auto-run it) or run it manually
+from the **Actions** tab. Note the session pooler string differs from
+the direct string only in host/port/user:
+`postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres`.
+
 ### Option 1 — GitHub integration (set-and-forget)
 
 1. Push this repo to GitHub (already done for `Yakeo/gachadebtgame`).
