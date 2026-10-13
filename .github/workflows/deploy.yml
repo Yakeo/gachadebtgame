@@ -34,6 +34,16 @@ jobs:
 
       - run: npm ci
 
+      # Reports which secrets exist and whether their shape is usable, without
+      # ever printing a secret. Runs even when the deploy later fails, so the
+      # run page always shows the configuration it worked with.
+      - name: Preflight — report Supabase configuration
+        continue-on-error: true
+        env:
+          SUPABASE_SESSION_URL: ${{ secrets.SUPABASE_SESSION_URL }}
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+        run: node scripts/diagnose-supabase.mjs --no-connect
+
       - name: Apply Supabase schema (supabase/schema.sql)
         env:
           SUPABASE_SESSION_URL: ${{ secrets.SUPABASE_SESSION_URL }}

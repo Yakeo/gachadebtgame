@@ -1,0 +1,45 @@
+name: Diagnose Supabase config
+
+# Manual only — never runs on push, and never deploys anything.
+#
+# Actions tab -> "Diagnose Supabase config" -> Run workflow (branch: main).
+# It reports, without revealing any secret:
+#   * which repository secrets exist (SUPABASE_SESSION_URL, SUPABASE_DATABASE_URL,
+#     VERCEL_TOKEN, GOOGLE_*),
+#   * whether each connection string has a usable shape (pooler host, port,
+#     postgres.<project-ref> username, URL-encoded password),
+#   * whether a live connection to Supabase works, and which game tables exist.
+#
+# A failure prints the reason as a GitHub annotation at the top of the run page.
+
+on: workflow_dispatch
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Diagnose Supabase + Vercel configuration
+        env:
+          SUPABASE_SESSION_URL: ${{ secrets.SUPABASE_SESSION_URL }}
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          # Reported (never printed) so a misnamed secret is easy to spot.
+          SUPABASE_DIRECT_URL: ${{ secrets.SUPABASE_DIRECT_URL }}
+          SUPABASE_SESSION_POOLER_URL: ${{ secrets.SUPABASE_SESSION_POOLER_URL }}
+          SUPABASE_POOLER_URL: ${{ secrets.SUPABASE_POOLER_URL }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: node scripts/diagnose-supabase.mjs
