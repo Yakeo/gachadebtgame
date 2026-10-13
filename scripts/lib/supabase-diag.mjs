@@ -88,7 +88,9 @@ export function classifyUrl(raw, { role = "runtime", label = "connection string"
 
   if (!value) {
     problems.push(
-      `${label} is empty. Either the repository secret does not exist under this exact name, or it was saved with no value.`,
+      `${label} is empty. Either no repository secret exists under this exact name, it was saved with no ` +
+        `value, or it is an *environment* secret (Settings -> Environments) while the workflow expects a ` +
+        `repository secret (Settings -> Secrets and variables -> Actions).`,
     );
     return { present: false, ok: false, problems, notes };
   }

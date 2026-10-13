@@ -168,6 +168,35 @@ Email + guest login work without this. To enable the Google button:
 | Progress disappears | Guest saves live in the DB but are tied to the guest session cookie; register to keep them. If even account saves vanish, §1b wasn't run on this project. |
 | Changed `src/db/schema.ts` | Re-run `npm run db:push` (with `DIRECT_URL`) or re-run `supabase/schema.sql`, then redeploy. `npm run db:generate` refreshes `drizzle/`. |
 
+## 7. When a deploy fails
+
+A failing run shows only `Process completed with exit code 1`, and the raw step
+log is not always available through the API (GitHub serves it from blob
+storage). So the two scripts below raise **annotations**, which appear at the
+top of the run page and are always readable.
+
+| What to run | When |
+|---|---|
+| `Diagnose Supabase config` (Actions → Run workflow) | Before/after adding secrets: reports which secrets exist, whether the connection strings are *shaped* correctly, and whether a live connection works. It deploys nothing. |
+| `npm run db:diagnose` | Same report from your machine (add `--no-connect` to skip the connection test). |
+| `npm run db:supabase` | Applies `supabase/schema.sql` and explains any failure. |
+
+Both are **secret-safe**: they never print a connection string, password, or
+project ref. The deploy workflow runs the report as a preflight step
+(`continue-on-error`), so even a failed run shows the configuration it used.
+
+Shapes that are rejected up front, with the reason:
+
+* the `.env.example` placeholder text left in the value;
+* the IPv6-only direct host `db.<ref>.supabase.co` (GitHub runners are IPv4-only);
+* the transaction pooler (`:6543`) where DDL is needed — that is the session pooler's job;
+* a pooler username without the `.<ref>` suffix (`postgres` alone only exists on the direct host);
+* a password character that must be URL-encoded (`@` → `%40`, `/` → `%2F`, `#` → `%23`, …).
+
+Note that Supabase shows connection strings with a `[YOUR-PASSWORD]`
+placeholder — pasting that into a secret without substituting the real
+password is the single most common cause of this failure.
+
 ## Pre-existing note (not a deploy blocker)
 
 The repo references key art at `public/images/*.jpg`
