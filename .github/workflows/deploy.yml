@@ -1,0 +1,102 @@
+name: Deploy (Supabase + Vercel)
+
+# Manual: Actions tab -> "Deploy (Supabase + Vercel)" -> Run workflow.
+# Automatic: every push to main.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_DATABASE_URL  Transaction pooler (:6543) - the running game
+#   SUPABASE_SESSION_URL   Session pooler (:5432)    - applying the schema
+#   VERCEL_TOKEN           vercel.com/account/tokens
+# Optional: GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (added to Vercel if set)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PROJECT_NAME: gachadebtgame
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Apply Supabase schema (supabase/schema.sql)
+        env:
+          SUPABASE_SESSION_URL: ${{ secrets.SUPABASE_SESSION_URL }}
+        run: node scripts/apply-supabase-schema.mjs
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@63
+
+      - name: Create + link Vercel project
+        run: |
+          vercel project create "$PROJECT_NAME" --token "$VERCEL_TOKEN" || echo "Project may already exist, continuing"
+          vercel link --yes --project "$PROJECT_NAME" --token "$VERCEL_TOKEN"
+
+      - name: Set Vercel production env vars
+        env:
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          SUPABASE_SESSION_URL: ${{ secrets.SUPABASE_SESSION_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set_env() {
+            # $1=name $2=value; skips empty values (e.g. optional Google vars)
+            if [ -n "$2" ]; then
+              vercel env add "$1" production --value "$2" --force --yes --token "$VERCEL_TOKEN"
+              echo "set $1"
+            else
+              echo "skipped $1 (empty)"
+            fi
+          }
+          set_env DATABASE_URL "$SUPABASE_DATABASE_URL"
+          set_env DIRECT_URL "$SUPABASE_SESSION_URL"
+          set_env GOOGLE_CLIENT_ID "$GOOGLE_CLIENT_ID"
+          set_env GOOGLE_CLIENT_SECRET "$GOOGLE_CLIENT_SECRET"
+
+      - name: Deploy to Vercel (production)
+        id: deploy1
+        run: |
+          vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
+          vercel build --prod --token "$VERCEL_TOKEN"
+          URL=$(vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "First deployment: $URL"
+
+      - name: Set APP_URL and redeploy
+        id: deploy2
+        run: |
+          APP_URL="${{ steps.deploy1.outputs.url }}"
+          vercel env add APP_URL production --value "$APP_URL" --force --yes --token "$VERCEL_TOKEN"
+          vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
+          vercel build --prod --token "$VERCEL_TOKEN"
+          URL=$(vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Production URL: $URL" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify /api/health and homepage
+        run: |
+          URL="${{ steps.deploy2.outputs.url }}"
+          for i in $(seq 1 30); do
+            HEALTH=$(curl -s -m 10 "$URL/api/health" || true)
+            echo "attempt $i: $HEALTH"
+            if [ "$HEALTH" = '{"ok":true}' ]; then echo "health OK"; break; fi
+            if [ "$i" = "30" ]; then echo "health check FAILED"; exit 1; fi
+            sleep 10
+          done
+          curl -s -o /dev/null -w "homepage: %{http_code}\n" -m 15 "$URL/"
+          echo "Live at $URL" >> "$GITHUB_STEP_SUMMARY"
