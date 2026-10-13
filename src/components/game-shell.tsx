@@ -1,0 +1,121 @@
+"use client";
+import { useState, type FormEvent, type CSSProperties } from "react";
+import { ArrowRight, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp, Clock3, Crosshair, Expand, Gift, Heart, Home, Info, ListChecks, LogIn, LogOut, Mail, MessageCircle, Plus, Radio, RefreshCw, Settings, ShieldCheck, ShoppingBag, Sparkles, Star, UsersRound, Volume2, VolumeX, Waypoints, Zap, Eye, EyeOff } from "lucide-react";
+import { useCallback, useState as useBootState } from "react";
+import { GameProvider, useGame } from "./game-context";
+import { LoadingScreen, LoginScreen, TitleScreen } from "./boot-screen";
+import { Avatar, Credit, Gem, Logo, Modal, ProgressBar, Spinner } from "./ui";
+import { ArchiveView, CampaignView, CharactersView, ExchangeView, MissionsView, RecruitView } from "./game-views";
+import { chapters, stages } from "@/lib/campaign";
+import { missionProgress, missions } from "@/lib/game-data";
+type View = "home" | "campaign" | "characters" | "recruit" | "missions" | "archive" | "exchange";
+type Dialog = "account" | "settings" | "mail" | "notices" | "daily" | null;
+const navigation = [
+  { id: "home", name: "Home", icon: Home }, { id: "campaign", name: "Campaign", icon: Waypoints }, { id: "characters", name: "Characters", icon: UsersRound }, { id: "recruit", name: "Recruit", icon: Sparkles }, { id: "missions", name: "Missions", icon: ListChecks }, { id: "archive", name: "Archives", icon: BookOpen },
+] as const;
+export default function Game() { return <GameProvider><BootFlow /></GameProvider>; }
+function BootFlow() {
+  const [phase, setPhase] = useBootState<"loading" | "title" | "login" | "game">("loading");
+  const { clearSession } = useGame();
+  const finishLoading = useCallback((next: "title" | "login" | "game") => setPhase(next), []);
+  const signedOut = useCallback(() => { clearSession(); setPhase("login"); }, [clearSession]);
+  if (phase === "loading") return <LoadingScreen onComplete={finishLoading} />;
+  if (phase === "title") return <TitleScreen onStart={() => setPhase("login")} />;
+  if (phase === "login") return <LoginScreen onEnter={() => setPhase("game")} />;
+  return <GameShell onSignedOut={signedOut} />;
+}
+function GameShell({ onSignedOut }: { onSignedOut: () => void }) {
+  const { state, player, loading, busy, error, action, sound, setSound } = useGame();
+  const [view, setView] = useState<View>("home");
+  const [dialog, setDialog] = useState<Dialog>(null);
+  const readyMissions = missions.filter(m => !state.claimed.includes(m.id) && missionProgress(state, m.kind) >= m.goal).length;
+  const dailyReady = state.lastDaily !== new Date().toISOString().slice(0, 10);
+  const level = 1 + Math.floor(state.cleared.length * 1.5);
+  return <div className={`game-shell ${view === "home" ? "is-home" : ""}`}>
+    <header className="topbar">
+      <button className="brand-button" onClick={() => setView("home")} aria-label="Gacha Debt home"><Logo /></button>
+      <span className="header-divider" />
+      <button className="profile-button" onClick={() => setDialog("account")} aria-label="Open account and save progress"><div className="profile-avatar"><Avatar id="ynna" /><span>{String(level).padStart(2, "0")}</span></div><div className="profile-copy"><strong>{player?.name || "President"}<ChevronDown size={12} /></strong><small>{loading ? "CONNECTING TO COUNCIL…" : player?.guest || !player ? "STUDENT COUNCIL · GUEST" : "STUDENT COUNCIL · LINKED"}</small></div></button>
+      <div className="resource-bar"><button className="resource energy-resource" onClick={() => setView("exchange")} title="Energy · regenerates 1 point every 4 minutes"><Zap size={20} fill="currentColor" /><span>{state.energy}<small> / 120</small></span><Plus size={14} className="resource-plus" /></button><button className="resource" onClick={() => setView("missions")} title="Earn gems through campaign and missions"><Gem size={21} /><span>{state.gems.toLocaleString()}</span><Plus size={14} className="resource-plus" /></button><button className="resource" onClick={() => setView("exchange")} title="Campus credits · open exchange"><Credit size={22} /><span>{state.credits.toLocaleString()}</span><Plus size={14} className="resource-plus" /></button></div>
+      <div className="header-actions"><button className="icon-button" onClick={() => setDialog("notices")} aria-label="Notices"><Bell size={21} /><i className="notification-dot" /></button><button className="icon-button" onClick={() => setDialog("mail")} aria-label="Open inbox"><Mail size={23} />{dailyReady && <i className="notification-dot" />}</button><button className="icon-button" onClick={() => setDialog("settings")} aria-label="Settings"><Settings size={22} /></button></div>
+    </header>
+    <main className={`game-main view-${view}`}>
+      {error && <div className="connection-banner">We couldn’t reach your save. <button disabled={busy} onClick={() => action("init", {}, true)}>Reconnect <RefreshCw size={14} /></button></div>}
+      {view === "home" && <HomeView navigate={setView} openDialog={setDialog} dailyReady={dailyReady} />}
+      {view === "campaign" && <CampaignView />}
+      {view === "characters" && <CharactersView />}
+      {view === "recruit" && <RecruitView />}
+      {view === "missions" && <MissionsView />}
+      {view === "archive" && <ArchiveView />}
+      {view === "exchange" && <ExchangeView />}
+    </main>
+    <footer className="bottom-bar"><nav className="main-nav" aria-label="Game navigation">{navigation.map(item => <button key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}><item.icon size={23} strokeWidth={view === item.id ? 2.4 : 1.8} /><span>{item.name}</span>{item.id === "missions" && readyMissions > 0 && <span className="nav-count">{readyMissions}</span>}<span className="nav-index">0{navigation.indexOf(item) + 1}</span></button>)}</nav><div className="status-bar"><button className="music-button" onClick={() => setSound(!sound)} title={sound ? "Mute ambient music" : "Play ambient music"}>{sound ? <Volume2 size={13} /> : <VolumeX size={13} />}<span className={`equalizer ${sound ? "playing" : ""}`}><i/><i/><i/><i/></span><span>AFTER SCHOOL <b>—</b> A QUIET AFTERNOON</span></button><span className="build-label">GACHA DEBT <b>/</b> PREVIEW 0.1 · CONCEPT ART</span><span className="online-status"><i className={error ? "offline" : ""} />{loading ? "CONNECTING" : error ? "CONNECTION INTERRUPTED" : player?.guest ? "GUEST SESSION · LINK TO SAVE" : "ACCOUNT SYNCED"}</span></div></footer>
+    {dialog === "account" && <AccountDialog onClose={() => setDialog(null)} onSignedOut={onSignedOut} />}
+    {dialog === "settings" && <SettingsDialog onClose={() => setDialog(null)} openAccount={() => setDialog("account")} />}
+    {dialog === "daily" && <DailyDialog onClose={() => setDialog(null)} />}
+    {dialog === "mail" && <Modal title="Council inbox" eyebrow="YOU’VE GOT MAIL" onClose={() => setDialog(null)}><div className="mail-item"><div className="mail-icon"><Gift size={25} /></div><div><span className="eyebrow">FROM THE STUDENT COUNCIL</span><h3>A little help for your first chapter.</h3><p>Your starter supplies are already in your account: <strong>4,800 gems</strong> and <strong>25,000 credits</strong>. No real money. No fine print. Ninette insisted.</p><div className="delivered"><CheckCheck size={15} /> Starter supplies delivered</div></div></div><div className="mail-note"><Heart size={19} /><p>There’s also a new council gift every day. Stop by when you can!</p></div><button className="primary-button full-width" onClick={() => setDialog("daily")}>View daily gift <ArrowRight size={17} /></button></Modal>}
+    {dialog === "notices" && <Modal title="The council bulletin" eyebrow="WHAT’S NEW / PREVIEW 0.1" onClose={() => setDialog(null)}><div className="notice-hero"><Sparkles size={33} /><div><h3>Your very expensive adventure begins.</h3><p>A visual novel. A tactical RPG. A seriously questionable budget.</p></div></div><div className="notice-list"><p><Check size={16} /><span><strong>25 story stages</strong> across 5 chapters, from the first audit to the final override.</span></p><p><Check size={16} /><span><strong>Fair recruitment.</strong> An SSR or better within every 50 pulls. Published, fixed rates.</span></p><p><Check size={16} /><span><strong>Your progress is yours.</strong> Register to keep your squad and continue across devices.</span></p><p><Info size={16} /><span>All character illustrations are temporary concept art. Original designs will replace them.</span></p></div><button className="primary-button full-width" onClick={() => { setDialog(null); setView("campaign"); }}>Let’s make some questionable decisions <ArrowRight size={16} /></button></Modal>}
+    
+  </div>;
+}
+function HomeView({ navigate, openDialog, dailyReady }: { navigate: (view: View) => void; openDialog: (dialog: Dialog) => void; dailyReady: boolean }) {
+  const { state, player } = useGame();
+  const [quote, setQuote] = useState(0);
+  const [banner, setBanner] = useState(0);
+  const quotes = ["Just one more pull… What could possibly go wrong?", "Welcome back! Ninette says we're not allowed near the treasury. Again.", "A whole new adventure, and my favorite person to share it with. Ready?", "It's not a spending problem. It's a character-building experience!"];
+  const next = stages[Math.min(state.cleared.length, 24)];
+  const chapter = chapters[next.chapter - 1];
+  return <div className="home-scene">
+    <img className="home-keyart" src="/images/council-keyart.jpg" alt="Temporary concept art of Ynna in a sunlit student council room" fetchPriority="high" />
+    <div className="home-atmosphere" /><div className="home-grid" /><div className="scene-corner top-left" /><div className="scene-corner bottom-right" />
+    <div className="scene-location"><span className="location-cross"><Crosshair size={18} /></span><div><strong>STUDENT COUNCIL ROOM</strong><small>ACADEMY DISTRICT 07 <span> / </span> AFTER SCHOOL</small></div></div>
+    <div className="scene-welcome"><span>HOME TERMINAL</span><div>It’s good to have you back, <strong>{player?.name || "President"}.</strong><span className="tiny-spark">✦</span></div></div>
+    <div className="floating-particles" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <i key={i} style={{ "--i": i } as CSSProperties} />)}</div>
+    <div className="companion-tools"><button onClick={() => setQuote((quote + 1) % quotes.length)} aria-label="Talk to Ynna"><MessageCircle size={19} /></button><button onClick={() => openDialog("notices")} aria-label="About the game"><Info size={18} /></button></div>
+    <div className="companion-dialogue" key={quote}><div className="companion-name"><span>Ynna</span><small>YOUR COUNCIL COMPANION</small><Sparkles size={14} /></div><button className="companion-quote" onClick={() => setQuote((quote + 1) % quotes.length)} aria-label="Next companion dialogue"><span>“{quotes[quote]}”</span><span className="quote-next">▾</span></button><span className="companion-caption">A LITTLE LUCK. A LOT OF TROUBLE.</span></div>
+    <div className="featured-wrap"><button className={`featured-banner banner-${banner}`} onClick={() => banner === 1 ? openDialog("daily") : navigate(banner === 2 ? "campaign" : "recruit")}><img src={banner === 2 ? "/images/academy.jpg" : banner === 0 ? "/images/splash-penelope.jpg" : "/images/splash-purp.jpg"} alt="" /><div className="featured-shade" /><div className="featured-copy"><span className="eyebrow"><i />{banner === 0 ? "FEATURED RECRUITMENT" : banner === 1 ? "A GIFT FROM THE COUNCIL" : "YOUR STORY STARTS HERE"}</span><h3>{banner === 0 ? <>KITCHEN <span>CATASTROPHE</span></> : banner === 1 ? <>A LITTLE <span>GOOD LUCK</span></> : <>MIDNIGHT <span>MISCHIEF</span></>}</h3><p>{banner === 0 ? <><span className="gold-text">SSR</span> Penelope <b>RATE UP ↑</b></> : banner === 1 ? "160 gems. Every day. On the house." : <><span className="gold-text">SSR</span> Purp <b>RATE UP ↑</b></>}</p></div><span className="featured-arrow"><ArrowUpRight size={21} /></span></button><div className="banner-indicators">{[0, 1, 2].map(i => <button key={i} aria-label={`Show featured notice ${i + 1}`} aria-pressed={banner === i} className={banner === i ? "active" : ""} onClick={() => setBanner(i)} />)}<span>COUNCIL NEWS <span>01—03</span></span></div></div>
+    <div className="home-menu"><div className="menu-kicker"><span><i /> THE NEXT CHAPTER IS YOURS</span><Star size={14} /></div>
+      <button className="campaign-tile menu-tile" onClick={() => navigate("campaign")}><img src="/images/academy.jpg" alt="" /><div className="campaign-tile-shade" /><span className="tile-chapter-watermark">0{next.chapter}</span><div className="campaign-tile-top"><span className="tile-tag"><BookOpen size={12} /> MAIN STORY</span><span className="chapter-index">CHAPTER <b>0{next.chapter}</b></span></div><h1>Campaign<span className="heading-arrow"><ArrowUpRight size={34} strokeWidth={1.5} /></span></h1><p>{chapter.title}</p><div className="campaign-tile-bottom"><span className="next-label">{state.cleared.length >= 25 ? "COMPLETE" : "UP NEXT"}</span><span>{next.id}<b> / </b>{next.title}</span><ChevronRight size={17} /></div></button>
+      <div className="menu-row"><button className="characters-tile menu-tile" onClick={() => navigate("characters")}><div className="tile-watermark"><UsersRound size={105} strokeWidth={1.2} /></div><span className="tile-kicker">BETTER TOGETHER</span><UsersRound size={26} className="tile-symbol" /><h2>Characters</h2><div className="tile-foot"><span><b>{String(state.roster.length).padStart(2, "0")}</b> RECRUITED</span><ArrowUpRight size={19} /></div></button><button className="recruit-tile menu-tile" onClick={() => navigate("recruit")}><div className="tile-watermark"><Sparkles size={122} strokeWidth={1} /></div><span className="new-label">RATE UP!</span><span className="tile-kicker">MEET YOUR NEXT FAVORITE</span><Sparkles size={27} className="tile-symbol" /><h2>Recruit</h2><div className="tile-foot"><span><Gem size={12} /> <b>160</b> / PULL</span><ArrowUpRight size={19} /></div></button></div>
+      <div className="quick-menu"><button className="quick-tile menu-tile" onClick={() => navigate("missions")}><ListChecks size={28} /><span>Missions</span><small>MAKE IT COUNT</small><span className="quick-corner">↗</span></button><button className="quick-tile menu-tile" onClick={() => navigate("exchange")}><ShoppingBag size={27} /><span>Exchange</span><small>A FAIR TRADE</small><span className="quick-corner">↗</span></button><button className="quick-tile menu-tile" onClick={() => navigate("archive")}><BookOpen size={27} /><span>Archives</span><small>EVERY MOMENT</small><span className="quick-corner">↗</span></button></div>
+      <button className={`daily-strip ${!dailyReady ? "claimed" : ""}`} onClick={() => openDialog("daily")}><span className="daily-gift-icon">{dailyReady ? <Gift size={26} /> : <CheckCheck size={26} />}</span><span><strong>{dailyReady ? "A little gift. A big adventure." : "A little luck, delivered."}</strong><small>{dailyReady ? "Your daily council supplies are ready!" : "Your next council gift arrives tomorrow."}</small></span><span className="daily-claim">{dailyReady ? "CLAIM" : "CLAIMED"}<ChevronRight size={15} /></span>{dailyReady && <i className="daily-dot" />}</button>
+      <div className="home-menu-note"><ShieldCheck size={12} /><span>NO REAL-MONEY PURCHASES. JUST GOOD ADVENTURES.</span></div>
+    </div>
+  </div>;
+}
+function AccountDialog({ onClose, onSignedOut }: { onClose: () => void; onSignedOut: () => void }) {
+  const { player, state, googleEnabled, setAccount, notify, action } = useGame();
+  const [mode, setMode] = useState<"register" | "login">("register");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); setPending(true); setError("");
+    const form = new FormData(e.currentTarget);
+    try {
+      const response = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: mode, name: form.get("name"), email: form.get("email"), password: form.get("password") }) });
+      const result = await response.json(); if (!response.ok) throw new Error(result.error);
+      setAccount(result.player, result.state); notify(mode === "register" ? "Your account is ready. All guest progress has been linked!" : `Welcome back, ${result.player.name}!`); onClose();
+    } catch (e) { setError(e instanceof Error ? e.message : "Unable to sign in."); } finally { setPending(false); }
+  }
+  async function signOut() {
+    setPending(true);
+    try { const response = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "logout" }) }); if (!response.ok) throw new Error("Could not sign out. Try again."); notify("Signed out. Sign in again to continue."); onSignedOut(); } catch (e) { setError(e instanceof Error ? e.message : "Sign-out failed."); } finally { setPending(false); }
+  }
+  const linked = player && !player.guest;
+  return <Modal title={linked ? "Your council ID" : "Your story. Safely saved."} eyebrow={linked ? "ACCOUNT & PROGRESS" : "WELCOME TO THE COUNCIL"} onClose={onClose} className="account-modal">
+    {linked ? <><div className="account-profile"><Avatar id="ynna" /><div><h3>{player.name}</h3><p>{player.email}</p><span><ShieldCheck size={14} /> Account linked · progress synced</span></div></div><div className="account-stats"><div><strong>{state.cleared.length}<small>/25</small></strong><span>STAGES CLEARED</span></div><div><strong>{state.roster.length}</strong><span>CHARACTERS</span></div><div><strong>{state.totalPulls}</strong><span>TOTAL PULLS</span></div></div><p className="muted-text">Your squad, gems, pity counter, upgrades, and campaign progress are saved automatically after every action.</p>{googleEnabled && <a className="secondary-button full-width" href="/api/auth/google">Connect or sign in with Google <ArrowUpRight size={16} /></a>}<button className="secondary-button full-width logout-button" disabled={pending} onClick={signOut}>{pending ? <Spinner /> : <LogOut size={17} />} Sign out</button></> : <>
+      <p className="modal-description">Link an account to keep your squad, your pulls, and every questionable decision. Your current guest progress comes with you.</p><div className="segmented-tabs"><button className={mode === "register" ? "active" : ""} onClick={() => { setMode("register"); setError(""); }}>Create account</button><button className={mode === "login" ? "active" : ""} onClick={() => { setMode("login"); setError(""); }}>Sign in</button></div>
+      <form onSubmit={submit} className="auth-form">{mode === "register" && <label>What should we call you?<input name="name" placeholder="Your council name" minLength={2} maxLength={24} required autoComplete="nickname" /></label>}<label>Email address<input name="email" type="email" placeholder="you@example.com" required autoComplete="email" /></label><label>Password<span className="password-field"><input name="password" type={showPassword ? "text" : "password"} placeholder="At least 8 characters" required minLength={8} maxLength={128} autoComplete={mode === "register" ? "new-password" : "current-password"} /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></span></label>{error && <p className="form-error" role="alert">{error}</p>}<button type="submit" className="primary-button full-width" disabled={pending}>{pending ? <Spinner /> : <LogIn size={17} />}{mode === "register" ? "Create account & save progress" : "Sign in to your account"}<ArrowRight size={17} /></button></form><div className="or-divider"><span>OR CONTINUE WITH</span></div><button className="google-button" disabled={!googleEnabled || pending} onClick={() => { window.location.href = "/api/auth/google"; }}><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.5-.2-2.2H12v4.3h5.4a4.6 4.6 0 0 1-2 3v2.8h3.5c2-1.8 2.7-4.5 2.7-7.9Z"/><path fill="#34A853" d="M12 22c2.7 0 5-1 6.8-2.6l-3.5-2.7c-1 .6-2.1 1-3.3 1-2.6 0-4.8-1.8-5.6-4.1H2.8v2.8A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.4 13.6a6 6 0 0 1 0-3.2V7.6H2.8a10 10 0 0 0 0 8.8Z"/><path fill="#EA4335" d="M12 6.3c1.5 0 2.8.5 3.8 1.5L19 4.7A10 10 0 0 0 2.8 7.6l3.6 2.8C7.2 8.1 9.4 6.3 12 6.3Z"/></svg>Google</button>{!googleEnabled && <p className="auth-footnote">Google sign-in is awaiting server configuration. Email accounts are fully available.</p>}{mode === "login" && <p className="auth-footnote">Signing in loads that account’s save. To keep this guest session’s progress, create a new account instead.</p>}<div className="privacy-note"><ShieldCheck size={13} /> Encrypted passwords. Private progress. No spam.</div>
+    </>}{linked && error && <p className="form-error">{error}</p>}
+  </Modal>;
+}
+function SettingsDialog({ onClose, openAccount }: { onClose: () => void; openAccount: () => void }) {
+  const { sound, setSound, reducedMotion, setReducedMotion, notify } = useGame();
+  return <Modal title="Make yourself at home." eyebrow="SYSTEM / PREFERENCES" onClose={onClose}><div className="settings-row"><div><Volume2 size={21} /><span><strong>Ambient music</strong><small>A quiet, original council-room melody.</small></span></div><button role="switch" aria-checked={sound} aria-label="Ambient music" className={`toggle ${sound ? "on" : ""}`} onClick={() => setSound(!sound)}><i /></button></div><div className="settings-row"><div><Sparkles size={21} /><span><strong>Reduced motion</strong><small>Limit floating, flash, and reveal animations.</small></span></div><button role="switch" aria-checked={reducedMotion} aria-label="Reduced motion" className={`toggle ${reducedMotion ? "on" : ""}`} onClick={() => setReducedMotion(!reducedMotion)}><i /></button></div><button className="settings-link" onClick={async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { notify("Fullscreen isn't available in this embedded preview. Open the game in its own tab.", "error"); } }}><Expand size={21} /><span>Toggle fullscreen</span><ArrowUpRight size={18} /></button><button className="settings-link" onClick={openAccount}><ShieldCheck size={21} /><span>Account & saved progress</span><ChevronRight size={18} /></button><div className="settings-about"><Logo /><p>One pull. All the problems.</p><small>Preview 0.1 · Original character designs pending.<br />All recruitment uses free, in-game currency.</small></div></Modal>;
+}
+function DailyDialog({ onClose }: { onClose: () => void }) {
+  const { state, action, busy } = useGame();
+  const claimed = state.lastDaily === new Date().toISOString().slice(0, 10);
+  return <Modal title={claimed ? "A little luck, delivered." : "Good things come daily."} eyebrow="COUNCIL CARE PACKAGE" onClose={onClose} className="daily-modal"><div className={`big-gift ${claimed ? "is-claimed" : ""}`}><span>✦</span>{claimed ? <CheckCheck size={65} /> : <Gift size={70} />}<span>✦</span></div><p className="modal-description centered">{claimed ? "You’ve collected today’s gift. Come back tomorrow for another little boost!" : "A small thank-you for showing up. Even Ninette approved this one."}</p><div className="reward-grid"><div><Gem size={26} /><strong>160</strong><span>GEMS</span></div><div><Credit size={28} /><strong>1,000</strong><span>CREDITS</span></div><div><Zap size={27} /><strong>30</strong><span>ENERGY</span></div></div><button className="primary-button full-width" disabled={claimed || busy} onClick={() => action("daily")}>{busy ? <Spinner /> : claimed ? <Check size={18} /> : <Gift size={18} />}{claimed ? "Claimed. See you tomorrow!" : "Claim daily supplies"}</button><p className="auth-footnote"><Clock3 size={12} /> Resets daily at 00:00 UTC. Energy is capped at 120.</p></Modal>;
+}
