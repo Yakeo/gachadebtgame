@@ -14,7 +14,7 @@ import { readFileSync } from "node:fs";
 
 import { Client } from "pg";
 
-import { annotate, classifyUrl, explainError } from "./lib/supabase-diag.mjs";
+import { annotate, classifyUrl, explainError, sslFor } from "./lib/supabase-diag.mjs";
 
 const url =
   process.env.SUPABASE_SESSION_URL || process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -48,7 +48,7 @@ const sql = readFileSync(new URL("../supabase/schema.sql", import.meta.url), "ut
 
 const client = new Client({
   connectionString: url,
-  ssl: { rejectUnauthorized: false },
+  ssl: sslFor(url),
   connectionTimeoutMillis: 20_000,
 });
 

@@ -52,6 +52,20 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@63
 
+      # Fail here, with one clear message, instead of at step 5 of 6 with a
+      # stack of "permission denied"/"project not found" errors.
+      - name: Verify the Vercel token
+        run: |
+          if vercel_user=$(vercel whoami --token "$VERCEL_TOKEN" 2>&1); then
+            echo "Authenticated to Vercel as: $vercel_user"
+          else
+            DETAIL=$(printf '%s' "$vercel_user" | tr '\n' ' ' | cut -c1-400 | sed 's/%/%25/g')
+            echo "::error title=Vercel token rejected::vercel whoami failed: ${DETAIL}"
+            echo "Create a new token at https://vercel.com/account/tokens (scope: your personal account or the team"
+            echo "that owns the project) and store it as the repository secret VERCEL_TOKEN."
+            exit 1
+          fi
+
       - name: Create + link Vercel project
         run: |
           vercel project create "$PROJECT_NAME" --token "$VERCEL_TOKEN" || echo "Project may already exist, continuing"

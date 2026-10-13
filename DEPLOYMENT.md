@@ -83,6 +83,21 @@ from the **Actions** tab. Note the session pooler string differs from
 the direct string only in host/port/user:
 `postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres`.
 
+**The secret names must match exactly**, and they must be *repository*
+secrets (Settings → Secrets and variables → **Actions**), not environment
+secrets — the `deploy` job declares no `environment:`, so a secret stored
+under Environments is invisible to it. A wrong or missing secret is not a
+silent failure: the job verifies the Vercel token, checks the shape of the
+Supabase connection strings, and prints what is wrong as an **annotation**
+at the top of the run page (§7). Two preflight checks run before the
+deploy proper:
+
+1. `Verify the Vercel token` — fails immediately if `VERCEL_TOKEN` is
+   invalid, instead of six steps later.
+2. `Preflight — report Supabase configuration` — lists which of
+   `SUPABASE_SESSION_URL` / `SUPABASE_DATABASE_URL` exist and whether they
+   are shaped correctly. Never prints their values.
+
 ### Option 1 — GitHub integration (set-and-forget)
 
 1. Push this repo to GitHub (already done for `Yakeo/gachadebtgame`).
@@ -147,6 +162,20 @@ Email + guest login work without this. To enable the Google button:
 ## 5. Verify the deployment
 
 1. Open `https://<your-domain>/api/health` → expect `{"ok":true}`.
+
+   Or check the whole flow at once — guest session, ten-pull, level up,
+   reload persistence, account binding, sign out/sign in, and the sign-in
+   guards — with the same script that was used to verify this repo against
+   a real Postgres:
+
+   ```bash
+   TEST_BASE_URL=https://<your-domain> npm run e2e
+   ```
+
+   It prints one line per check and exits non-zero if anything fails. It
+   creates throwaway accounts (`e2e-<timestamp>@example.com`) on whatever
+   URL you point it at, so point it at your own deployment.
+
    (`{"ok":false}`/500 = the app can't reach Supabase — see §6.)
 2. Open the site: the boot sequence waits for `/api/health`, then
    **Tap anywhere to start** → sign-in screen. Choose **Play as guest**,
