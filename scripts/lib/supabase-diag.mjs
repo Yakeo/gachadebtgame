@@ -74,6 +74,54 @@ const UNENCODED = /[/@#?%[\]{}|^`\\ "<>]/;
 const ENCODE_HINT = { "@": "%40", "#": "%23", "/": "%2F", "?": "%3F", ":": "%3A", "%": "%25", " ": "%20" };
 
 /**
+ * Host + port of a Postgres URL, tolerating forms `new URL()` rejects but pg
+ * accepts — most importantly unix-socket targets such as
+ * `postgresql://user:pw@/db?host=/var/run/postgresql`.
+ *
+ * @returns {{host:string, port:number, tolerant:boolean}|null} null if the value
+ *          does not look like `scheme://...` at all.
+ */
+export function hostOf(raw) {
+  const value = String(raw ?? "").trim();
+  if (!/^[a-z0-9+.-]+:\/\//i.test(value)) return null;
+
+  try {
+    const parsed = new URL(value);
+    return { host: parsed.hostname.toLowerCase(), port: parsed.port ? Number(parsed.port) : 5432, tolerant: false };
+  } catch {
+    // Everything after the last "@" is the host, minus a trailing ":port".
+    const authority = /^[a-z0-9+.-]+:\/\/([^/?#]*)/i.exec(value)?.[1] ?? "";
+    const afterCreds = authority.slice(authority.lastIndexOf("@") + 1);
+    const portMatch = /:(\d+)$/.exec(afterCreds);
+    const host = (portMatch ? afterCreds.slice(0, -portMatch[1].length - 1) : afterCreds)
+      .replace(/^\[|\]$/g, "")
+      .toLowerCase();
+    return { host, port: portMatch ? Number(portMatch[1]) : 5432, tolerant: true };
+  }
+}
+
+/**
+ * TLS options for a connection string, matching src/db/index.ts: an explicit
+ * sslmode wins, Supabase hosts force TLS (its pooler URL's `?sslmode=require`
+ * is downgraded by some pg versions), and anything else — a local Postgres, a
+ * self-hosted server — is left to pg's default so it is not broken.
+ *
+ * @returns {false|{rejectUnauthorized:boolean}|undefined}
+ */
+export function sslFor(raw) {
+  const mode = /[?&]sslmode=([a-z-]+)/i.exec(String(raw ?? ""))?.[1]?.toLowerCase();
+  if (mode === "disable") return false;
+  if (mode === "require" || mode === "prefer" || mode === "allow" || mode === "verify-ca" || mode === "verify-full") {
+    return { rejectUnauthorized: false };
+  }
+  const { host } = hostOf(raw) ?? {};
+  if (host && (host.endsWith(".supabase.co") || host.endsWith(".supabase.com"))) {
+    return { rejectUnauthorized: false };
+  }
+  return undefined;
+}
+
+/**
  * Describe a connection string without revealing it.
  *
  * @param raw   the value of the secret
@@ -119,26 +167,31 @@ export function classifyUrl(raw, { role = "runtime", label = "connection string"
     }
   }
 
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
+  const schemeMatch = /^([a-z0-9+.-]+):\/\//i.exec(value);
+  if (!schemeMatch) {
     problems.push(
-      "not a parseable URL. By far the most common cause is an unencoded special character in the database password.",
+      "not a parseable URL. It must start with postgresql:// — by far the most common cause is an unencoded special character in the database password.",
     );
     return { present: true, ok: false, problems, notes };
   }
-
-  const protocol = url.protocol.toLowerCase();
-  if (protocol !== "postgres:" && protocol !== "postgresql:") {
-    problems.push(`scheme is "${url.protocol}" but must be postgresql://.`);
+  if (!/^postgres(ql)?:$/i.test(schemeMatch[1] + ":")) {
+    problems.push(`scheme is "${schemeMatch[1]}://" but must be postgresql://.`);
   }
 
-  const host = url.hostname.toLowerCase();
-  const port = url.port ? Number(url.port) : 5432;
+  const { host, port, tolerant } = hostOf(value);
+  if (tolerant) {
+    notes.push("parsed with the tolerant parser (pg accepts forms `new URL()` rejects, e.g. `?host=` directories).");
+  }
 
-  if (host === "localhost" || host === "127.0.0.1" || host === "::1") {
-    problems.push("points at localhost, which a GitHub runner cannot reach — use your Supabase pooler host.");
+  const localTargets = { "": "has no host (a unix-socket / ?host= connection string)", localhost: "points at localhost", "127.0.0.1": "points at localhost", "::1": "points at localhost" };
+  if (Object.hasOwn(localTargets, host)) {
+    // Legitimate for local development, fatal on a GitHub runner.
+    const message = `${localTargets[host]}, which a GitHub runner cannot reach`;
+    if (process.env.CI) {
+      problems.push(`${message} — use your Supabase pooler host (see DEPLOYMENT.md §1a).`);
+    } else {
+      notes.push(`${message} — expected for local development.`);
+    }
   } else if (/^db\.[a-z0-9-]+\.supabase\.co$/i.test(host)) {
     problems.push(
       "this is the DIRECT connection host (db.<ref>.supabase.co). It is IPv6-only, so GitHub runners (IPv4-only) fail with ENOTFOUND / EHOSTUNREACH. Use the Session pooler instead: postgres.<ref>@aws-<n>-<region>.pooler.supabase.com:5432.",
@@ -158,7 +211,7 @@ export function classifyUrl(raw, { role = "runtime", label = "connection string"
     if (port !== 5432 && port !== 6543) {
       notes.push(`unusual pooler port ${port} (Supabase uses 6543 transaction / 5432 session).`);
     }
-    if (!url.username.includes(".")) {
+    if (!(splitCredentials(value)?.user ?? "").includes(".")) {
       problems.push(
         `pooler usernames must be postgres.<project-ref> (got a username without the .<ref> suffix) — the plain "postgres" user only exists on the direct host.`,
       );

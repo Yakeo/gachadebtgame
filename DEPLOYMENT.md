@@ -162,6 +162,20 @@ Email + guest login work without this. To enable the Google button:
 ## 5. Verify the deployment
 
 1. Open `https://<your-domain>/api/health` → expect `{"ok":true}`.
+
+   Or check the whole flow at once — guest session, ten-pull, level up,
+   reload persistence, account binding, sign out/sign in, and the sign-in
+   guards — with the same script that was used to verify this repo against
+   a real Postgres:
+
+   ```bash
+   TEST_BASE_URL=https://<your-domain> npm run e2e
+   ```
+
+   It prints one line per check and exits non-zero if anything fails. It
+   creates throwaway accounts (`e2e-<timestamp>@example.com`) on whatever
+   URL you point it at, so point it at your own deployment.
+
    (`{"ok":false}`/500 = the app can't reach Supabase — see §6.)
 2. Open the site: the boot sequence waits for `/api/health`, then
    **Tap anywhere to start** → sign-in screen. Choose **Play as guest**,

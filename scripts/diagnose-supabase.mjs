@@ -13,7 +13,7 @@
 // ref — only whether a secret is set and what *shape* it has.
 import { Client } from "pg";
 
-import { annotate, classifyUrl, explainError, SUPABASE_TABLES } from "./lib/supabase-diag.mjs";
+import { annotate, classifyUrl, explainError, sslFor, SUPABASE_TABLES } from "./lib/supabase-diag.mjs";
 
 const connectEnabled = !process.argv.includes("--no-connect");
 
@@ -51,11 +51,29 @@ if (ALIASES.length > 0) {
 }
 say("");
 
-const session = classifyUrl(values.SUPABASE_SESSION_URL, {
+// A diagnostic that dies with a stack trace is worse than useless: a bug in
+// classifyUrl itself must still produce an explanation, not a ReferenceError.
+function safeClassify(raw, options) {
+  try {
+    return classifyUrl(raw, options);
+  } catch (error) {
+    return {
+      present: Boolean((raw ?? "").trim()),
+      ok: false,
+      notes: [],
+      problems: [
+        `the checker itself failed on this value (${error?.name ?? "Error"}: ${error?.message ?? error}). ` +
+          `Please report this shape at https://github.com/Yakeo/gachadebtgame/issues — the value itself was not printed.`,
+      ],
+    };
+  }
+}
+
+const session = safeClassify(values.SUPABASE_SESSION_URL, {
   role: "ddl",
   label: "secret SUPABASE_SESSION_URL",
 });
-const runtime = classifyUrl(values.SUPABASE_DATABASE_URL, {
+const runtime = safeClassify(values.SUPABASE_DATABASE_URL, {
   role: "runtime",
   label: "secret SUPABASE_DATABASE_URL",
 });
@@ -79,7 +97,7 @@ if (connectEnabled && session.present) {
   say("Live connection test (schema/session connection)…");
   const client = new Client({
     connectionString: values.SUPABASE_SESSION_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: sslFor(values.SUPABASE_SESSION_URL),
     connectionTimeoutMillis: 10_000,
   });
   try {
