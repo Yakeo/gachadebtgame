@@ -83,6 +83,21 @@ from the **Actions** tab. Note the session pooler string differs from
 the direct string only in host/port/user:
 `postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres`.
 
+**The secret names must match exactly**, and they must be *repository*
+secrets (Settings → Secrets and variables → **Actions**), not environment
+secrets — the `deploy` job declares no `environment:`, so a secret stored
+under Environments is invisible to it. A wrong or missing secret is not a
+silent failure: the job verifies the Vercel token, checks the shape of the
+Supabase connection strings, and prints what is wrong as an **annotation**
+at the top of the run page (§7). Two preflight checks run before the
+deploy proper:
+
+1. `Verify the Vercel token` — fails immediately if `VERCEL_TOKEN` is
+   invalid, instead of six steps later.
+2. `Preflight — report Supabase configuration` — lists which of
+   `SUPABASE_SESSION_URL` / `SUPABASE_DATABASE_URL` exist and whether they
+   are shaped correctly. Never prints their values.
+
 ### Option 1 — GitHub integration (set-and-forget)
 
 1. Push this repo to GitHub (already done for `Yakeo/gachadebtgame`).
