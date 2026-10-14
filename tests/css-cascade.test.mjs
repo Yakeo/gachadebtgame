@@ -274,3 +274,30 @@ test("the banner survives a stylesheet that fails to load", () => {
   assert.ok(RECRUIT_ART_FIGURE.zIndex < RECRUIT_CONTENT_Z,
     "the art must paint behind the copy");
 });
+
+test("the decision options are centred rather than stretched", () => {
+  // The options first spanned the whole dialogue box, which read as a form
+  // rather than a decision. They are a centred stack now, so the moment you
+  // are asked to choose is the moment the screen points at the middle.
+  const stack = resolve(element("div", ["story-choices"]));
+  assert.match(String(stack["max-width"] ?? ""), /\d+px/,
+    "the option stack needs a width so the bars do not span the whole box");
+  assert.match(String(stack.margin ?? ""), /auto/,
+    "the option stack must be centred horizontally (margin ... auto)");
+  const option = resolve(element("button", ["x"]), undefined) || {};
+  const row = resolve(element("div", ["story-choices"]));
+  assert.ok(row["max-width"], "story-choices must set max-width");
+  // the bar centres its label and pins the tick / arrow to the edges
+  const button = {};
+  for (const rule of parse(CSS)) {
+    if (!mediaApplies(rule.media)) continue;
+    for (const selector of rule.selector.split(",")) {
+      const compiled = compile(selector);
+      if (compiled && matches(compiled.chain, { tag: "button", classes: [], parent: { tag: "div", classes: ["story-choices"], parent: view } })) {
+        Object.assign(button, declarations(rule.body));
+      }
+    }
+  }
+  assert.equal(button["justify-content"], "center", "the option label must be centred in its bar");
+  assert.equal(button["text-align"], "center");
+});

@@ -323,3 +323,43 @@ test("sprites render at a consistent height in the arena box", () => {
     `rendered figure heights span ${Math.min(...values)}..${Math.max(...values)}px (spread ${spread}): ` +
     heights.map(h => `${h.file.split("/").pop()} ${h.height}`).join(", "));
 });
+
+test("no portrait carries chroma-key residue", () => {
+  // Alvida's portraits were keyed out of a flat chroma green. The first pass
+  // used a hard threshold and then saved to a palette, which dropped partial
+  // alpha: the anti-aliased boundary survived as opaque green and showed up in
+  // the game as a green glow around the character. A portrait should have no
+  // visible pixel that leans green.
+  const offenders = [];
+  for (const file of walk("public/images/faces", [".png"])) {
+    const image = decodePng(file);
+    const { pixels, channels, width, height, palette } = image;
+    const transparent = new Set();
+    const raw = image.transparency;
+    if (typeof raw === "number") transparent.add(raw);
+    if (raw && typeof raw === "object" && !Array.isArray(raw) && raw.length) {
+      for (let i = 0; i < raw.length; i++) if (raw[i] === 0) transparent.add(i);
+    }
+    let green = 0;
+    for (let i = 0; i < width * height; i++) {
+      let r, g, b;
+      if (palette) {
+        if (transparent.has(pixels[i])) continue;
+        r = palette[pixels[i] * 3]; g = palette[pixels[i] * 3 + 1]; b = palette[pixels[i] * 3 + 2];
+      } else {
+        if (pixels[i * channels + 3] === 0) continue;
+        r = pixels[i * channels]; g = pixels[i * channels + 1]; b = pixels[i * channels + 2];
+      }
+      // Two floors, because "green" alone is not enough to tell residue from
+      // art. Keyed-out green is bright AND strongly dominant; the cast's own
+      // greenish fringe pixels are either dark or barely tinted. Measured
+      // across all 66 portraits these thresholds separate the two exactly:
+      // they flag 124-157px on the defective Alvida portraits and nothing at
+      // all on anyone else.
+      if (g > 90 && g - Math.max(r, b) > 30) green++;
+    }
+    if (green > 0) offenders.push(`${file} (${green} px)`);
+  }
+  assert.deepEqual(offenders, [],
+    `these portraits still contain keyed-out green: ${offenders.join(", ")}`);
+});
