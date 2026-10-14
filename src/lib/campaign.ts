@@ -1,12 +1,19 @@
 export type Dialogue = { speaker: string; text: string };
 export type Stage = { id: string; chapter: number; number: number; title: string; location: string; pre: Dialogue[]; post: Dialogue[]; enemies: { name: string; sprite: string; boss?: boolean }[]; boss: boolean; choices?: string[]; };
+// Every chapter fights somewhere different, so `battlefield` points at that
+// chapter's own arena art. The story screen, the campaign map and the home
+// tile follow the same picture, which keeps the whole journey legible.
 export const chapters = [
-  { id: 1, title: "The $30,000 Treasury Incident", short: "The Treasury Incident", subtitle: "One banner. An entire semester's budget. What could go wrong?", color: "#238afa", location: "ACADEMY DISTRICT" },
-  { id: 2, title: "The Grand Campus Cleanup", short: "The Hidden Facility", subtitle: "Glowing mushrooms, purple magic, and a very questionable refund.", color: "#a084eb", location: "THE OLD WEST WING" },
-  { id: 3, title: "The Sanctum of the Holy Ledger", short: "The Holy Ledger", subtitle: "Some sins cannot be written off. Some ledgers hide the truth.", color: "#d9b765", location: "SAINT ATHANASIUS CHAPEL" },
-  { id: 4, title: "Corporate Desolation", short: "Corporate Desolation", subtitle: "No more plastic swords. We end this today.", color: "#f08383", location: "GACHACORP HEADQUARTERS" },
-  { id: 5, title: "The Price of Redemption", short: "The Price of Redemption", subtitle: "The most important things were never behind a rate-up banner.", color: "#7ecbdb", location: "THE ZERO-POINT CORE" },
+  { id: 1, title: "The $30,000 Treasury Incident", short: "The Treasury Incident", subtitle: "One banner. An entire semester's budget. What could go wrong?", color: "#238afa", location: "ACADEMY DISTRICT", battlefield: "/images/academy.jpg" },
+  { id: 2, title: "The Grand Campus Cleanup", short: "The Hidden Facility", subtitle: "Glowing mushrooms, purple magic, and a very questionable refund.", color: "#a084eb", location: "THE OLD WEST WING", battlefield: "/images/west-wing.jpg" },
+  { id: 3, title: "The Sanctum of the Holy Ledger", short: "The Holy Ledger", subtitle: "Some sins cannot be written off. Some ledgers hide the truth.", color: "#d9b765", location: "SAINT ATHANASIUS CHAPEL", battlefield: "/images/chapel.jpg" },
+  { id: 4, title: "Corporate Desolation", short: "Corporate Desolation", subtitle: "No more plastic swords. We end this today.", color: "#f08383", location: "GACHACORP HEADQUARTERS", battlefield: "/images/hq.jpg" },
+  { id: 5, title: "The Price of Redemption", short: "The Price of Redemption", subtitle: "The most important things were never behind a rate-up banner.", color: "#7ecbdb", location: "THE ZERO-POINT CORE", battlefield: "/images/core.jpg" },
 ];
+/** The arena art for a chapter, with the academy courtyard as the fallback. */
+export function battlefieldFor(chapter: number | undefined) {
+  return chapters.find(c => c.id === chapter)?.battlefield ?? "/images/academy.jpg";
+}
 const lines = (script: string): Dialogue[] => script.trim().split("\n").map(line => { const i = line.indexOf("|"); return { speaker: line.slice(0, i), text: line.slice(i + 1) }; });
 const enemy = (name: string, sprite: string, boss = false) => ({ name, sprite, boss });
 function stage(chapter: number, number: number, title: string, location: string, pre: string, post: string, enemies: Stage["enemies"], boss = false, choices?: string[]): Stage { return { id: `${chapter}-${number}`, chapter, number, title, location, pre: lines(pre), post: lines(post), enemies, boss, choices }; }
