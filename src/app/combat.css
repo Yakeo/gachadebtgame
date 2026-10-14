@@ -16,3 +16,391 @@
 @keyframes flash-fx{0%{opacity:0}25%{opacity:.72}100%{opacity:0}}
 .side-enemy.pose-ultimate .sprite-rig{animation-name:sprite-ultimate-enemy}
 @keyframes sprite-ultimate-enemy{0%{transform:scale(1)}28%{transform:scale(1.16) translateY(-16px);filter:brightness(1.7)}68%{transform:translateX(24px) scale(1.04)}100%{transform:none}}
+
+/* ============================================================================
+   SSR attack choreography
+   ----------------------------------------------------------------------------
+   Every command used to share one generic motion, so Penelope's cast-iron pan
+   and Purp's floating grimoire swung in exactly the same way. These rules give
+   each SSR a signature animation per command, keyed to the weapon in their
+   art and to what their skill and ultimate claim to do.
+
+   How to read this:
+     --facing      -1 for allies, +1 for enemies. Every lunge multiplies by it,
+                   so a single rule reads correctly on both sides of the arena
+                   instead of marching the enemy team backwards.
+     .sprite-rig   pivots at 50% 92%, so rotations lean from the feet.
+     durations     must stay under the pose hold (POSE_HOLD_MS in
+                   combat-stage.tsx). Hold the class longer than the animation
+                   and it is cut off mid-swing; tests/ssr-attacks.test.mjs
+                   enforces this against the constant itself.
+
+   Particles: .sprite-fx carries five <i> plus the stage's own ::before/::after.
+   Shared keyframes are named fx-*; a character's body motion is named after the
+   character, so tests can prove nobody borrowed anybody else's animation.
+   ========================================================================== */
+
+.side-ally{--facing:-1}.side-enemy{--facing:1}
+.ally-unit .combat-unit-art{--facing:-1}.enemy-unit .combat-unit-art{--facing:1}
+.sprite-stage::before,.sprite-stage::after{content:"";position:absolute;pointer-events:none;opacity:0;z-index:5}
+.sprite-fx i:nth-child(4),.sprite-fx i:nth-child(5){position:absolute;inset:auto;opacity:0}
+
+/* What a landed blow does to the thing that took it. The colour comes from the
+   attacker, passed down as --impact-color, so Penelope's bonk reads pink and
+   Escanooor's gauntlet reads ember orange. No transform here: .combat-unit-art
+   already carries the boss scale and animating it would erase that. */
+.combat-unit[data-hit="on"] .combat-unit-art::after{content:"";position:absolute;inset:-16% 4% 6%;border-radius:50%;border:2px solid var(--impact-color,#ffeec2);box-shadow:0 0 20px var(--impact-color,#ffeec2);opacity:0;animation:fx-target-shock .5s ease-out both}
+@keyframes fx-target-shock{0%{opacity:0;transform:translateX(calc(var(--facing) * -10px)) scale(.34)}18%{opacity:.95}100%{opacity:0;transform:translateX(calc(var(--facing) * 5px)) scale(1.5)}}
+
+/* ---------------------------------------------------------------- shared fx */
+/* a bolt that leaves the caster and crosses to the enemy line */
+@keyframes fx-fly{0%{opacity:0;transform:translate(0,0) scale(.5)}22%{opacity:1}100%{opacity:0;transform:translate(calc(var(--facing) * 104px),-4px) scale(1.15)}}
+/* a straight thrust streak, anchored at the weapon */
+@keyframes fx-streak{0%{opacity:0;transform:translateX(0) scaleX(.15)}30%{opacity:1}100%{opacity:0;transform:translateX(calc(var(--facing) * 74px)) scaleX(1.1)}}
+/* something driven straight down - pans, staves, gauntlets */
+@keyframes fx-jab{0%{opacity:0;transform:translateY(-46px) scaleY(.3)}26%{opacity:1}70%{opacity:.9}100%{opacity:0;transform:translateY(30px) scaleY(1.5)}}
+/* a ring that expands away from the character */
+@keyframes fx-ring{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(1.4)}}
+/* arcane circle: expands while counter-rotating */
+@keyframes fx-hex{0%{opacity:0;transform:scale(.3) rotate(0)}25%{opacity:.9}100%{opacity:0;transform:scale(1.35) rotate(-140deg)}}
+/* a halo that opens upward */
+@keyframes fx-halo{0%{opacity:0;transform:translateY(14px) scale(.4)}30%{opacity:1}100%{opacity:0;transform:translateY(-40px) scale(1.35)}}
+/* a column of light dropped on the field */
+@keyframes fx-pillar{0%{opacity:0;transform:scaleY(.05)}18%{opacity:.95;transform:scaleY(1)}72%{opacity:.8}100%{opacity:0;transform:scaleY(1.1)}}
+/* ground shockwave at the feet */
+@keyframes fx-ground{0%{opacity:0;transform:scale(.3,.16)}16%{opacity:.9}100%{opacity:0;transform:scale(1.5,.5)}}
+/* garnish that pops upward: soufflé stars, gacha stars, embers */
+@keyframes fx-pop{0%{opacity:0;transform:translateY(6px) scale(.3) rotate(0)}28%{opacity:1}100%{opacity:0;transform:translateY(-54px) scale(1.1) rotate(72deg)}}
+/* embers rising off a gauntlet */
+@keyframes fx-ember{0%{opacity:0;transform:translate(0,6px) scale(.6)}30%{opacity:.95}100%{opacity:0;transform:translate(calc(var(--facing) * 22px),-40px) scale(.2)}}
+/* ledger figures spiralling outward, then yanked back to the caster */
+@keyframes fx-spiral{0%{opacity:0;transform:rotate(0) translateX(8px) scale(.5)}30%{opacity:.9;transform:rotate(150deg) translateX(42px) scale(1)}100%{opacity:0;transform:rotate(300deg) translateX(2px) scale(.35)}}
+/* something collapsing inward instead of outward */
+@keyframes fx-implode{0%{opacity:0;transform:scale(1.35)}24%{opacity:.85}100%{opacity:0;transform:scale(.2) rotate(38deg)}}
+/* a seal stamped onto the field */
+@keyframes fx-seal{0%{opacity:0;transform:translate(calc(var(--facing) * 30px),-58px) scale(1.5) rotate(-24deg)}24%{opacity:.95}100%{opacity:0;transform:translate(calc(var(--facing) * 30px),-4px) scale(.7) rotate(6deg)}}
+/* full-frame flash, used sparingly on ultimates */
+@keyframes fx-flash{0%{opacity:0}14%{opacity:.5}100%{opacity:0}}
+/* a beam that travels back to the caster - siphons, audits, collections */
+@keyframes fx-siphon{0%{opacity:0;transform:translate(calc(var(--facing) * 88px),-6px) scale(1)}26%{opacity:.95}100%{opacity:0;transform:translate(0,0) scale(.35)}}
+
+/* ============================== PENELOPE ==============================
+   Cast-Iron Frying Pan. The pan is always overhead, so her attacks are
+   overhead: she winds it up and brings it down. */
+@keyframes penelope-bonk{
+  0%{transform:translateY(0) rotate(0) scale(1)}
+  32%{transform:translateY(-26px) rotate(-11deg) scale(1.11)}
+  50%{transform:translateY(-28px) rotate(-12deg) scale(1.11)}
+  64%{transform:translateY(13px) rotate(13deg) scale(.89)}
+  78%{transform:translateY(3px) rotate(-4deg) scale(1.03)}
+  100%{transform:none}}
+.sprite-stage[data-character="penelope"].pose-attack .sprite-rig{animation:penelope-bonk .74s cubic-bezier(.34,0,.2,1) both}
+.pose-attack[data-character="penelope"] .sprite-fx i:nth-child(1){left:36%;right:36%;top:-4%;bottom:6%;background:linear-gradient(180deg,transparent,#fff 44%,#ffd9f1);animation:fx-jab .52s .28s ease-in both}
+.pose-attack[data-character="penelope"] .sprite-fx i:nth-child(4){left:-14%;right:-14%;bottom:-4%;height:16px;border-radius:50%;border:2px solid #ffd9f1;animation:fx-ground .46s .46s ease-out both}
+.pose-attack[data-character="penelope"] .sprite-fx i:nth-child(5){left:52%;top:34%;width:12px;height:12px;background:conic-gradient(#fff,#ef6ec0,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-pop .56s .5s ease-out both}
+/* Flambé Special: she hops and swings the pan the whole way round. */
+@keyframes penelope-flambe{
+  0%{transform:translateY(0) rotate(0)}
+  22%{transform:translateY(-22px) rotate(-14deg)}
+  58%{transform:translateY(-16px) rotate(348deg)}
+  82%{transform:translateY(-4px) rotate(362deg)}
+  100%{transform:none}}
+.sprite-stage[data-character="penelope"].pose-skill .sprite-rig{animation:penelope-flambe .74s ease-in-out both}
+.pose-skill[data-character="penelope"] .sprite-fx i:nth-child(2){inset:-6% 4%;border-radius:50%;border:3px solid #ff9a5c;box-shadow:0 0 22px #ff9a5c;animation:fx-ring .62s .12s ease-out both}
+.pose-skill[data-character="penelope"] .sprite-fx i:nth-child(3){inset:4% 26%;border-radius:50%;background:radial-gradient(circle,#ffd9a0cc,transparent 66%);animation:fx-flash .6s .1s ease both}
+.pose-skill[data-character="penelope"] .sprite-fx i:nth-child(5){left:16%;bottom:12%;width:10px;height:10px;border-radius:50%;background:#ffb15c;box-shadow:0 0 8px #ff8a3d;animation:fx-ember .7s .24s ease-out both}
+/* Kitchen Catastrophe: double wind-up, then the whole kitchen comes down. */
+@keyframes penelope-catastrophe{
+  0%{transform:none}
+  14%{transform:translateY(-14px) rotate(-6deg) scale(1.05)}
+  24%{transform:translateY(-6px) rotate(-1deg) scale(1)}
+  38%{transform:translateY(-25px) rotate(-12deg) scale(1.12)}
+  52%{transform:translateY(12px) rotate(12deg) scale(.9)}
+  64%{transform:translateY(-2px) rotate(-4deg) scale(1.05)}
+  78%{transform:translateY(5px) rotate(2deg) scale(.98)}
+  100%{transform:none}}
+.sprite-stage[data-character="penelope"].pose-ultimate .sprite-rig{animation:penelope-catastrophe .76s cubic-bezier(.3,0,.2,1) both}
+.pose-ultimate[data-character="penelope"] .sprite-fx i:nth-child(1){left:32%;right:32%;top:-8%;bottom:2%;background:linear-gradient(180deg,transparent,#fff 46%,#ffc2e6);animation:fx-jab .5s .38s ease-in both}
+.pose-ultimate[data-character="penelope"] .sprite-fx i:nth-child(4){left:-40%;right:-40%;bottom:-8%;height:26px;border-radius:50%;border:3px solid #ffc2e6;box-shadow:0 0 26px #ef6ec0;animation:fx-ground .62s .5s ease-out both}
+.pose-ultimate[data-character="penelope"] .sprite-fx i:nth-child(5){left:58%;top:26%;width:16px;height:16px;background:conic-gradient(#fff,#ef6ec0,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-pop .7s .54s ease-out both}
+.sprite-stage.pose-ultimate[data-character="penelope"]::before{inset:0;background:radial-gradient(circle at 50% 60%,#fff6fb,transparent 70%);animation:fx-flash .6s .48s ease both}
+
+/* ================================ RUTA ================================
+   Long Lance. Everything she does is a straight line toward the enemy. */
+@keyframes ruta-thrust{
+  0%{transform:none}
+  26%{transform:translateX(calc(var(--facing) * -13px)) rotate(calc(var(--facing) * 5deg))}
+  46%{transform:translateX(calc(var(--facing) * 62px)) rotate(calc(var(--facing) * -5deg)) scale(1.04)}
+  62%{transform:translateX(calc(var(--facing) * 62px)) rotate(calc(var(--facing) * -5deg)) scale(1.04)}
+  100%{transform:none}}
+.sprite-stage[data-character="ruta"].pose-attack .sprite-rig{animation:ruta-thrust .6s cubic-bezier(.3,0,.15,1) both}
+.pose-attack[data-character="ruta"] .sprite-fx i:nth-child(1){left:30%;right:8%;top:44%;height:4px;background:linear-gradient(90deg,transparent,#fff,#ffd0c9);box-shadow:0 0 12px #fff;animation:fx-streak .42s .24s ease-out both}
+.pose-attack[data-character="ruta"] .sprite-fx i:nth-child(4){left:6%;right:6%;bottom:-4%;height:10px;border-radius:50%;border:2px solid #ffd0c9;animation:fx-ground .36s .4s ease-out both}
+/* Spiral Thrust: two stabs, and her reach does not stop where she planned. */
+@keyframes ruta-spiral{
+  0%{transform:none}
+  18%{transform:translateX(calc(var(--facing) * -12px)) rotate(calc(var(--facing) * 8deg))}
+  36%{transform:translateX(calc(var(--facing) * 54px)) rotate(calc(var(--facing) * -6deg))}
+  50%{transform:translateX(calc(var(--facing) * -8px)) rotate(calc(var(--facing) * -8deg))}
+  70%{transform:translateX(calc(var(--facing) * 66px)) rotate(calc(var(--facing) * 6deg))}
+  100%{transform:none}}
+.sprite-stage[data-character="ruta"].pose-skill .sprite-rig{animation:ruta-spiral .7s cubic-bezier(.3,0,.15,1) both}
+.pose-skill[data-character="ruta"] .sprite-fx i:nth-child(1){left:28%;right:10%;top:40%;height:3px;background:linear-gradient(90deg,transparent,#fff);box-shadow:0 0 10px #fff;animation:fx-streak .34s .18s ease-out both}
+.pose-skill[data-character="ruta"] .sprite-fx i:nth-child(2){left:28%;right:10%;top:52%;height:3px;background:linear-gradient(90deg,transparent,#ffe3de);animation:fx-streak .34s .48s ease-out both}
+.pose-skill[data-character="ruta"] .sprite-fx i:nth-child(3){inset:6% 22%;border-radius:50%;border:2px dashed #ffd0c9;animation:fx-ring .58s ease-out both}
+/* Grand Palisade: she goes through the line rather than at one thing in it. */
+@keyframes ruta-palisade{
+  0%{transform:none}
+  16%{transform:translateX(calc(var(--facing) * -18px)) translateY(6px) scale(.95)}
+  44%{transform:translateX(calc(var(--facing) * 80px)) rotate(calc(var(--facing) * -8deg))}
+  62%{transform:translateX(calc(var(--facing) * 80px)) rotate(calc(var(--facing) * -8deg))}
+  100%{transform:none}}
+.sprite-stage[data-character="ruta"].pose-ultimate .sprite-rig{animation:ruta-palisade .76s cubic-bezier(.25,0,.15,1) both}
+.pose-ultimate[data-character="ruta"] .sprite-fx i:nth-child(1){left:44%;right:-16%;top:46%;height:5px;background:linear-gradient(90deg,#fff,#ffd0c9,transparent);box-shadow:0 0 18px #fff;animation:fx-streak .58s .36s ease-out both}
+.pose-ultimate[data-character="ruta"] .sprite-fx i:nth-child(2){inset:0 12%;border-radius:50%;border:2px solid #ffe3de;animation:fx-ring .66s .3s ease-out both}
+.pose-ultimate[data-character="ruta"] .sprite-fx i:nth-child(4){left:-46%;right:-46%;bottom:-6%;height:22px;border-radius:50%;border:2px solid #ffd0c9;animation:fx-ground .6s .48s ease-out both}
+
+/* ================================ PURP ================================
+   Floating Grimoire. He is a caster: he rises, the book opens, things fly. */
+@keyframes purp-bolt{
+  0%{transform:none}
+  26%{transform:translateY(-15px) rotate(-3deg) scale(1.03)}
+  50%{transform:translateY(-17px) rotate(3deg) scale(1.04)}
+  100%{transform:none}}
+.sprite-stage[data-character="purp"].pose-attack .sprite-rig{animation:purp-bolt .66s ease-in-out both}
+.pose-attack[data-character="purp"] .sprite-fx i:nth-child(1){left:34%;top:26%;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#fff,var(--character-color,#b79bf5));box-shadow:0 0 18px var(--character-color,#b79bf5);animation:fx-fly .58s .26s ease-out both}
+.pose-attack[data-character="purp"] .sprite-fx i:nth-child(3){inset:14% 30%;border-radius:50%;background:radial-gradient(circle,#d9c8ffcc,transparent 68%);animation:fx-flash .5s .2s ease both}
+/* Packet Loss: the ring goes out, then the squad collects what it dropped. */
+@keyframes purp-packet-loss{
+  0%{transform:none}
+  30%{transform:translateY(-20px) scale(1.05)}
+  56%{transform:translateY(-24px) rotate(4deg) scale(1.06)}
+  100%{transform:none}}
+.sprite-stage[data-character="purp"].pose-skill .sprite-rig{animation:purp-packet-loss .74s ease-in-out both}
+.pose-skill[data-character="purp"] .sprite-fx i:nth-child(2){inset:2% 18%;border-radius:50%;border:2px solid var(--character-color,#b79bf5);box-shadow:0 0 18px #9b6bed99;animation:fx-hex .68s .12s ease-out both}
+.pose-skill[data-character="purp"] .sprite-fx i:nth-child(5){left:18%;top:30%;width:14px;height:14px;background:conic-gradient(#fff,#9b6bed,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-spiral .7s .18s linear both}
+.pose-skill[data-character="purp"] .sprite-fx i:nth-child(3){inset:12% 28%;border-radius:50%;background:radial-gradient(circle,#c9b4ffaa,transparent 70%);animation:fx-flash .62s .1s ease both}
+/* Grand Shadow Arcane: the cascade, at height. */
+@keyframes purp-arcane{
+  0%{transform:none}
+  24%{transform:translateY(-28px) scale(1.1) rotate(-5deg)}
+  48%{transform:translateY(-32px) scale(1.14) rotate(5deg)}
+  72%{transform:translateY(-24px) scale(1.08)}
+  100%{transform:none}}
+.sprite-stage[data-character="purp"].pose-ultimate .sprite-rig{animation:purp-arcane .76s ease-in-out both}
+.pose-ultimate[data-character="purp"] .sprite-fx i:nth-child(2){inset:-4% 12%;border-radius:50%;border:3px solid #b79bf5;box-shadow:0 0 26px #9b6bed;animation:fx-hex .72s .14s ease-out both}
+.pose-ultimate[data-character="purp"] .sprite-fx i:nth-child(1){left:36%;top:20%;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,#fff,#6f5bd6);box-shadow:0 0 24px #b79bf5;animation:fx-fly .62s .3s ease-out both}
+.pose-ultimate[data-character="purp"] .sprite-fx i:nth-child(5){left:20%;top:26%;width:16px;height:16px;background:conic-gradient(#fff,#9b6bed,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-spiral .76s .2s linear both}
+.pose-ultimate[data-character="purp"] .sprite-fx i:nth-child(3){inset:6% 20%;border-radius:50%;background:radial-gradient(circle,#e0d4ffff,transparent 72%);animation:fx-flash .68s .28s ease both}
+
+/* ============================= EDGELORD69 =============================
+   Steel Katana. Draw cuts: he is still, then he is somewhere else. */
+@keyframes edgelord-dashcut{
+  0%{transform:none}
+  20%{transform:translateY(5px) scale(.95) rotate(calc(var(--facing) * 3deg))}
+  42%{transform:translateX(calc(var(--facing) * 54px)) rotate(calc(var(--facing) * -12deg)) scale(1.03)}
+  56%{transform:translateX(calc(var(--facing) * 54px)) rotate(calc(var(--facing) * -12deg)) scale(1.03)}
+  100%{transform:none}}
+.sprite-stage[data-character="edgelord"].pose-attack .sprite-rig{animation:edgelord-dashcut .62s cubic-bezier(.3,0,.1,1) both}
+.pose-attack[data-character="edgelord"] .sprite-fx i:nth-child(1){left:26%;right:4%;top:38%;height:3px;background:linear-gradient(90deg,transparent,#fff,#c7d2ff);box-shadow:0 0 14px #fff;animation:fx-streak .4s .3s ease-out both}
+.pose-attack[data-character="edgelord"] .sprite-fx i:nth-child(3){inset:8% 22%;border-radius:50%;background:radial-gradient(circle,#dfe6ffcc,transparent 70%);animation:fx-flash .38s .3s ease both}
+/* Plastic Eclipse: the whole way round, once. */
+@keyframes edgelord-eclipse{
+  0%{transform:none}
+  18%{transform:translateY(6px) scale(.94)}
+  62%{transform:rotate(calc(var(--facing) * 360deg)) translateY(-12px) scale(1.04)}
+  100%{transform:none}}
+.sprite-stage[data-character="edgelord"].pose-skill .sprite-rig{animation:edgelord-eclipse .72s cubic-bezier(.4,0,.2,1) both}
+.pose-skill[data-character="edgelord"] .sprite-fx i:nth-child(2){inset:4% 16%;border-radius:50%;border:2px solid #c7d2ff;box-shadow:0 0 20px #8f9fd4;animation:fx-ring .6s .2s ease-out both}
+.pose-skill[data-character="edgelord"] .sprite-fx i:nth-child(1){left:20%;right:8%;top:52%;height:3px;background:linear-gradient(90deg,transparent,#fff);animation:fx-streak .44s .3s ease-out both}
+/* No More Plastic Swords: he stops talking, which is the scary part. */
+@keyframes edgelord-noplastic{
+  0%{transform:none;filter:none}
+  26%{transform:translateY(4px) scale(.96);filter:brightness(1.3)}
+  36%{transform:translateY(4px) scale(.96);filter:brightness(1.7)}
+  54%{transform:translateX(calc(var(--facing) * 68px)) rotate(calc(var(--facing) * -14deg)) scale(1.05);filter:brightness(2)}
+  66%{transform:translateX(calc(var(--facing) * 68px)) rotate(calc(var(--facing) * -14deg)) scale(1.05);filter:brightness(1.4)}
+  100%{transform:none;filter:none}}
+.sprite-stage[data-character="edgelord"].pose-ultimate .sprite-rig{animation:edgelord-noplastic .76s cubic-bezier(.3,0,.1,1) both}
+.pose-ultimate[data-character="edgelord"] .sprite-fx i:nth-child(1){left:22%;right:-8%;top:34%;height:4px;background:linear-gradient(90deg,transparent,#fff,#c7d2ff);box-shadow:0 0 20px #fff;animation:fx-streak .5s .4s ease-out both}
+.pose-ultimate[data-character="edgelord"] .sprite-fx i:nth-child(2){left:22%;right:-8%;top:58%;height:4px;background:linear-gradient(90deg,transparent,#fff,#aab8ff);box-shadow:0 0 20px #fff;animation:fx-streak .5s .5s ease-out both}
+.pose-ultimate[data-character="edgelord"] .sprite-fx i:nth-child(3){inset:0 14%;border-radius:50%;background:radial-gradient(circle,#e6ebffff,transparent 74%);animation:fx-flash .7s .38s ease both}
+.sprite-stage.pose-ultimate[data-character="edgelord"]::before{inset:0;background:linear-gradient(90deg,transparent 30%,#dfe6ffaa,transparent 70%);animation:fx-flash .58s .46s ease both}
+
+/* ================================ YNNA ================================
+   Blessed Smartphone. Her whole kit is the banner: jitters, sparkles, ten
+   stars at once, and the pity counter coming due. */
+@keyframes ynna-swipe{
+  0%{transform:none}
+  26%{transform:translateY(-11px) rotate(calc(var(--facing) * 5deg))}
+  48%{transform:translateX(calc(var(--facing) * 32px)) rotate(calc(var(--facing) * -8deg)) scale(1.03)}
+  100%{transform:none}}
+.sprite-stage[data-character="ynna"].pose-attack .sprite-rig{animation:ynna-swipe .58s ease-out both}
+.pose-attack[data-character="ynna"] .sprite-fx i:nth-child(1){left:36%;top:30%;width:18px;height:18px;background:conic-gradient(#fff,#6fc2ff,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-fly .52s .22s ease-out both}
+.pose-attack[data-character="ynna"] .sprite-fx i:nth-child(5){left:26%;bottom:16%;width:10px;height:10px;background:conic-gradient(#fff,#9ad4ff,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-pop .54s .2s ease-out both}
+/* Rate-up Rush: build certainty with every swing. */
+@keyframes ynna-rateup{
+  0%{transform:none}
+  12%{transform:translateX(-7px) rotate(-2deg)}
+  22%{transform:translateX(7px) rotate(2deg)}
+  32%{transform:translateX(-8px) rotate(-3deg)}
+  42%{transform:translateX(8px) rotate(3deg)}
+  54%{transform:translateX(-5px) scale(1.04)}
+  66%{transform:translateX(4px) scale(1.02)}
+  100%{transform:none}}
+.sprite-stage[data-character="ynna"].pose-skill .sprite-rig{animation:ynna-rateup .66s ease-in-out both}
+.pose-skill[data-character="ynna"] .sprite-fx i:nth-child(3){inset:10% 26%;border-radius:50%;background:radial-gradient(circle,#bfe4ffaa,transparent 70%);animation:fx-flash .6s ease both}
+.pose-skill[data-character="ynna"] .sprite-fx i:nth-child(5){left:22%;bottom:14%;width:12px;height:12px;background:conic-gradient(#fff,#6fc2ff,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-pop .62s .1s ease-out both}
+.pose-skill[data-character="ynna"] .sprite-fx i:nth-child(2){inset:0 20%;border-radius:50%;border:2px dashed #9ad4ff;animation:fx-ring .6s .16s ease-out both}
+/* All-In: Ten Pull! The counter comes due all at once. */
+@keyframes ynna-tenpull{
+  0%{transform:none}
+  22%{transform:translateY(-15px) scale(1.04)}
+  42%{transform:translateY(-24px) rotate(-4deg) scale(1.09)}
+  62%{transform:translateY(-20px) rotate(2deg) scale(1.06)}
+  100%{transform:none}}
+.sprite-stage[data-character="ynna"].pose-ultimate .sprite-rig{animation:ynna-tenpull .76s ease-out both}
+.pose-ultimate[data-character="ynna"] .sprite-fx i:nth-child(5){left:30%;bottom:20%;width:20px;height:20px;background:conic-gradient(#fff,#6fc2ff,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-pop .74s .18s ease-out both}
+.pose-ultimate[data-character="ynna"] .sprite-fx i:nth-child(1){left:42%;top:24%;width:24px;height:24px;background:conic-gradient(#fff,#9ad4ff,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);box-shadow:0 0 20px #6fc2ff;animation:fx-fly .6s .42s ease-out both}
+.pose-ultimate[data-character="ynna"] .sprite-fx i:nth-child(2){inset:2% 16%;border-radius:50%;border:2px solid #9ad4ff;box-shadow:0 0 22px #2895ef88;animation:fx-ring .7s .2s ease-out both}
+.pose-ultimate[data-character="ynna"] .sprite-fx i:nth-child(3){inset:14% 30%;border-radius:50%;background:radial-gradient(circle,#d6ecffcc,transparent 72%);animation:fx-flash .66s .36s ease both}
+
+/* =============================== SOLARI ===============================
+   Ceremonial Staff. He is the audit's holy arm: the light comes down from
+   above rather than out of him. */
+@keyframes solari-smite{
+  0%{transform:none}
+  28%{transform:translateY(-17px) rotate(-5deg) scale(1.03)}
+  48%{transform:translateY(7px) rotate(6deg) scale(.96)}
+  66%{transform:translateY(1px) rotate(-2deg)}
+  100%{transform:none}}
+.sprite-stage[data-character="solari"].pose-attack .sprite-rig{animation:solari-smite .64s cubic-bezier(.34,0,.2,1) both}
+.pose-attack[data-character="solari"] .sprite-fx i:nth-child(1){left:38%;right:38%;top:-4%;bottom:8%;background:linear-gradient(180deg,transparent,#fff8dc 46%,#f0c96a);animation:fx-jab .5s .3s ease-in both}
+.pose-attack[data-character="solari"] .sprite-fx i:nth-child(3){inset:1% 24%;border-radius:50%;background:radial-gradient(circle,#fff3c9dd,transparent 70%);animation:fx-flash .5s .3s ease both}
+/* Divine Reconciliation: the surplus is sanctified, so it goes up and over. */
+@keyframes solari-reconcile{
+  0%{transform:none}
+  30%{transform:translateY(-13px) scale(1.04)}
+  56%{transform:translateY(-17px) rotate(3deg) scale(1.05)}
+  100%{transform:none}}
+.sprite-stage[data-character="solari"].pose-skill .sprite-rig{animation:solari-reconcile .72s ease-out both}
+.pose-skill[data-character="solari"] .sprite-fx i:nth-child(2){inset:2% 14%;border-radius:50%;border:2px solid #f5dc92;box-shadow:0 0 20px #d7ad5099;animation:fx-halo .66s .12s ease-out both}
+.pose-skill[data-character="solari"] .sprite-fx i:nth-child(5){left:28%;top:24%;width:12px;height:12px;background:conic-gradient(#fff,#f5dc92,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-pop .66s .2s ease-out both}
+/* Fiscal Purity: a column of it, straight down onto the field. */
+@keyframes solari-purity{
+  0%{transform:none;filter:none}
+  24%{transform:translateY(-18px) scale(1.06);filter:brightness(1.25)}
+  46%{transform:translateY(-20px) rotate(2deg) scale(1.08);filter:brightness(1.5)}
+  62%{transform:translateY(-14px);filter:brightness(1.3)}
+  100%{transform:none;filter:none}}
+.sprite-stage[data-character="solari"].pose-ultimate .sprite-rig{animation:solari-purity .76s ease-out both}
+.sprite-stage.pose-ultimate[data-character="solari"]::before{left:6%;right:6%;top:-56%;bottom:-6%;background:linear-gradient(180deg,transparent,#fff6cd 34%,#f0d4899e 72%,transparent);mask-image:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);animation:fx-pillar .74s .18s ease-out both}
+.pose-ultimate[data-character="solari"] .sprite-fx i:nth-child(2){inset:-6% 8%;border-radius:50%;border:2px solid #f5dc92;box-shadow:0 0 26px #d7ad50;animation:fx-halo .72s .2s ease-out both}
+.pose-ultimate[data-character="solari"] .sprite-fx i:nth-child(3){inset:2% 22%;border-radius:50%;background:radial-gradient(circle,#fff8dddd,transparent 74%);animation:fx-flash .7s .26s ease both}
+.pose-ultimate[data-character="solari"] .sprite-fx i:nth-child(5){left:34%;top:20%;width:14px;height:14px;background:conic-gradient(#fff,#f5dc92,#fff);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:fx-pop .7s .24s ease-out both}
+
+/* ============================= ESCANOOR =============================
+   Disciplinary Gauntlet. Weight, threat, and then a great deal of it
+   arriving at once. */
+@keyframes escanooor-punch{
+  0%{transform:none}
+  22%{transform:translateX(calc(var(--facing) * -15px)) rotate(calc(var(--facing) * 7deg)) scale(.97)}
+  44%{transform:translateX(calc(var(--facing) * 62px)) rotate(calc(var(--facing) * -5deg)) scale(1.06)}
+  58%{transform:translateX(calc(var(--facing) * 62px)) rotate(calc(var(--facing) * -5deg)) scale(1.06)}
+  100%{transform:none}}
+.sprite-stage[data-character="escanooor"].pose-attack .sprite-rig{animation:escanooor-punch .62s cubic-bezier(.3,0,.12,1) both}
+.pose-attack[data-character="escanooor"] .sprite-fx i:nth-child(4){left:-18%;right:-18%;bottom:-6%;height:18px;border-radius:50%;border:2px solid #ffb98f;box-shadow:0 0 20px #ee815b;animation:fx-ground .5s .42s ease-out both}
+.pose-attack[data-character="escanooor"] .sprite-fx i:nth-child(5){left:56%;bottom:30%;width:11px;height:11px;border-radius:50%;background:#ff9c5c;box-shadow:0 0 10px #ff7a2f;animation:fx-ember .56s .4s ease-out both}
+/* Final Warning: he tells you, points, and then does not ask again. */
+@keyframes escanooor-warning{
+  0%{transform:none}
+  26%{transform:translateY(-9px) scale(1.05) rotate(calc(var(--facing) * -3deg))}
+  46%{transform:translateY(-10px) scale(1.05) rotate(calc(var(--facing) * -3deg))}
+  62%{transform:translateY(8px) scale(.95)}
+  100%{transform:none}}
+.sprite-stage[data-character="escanooor"].pose-skill .sprite-rig{animation:escanooor-warning .7s cubic-bezier(.34,0,.2,1) both}
+.pose-skill[data-character="escanooor"] .sprite-fx i:nth-child(3){inset:8% 22%;border-radius:50%;background:radial-gradient(circle,#ffc9aacd,transparent 70%);animation:fx-flash .64s ease both}
+.pose-skill[data-character="escanooor"] .sprite-fx i:nth-child(5){left:24%;bottom:26%;width:12px;height:12px;border-radius:50%;background:#ff9c5c;box-shadow:0 0 12px #ff7a2f;animation:fx-ember .68s .16s ease-out both}
+/* Office Liquidation: up, and then down with the whole floor. */
+@keyframes escanooor-liquidation{
+  0%{transform:none}
+  18%{transform:translateY(7px) scale(.93)}
+  40%{transform:translateY(-32px) scale(1.11)}
+  58%{transform:translateY(12px) scale(.9)}
+  74%{transform:translateY(-2px) scale(1.05)}
+  100%{transform:none}}
+.sprite-stage[data-character="escanooor"].pose-ultimate .sprite-rig{animation:escanooor-liquidation .76s cubic-bezier(.3,0,.2,1) both}
+.sprite-stage.pose-ultimate[data-character="escanooor"]::before{inset:0;background:radial-gradient(circle at 50% 74%,#ffb27a99,transparent 66%);animation:fx-flash .66s .5s ease both}
+.pose-ultimate[data-character="escanooor"] .sprite-fx i:nth-child(4){left:-56%;right:-56%;bottom:-10%;height:30px;border-radius:50%;border:3px solid #ffb98f;box-shadow:0 0 30px #ee815b;animation:fx-ground .66s .54s ease-out both}
+.pose-ultimate[data-character="escanooor"] .sprite-fx i:nth-child(5){left:16%;bottom:34%;width:16px;height:16px;border-radius:50%;background:#ff9c5c;box-shadow:0 0 14px #ff7a2f;animation:fx-ember .72s .5s ease-out both}
+.pose-ultimate[data-character="escanooor"] .sprite-fx i:nth-child(3){inset:4% 18%;border-radius:50%;background:radial-gradient(circle,#ffd2b8cc,transparent 72%);animation:fx-flash .6s .5s ease both}
+
+/* ========================= DIRECTOR VANE =========================
+   Signed Contract. He does not swing: he advances paperwork, and the
+   paperwork wins. */
+@keyframes vane-clause{
+  0%{transform:none}
+  24%{transform:translateX(calc(var(--facing) * -11px)) rotate(calc(var(--facing) * 4deg))}
+  46%{transform:translateX(calc(var(--facing) * 48px)) rotate(calc(var(--facing) * -4deg)) scale(1.03)}
+  60%{transform:translateX(calc(var(--facing) * 48px)) rotate(calc(var(--facing) * -4deg)) scale(1.03)}
+  100%{transform:none}}
+.sprite-stage[data-character="vane"].pose-attack .sprite-rig{animation:vane-clause .6s cubic-bezier(.3,0,.15,1) both}
+.pose-attack[data-character="vane"] .sprite-fx i:nth-child(1){left:30%;top:28%;width:34px;height:24px;background:linear-gradient(180deg,#fffdf4,#e8d7a4);border:1px solid #c9a04a;box-shadow:0 0 12px #c9a04a99;animation:fx-seal .56s .24s ease-out both}
+.pose-attack[data-character="vane"] .sprite-fx i:nth-child(3){inset:10% 26%;border-radius:50%;background:radial-gradient(circle,#fff3cdcc,transparent 70%);animation:fx-flash .46s .3s ease both}
+/* Acquisition Clauses: he takes what the enemy has, then takes it back. */
+@keyframes vane-acquire{
+  0%{transform:none}
+  28%{transform:translateY(-9px) scale(1.04)}
+  54%{transform:translateY(-11px) rotate(calc(var(--facing) * 6deg)) scale(1.05)}
+  100%{transform:none}}
+.sprite-stage[data-character="vane"].pose-skill .sprite-rig{animation:vane-acquire .72s ease-out both}
+.pose-skill[data-character="vane"] .sprite-fx i:nth-child(2){inset:0 12%;border-radius:50%;border:2px solid #e8d7a4;box-shadow:0 0 20px #c9a04a99;animation:fx-hex .68s .1s ease-out both}
+.pose-skill[data-character="vane"] .sprite-fx i:nth-child(1){left:34%;top:26%;width:26px;height:19px;background:linear-gradient(180deg,#fffdf4,#e8d7a4);border:1px solid #c9a04a;animation:fx-seal .62s .18s ease-out both}
+/* Hostile Takeover: one enormous signature, over the entire line. */
+@keyframes vane-takeover{
+  0%{transform:none;filter:none}
+  22%{transform:translateY(-15px) scale(1.05);filter:brightness(1.2)}
+  44%{transform:translateY(-15px) scale(1.05);filter:brightness(1.5)}
+  60%{transform:translateY(9px) scale(.94);filter:brightness(1.8)}
+  76%{transform:translateY(-1px) scale(1.04);filter:brightness(1.2)}
+  100%{transform:none;filter:none}}
+.sprite-stage[data-character="vane"].pose-ultimate .sprite-rig{animation:vane-takeover .76s cubic-bezier(.34,0,.2,1) both}
+.sprite-stage.pose-ultimate[data-character="vane"]::before{left:-24%;right:-24%;top:-74%;bottom:6%;background:radial-gradient(circle at 50% 70%,#fff6d8 12%,#d7ad50aa 42%,transparent 70%);border-radius:50%;animation:fx-seal .76s .2s ease-in both}
+.pose-ultimate[data-character="vane"] .sprite-fx i:nth-child(1){left:26%;top:20%;width:44px;height:32px;background:linear-gradient(180deg,#fffdf4,#e8d7a4);border:2px solid #c9a04a;box-shadow:0 0 22px #c9a04a;animation:fx-seal .72s .22s ease-in both}
+.pose-ultimate[data-character="vane"] .sprite-fx i:nth-child(2){inset:-2% 10%;border-radius:50%;border:3px solid #e8d7a4;box-shadow:0 0 26px #c9a04a;animation:fx-hex .72s .26s ease-out both}
+.pose-ultimate[data-character="vane"] .sprite-fx i:nth-child(4){left:-30%;right:-30%;bottom:-8%;height:22px;border-radius:50%;border:2px solid #e8d7a4;animation:fx-ground .6s .6s ease-out both}
+.pose-ultimate[data-character="vane"] .sprite-fx i:nth-child(3){inset:6% 20%;border-radius:50%;background:radial-gradient(circle,#fff6d8cc,transparent 72%);animation:fx-flash .6s .58s ease both}
+
+/* ========================= MYSTERIOUS SORCERER =========================
+   Ledger of Debts. His damage does not leave him, it comes back to him,
+   so his motions pull inward where everyone else's push out. */
+@keyframes sorcerer-bolt{
+  0%{transform:none}
+  28%{transform:translateY(-9px) rotate(-3deg) scale(1.03)}
+  52%{transform:translateY(-11px) rotate(2deg) scale(1.03)}
+  100%{transform:none}}
+.sprite-stage[data-character="sorcerer"].pose-attack .sprite-rig{animation:sorcerer-bolt .66s ease-in-out both}
+.pose-attack[data-character="sorcerer"] .sprite-fx i:nth-child(1){left:34%;top:28%;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#e2d9ff,#4a3f7a);box-shadow:0 0 18px #6f5bd6;animation:fx-fly .56s .24s ease-out both}
+.pose-attack[data-character="sorcerer"] .sprite-fx i:nth-child(5){left:22%;top:34%;width:13px;height:13px;border-radius:2px;background:#b9a8ff;animation:fx-spiral .6s .18s linear both}
+/* Compound Interest: the figures go out, and then they are his. */
+@keyframes sorcerer-interest{
+  0%{transform:none}
+  30%{transform:translateY(-11px) scale(1.04)}
+  56%{transform:translateY(-7px) rotate(-3deg) scale(1.03)}
+  100%{transform:none}}
+.sprite-stage[data-character="sorcerer"].pose-skill .sprite-rig{animation:sorcerer-interest .72s ease-in-out both}
+.pose-skill[data-character="sorcerer"] .sprite-fx i:nth-child(5){left:20%;top:30%;width:14px;height:14px;border-radius:2px;background:#b9a8ff;animation:fx-spiral .7s .12s linear both}
+.pose-skill[data-character="sorcerer"] .sprite-fx i:nth-child(2){inset:2% 16%;border-radius:50%;border:2px solid #9c8bf0;animation:fx-hex .68s .16s ease-out both}
+.pose-skill[data-character="sorcerer"] .sprite-fx i:nth-child(1){left:20%;top:40%;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#e2d9ff,#6f5bd6);box-shadow:0 0 16px #6f5bd6;animation:fx-siphon .68s .2s ease-in both}
+/* Unpaid Debts Take Form: the only ultimate in the game that collapses. */
+@keyframes sorcerer-debts{
+  0%{transform:none;filter:none}
+  28%{transform:translateY(-17px) scale(1.16);filter:brightness(1.5)}
+  52%{transform:translateY(4px) scale(.85);filter:brightness(.85)}
+  70%{transform:translateY(-1px) scale(1.06);filter:brightness(1.2)}
+  100%{transform:none;filter:none}}
+.sprite-stage[data-character="sorcerer"].pose-ultimate .sprite-rig{animation:sorcerer-debts .76s cubic-bezier(.4,0,.3,1) both}
+.pose-ultimate[data-character="sorcerer"] .sprite-fx i:nth-child(3){inset:-10%;border-radius:50%;background:radial-gradient(circle,transparent 30%,#241a4ecc 62%,transparent 76%);border:2px solid #9c8bf0;animation:fx-implode .72s .24s ease-in both}
+.pose-ultimate[data-character="sorcerer"] .sprite-fx i:nth-child(5){left:24%;top:26%;width:16px;height:16px;border-radius:2px;background:#b9a8ff;box-shadow:0 0 12px #6f5bd6;animation:fx-spiral .76s .18s linear both}
+.pose-ultimate[data-character="sorcerer"] .sprite-fx i:nth-child(2){inset:-4% 8%;border-radius:50%;border:2px solid #9c8bf0;box-shadow:0 0 24px #6f5bd6;animation:fx-hex .74s .2s ease-out both}
+.sprite-stage.pose-ultimate[data-character="sorcerer"]::before{inset:0;background:radial-gradient(circle at 50% 50%,#0d081fdd 24%,transparent 72%);animation:fx-flash .62s .34s ease both}
