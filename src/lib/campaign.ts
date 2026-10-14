@@ -31,15 +31,29 @@ Ninette|The disciplinary head is on his way. Put. The phone. Down.`, [enemy("Blu
 Ninette|Sir, we can explain. There has been a… clerical discrepancy.
 Ynna|A thirty-thousand-dollar discrepancy, if we're being precise.
 Escanooor|The campus security constructs will escort you to my office. Do not make this difficult.
-Edgelord69|Alas. Difficulty is my middle name.`, `Escanooor|Enough. You have demonstrated considerable energy. Perhaps you can put it toward repaying the academy.
-Ninette|Repaying… all of it?`, [enemy("Blue Slime", "slime-blue"), enemy("Red Slime", "slime-red")]),
+Edgelord69|Alas. Difficulty is my middle name.
+Ruta|(Arriving behind the constructs with her spear racked) Disciplinary Committee, armed response. I am the escort.
+Ynna|Oh no. We can handle constructs. That one has a lance.
+Ruta|You will walk in front of me in an orderly manner. That is the whole arrangement.
+Edgelord69|(Eyes widening) A warrior of the Unbroken Line! Your spear sings the song of the eternal—
+Ruta|It does not sing. Keep walking.`, `Escanooor|Enough. You have demonstrated considerable energy. Perhaps you can put it toward repaying the academy.
+Ninette|Repaying… all of it?
+Ruta|(Writing in a small notebook) Escort complete. No resistance. Subjects walked in a straight line and said nothing useful.
+Ninette|That is the most terrifying compliment anyone has ever paid us.
+Ruta|It is not a compliment. It is a record. But you did not run.`, [enemy("Blue Slime", "slime-blue"), enemy("Red Slime", "slime-red")]),
   stage(1, 3, "Escanooor's Ultimatum", "Disciplinary Office", `Escanooor|Recover the $30,000 before the end of the week. Otherwise, I liquidate the Student Council office.
 Ynna|Does that include the snack drawer?
 Escanooor|Every drawer. Every chair. Every questionable plastic sword.
 Edgelord69|You would confiscate the Blade of Eternal Night?!
-Ninette|We'll recover it. Somehow.`, `Ninette|We need a plan that doesn't involve another banner.
+Ninette|We'll recover it. Somehow.
+Ruta|(Standing at the door, spear planted, reading from the file) One week. The deadline is one week from today.
+Ninette|You have our file?
+Ruta|I have every file. It is why they assigned me.`, `Ninette|We need a plan that doesn't involve another banner.
 Ynna|GachaCorp has a customer-support server under the old west wing. Maybe we can request a refund in person.
-Ninette|That is the first sensible thing you've said today.`, [enemy("Red Slime", "slime-red"), enemy("Gold Slime", "slime-gold"), enemy("Blue Slime", "slime-blue")]),
+Ninette|That is the first sensible thing you've said today.
+Ruta|(Pausing in the doorway on her way out) For what it is worth — most people in your position quietly stop trying to repay it.
+Ynna|Is that encouragement?
+Ruta|It is an observation. Do not put it in the minutes.`, [enemy("Red Slime", "slime-red"), enemy("Gold Slime", "slime-gold"), enemy("Blue Slime", "slime-blue")]),
   stage(1, 4, "Cleanup on Campus", "West Courtyard", `Ninette|The campus cleanup contract pays a little. We'll take it while we find the server entrance.
 Ynna|The plants look… unusually enthusiastic.
 Narrator|Something enormous screams out of the cafeteria doors, trailing steam and a truly unreasonable amount of glitter.
@@ -59,10 +73,23 @@ Penelope|Great! Who wants breakfast? It's the only thing I can't destroy.`, [ene
 Ninette|Then let us fix it. We need the cleanup payment, and we need what's downstairs.
 Escanooor|I cannot officially authorize this. But I can look the other way for five minutes.
 Ynna|See? Deep down, he likes us.
-Edgelord69|The gates of destiny await!`, `Escanooor|The clock is ticking, council. Don't make me regret this.
+Edgelord69|The gates of destiny await!
+Ruta|(Opening a small notebook) The gate malfunctioned. Nothing was seen. Nothing was authorized.
+Ynna|Wait — how long have you been standing there?
+Ruta|I am always standing there. That is what armed response means.`, `Escanooor|The clock is ticking, council. Don't make me regret this.
+Ruta|(Closing the notebook) Five minutes. Nothing observed. Log closed.
+Ynna|You're not going to stop us?
+Ruta|The gate was malfunctioning. It says so in the report.
+Ninette|(Narrowing her eyes) …Did you write the report?
+Ruta|I wrote the report.
 Ninette|We'll bring back the treasury.
 Narrator|The old doors creak open. A strange purple glow spills up the basement stairs.`, [enemy("Crowned Slime", "kingslime", true), enemy("Blue Slime", "slime-blue"), enemy("Blue Slime", "slime-blue")], true),
-  stage(2, 1, "Spores in the West Wing", "Old West Wing Corridor", `Ninette|(Coughs) Ugh! The humidity down here is insane! Why is the hallway completely overgrown with giant red and blue mushrooms?!
+  stage(2, 1, "Spores in the West Wing", "Old West Wing Corridor", `Ruta|(At the gate with a clipboard) Restricted wing. Officially, nobody goes down there until the structural sweep is logged.
+Ninette|And unofficially?
+Ruta|Unofficially the sweep was logged this morning. Whatever happens in that corridor is not on my record.
+Ynna|Ruta, you're the best.
+Ruta|I am the paperwork. There is a difference. (Steps aside)
+Ninette|(Coughs) Ugh! The humidity down here is insane! Why is the hallway completely overgrown with giant red and blue mushrooms?!
 Ynna|(Pokes a mushroom with a ruler) Look, this Spun Shroom has googly eyes! It's kind of cute—
 Narrator|The Spun Shroom violently shakes and sprays a cloud of red spores everywhere.
 Edgelord69|(Draws plastic katana) BREATHE IT NOT! The spores of the Reroom inflame the soul with unholy rage!
@@ -108,7 +135,12 @@ Purp|What? I clicked “Reverse Transaction & Convert to Account Credit.”
 Ynna|…Purp… you converted the $30,000 debt into 300,000 In-Game Paid Gems on my account instead of refunding the bank…
 Ninette|(Voice trembling) YOU… DID… WHAT?!
 Ynna|THREE HUNDRED THOUSAND GEMS?! DO YOU KNOW HOW MANY PULLS THAT IS?!
-Ninette|YNNAAAA! PURPPP! I'M GOING TO THROW BOTH OF YOU OFF THE SCHOOL ROOF!`, [enemy("GachaCorp Server Terminal", "terminal", true), enemy("Cursed Clockwork Cat", "cat"), enemy("Cursed Clockwork Cat", "cat")], true),
+Ninette|YNNAAAA! PURPPP! I'M GOING TO THROW BOTH OF YOU OFF THE SCHOOL ROOF!
+Ruta|(Reading from the clipboard she has carried since the server room) The refund was rejected before you started. It says so in the response header. "Debt instruments are held by GachaCorp Financial Services, a licensed district contractor."
+Purp|…That is a different company from the one we just hacked.
+Ruta|It is a subsidiary. Same building, separate contract. That is how the money survives.
+Ninette|So the debt outlives the server.
+Ruta|The debt outlives everything. It is the only thing in this building that is properly documented.`, [enemy("GachaCorp Server Terminal", "terminal", true), enemy("Cursed Clockwork Cat", "cat"), enemy("Cursed Clockwork Cat", "cat")], true),
   stage(3, 1, "An Unholy Anathema", "Cathedral of Saint Athanasius", `Ninette|(Stares blankly at his phone terminal, hands shaking) It's over. The bank froze all remaining accounts. They aren't just taking the desk chairs anymore, Ynna… my scholarship was revoked twenty minutes ago.
 Ynna|Ninette… I tried to pull on the banner to see if we could convert the dupes into tradeable currency. The game… locked me out.
 Purp|Because that wasn't standard in-game currency. GachaCorp uses the 300,000 Paid Gems as an encrypted digital ledger to hide unrecorded offshore transactions. Your $30,000 accidentally intercepted a corporate laundering node.
@@ -147,6 +179,8 @@ Ruta|Penelope, I have seen your kitchen. I decline.
 Solari|No. It is about every future they put a price on. Stand with me.`, `Ruta|Line held. All six withdrew. The audit is intact.
 Solari|The evidence is certified. Our next destination is GachaCorp's executive board.
 Ruta|Then I am coming with you. GachaCorp's subsidiaries hold every disciplinary contract in this district. Mine included.
+Ninette|Ruta, if you come with us, your contract—
+Ruta|I know exactly what my contract says. That is why I am coming.
 Narrator|Ruta joins the council. The line holds.
 Edgelord69|No more hiding in basements.
 Ynna|And no more running from what I did. Let's go.`, [enemy("Corporate Enforcer", "enforcer", true), enemy("Asset Collector", "sentry"), enemy("Asset Collector", "sentry")], true),
@@ -154,12 +188,20 @@ Ynna|And no more running from what I did. Let's go.`, [enemy("Corporate Enforcer
 Ninette|So Escanooor didn't just lose the budget… he was backed into a corner by their high interest rates.
 Purp|My account wasn't permabanned because I hacked the game. I was banned because I found their internal files proving they manipulate pull rates dynamically based on a player's real-life bank balance.
 Ynna|They took $30,000 from us… they ruined Ninette's scholarship… and they made us think it was just a stupid joke.
-Edgelord69|(Unsheathing a genuine steel blade from beneath his coat) No more plastic swords. We end this today.`, `Ninette|The plaza is clear. Purp, find us a way up.
+Edgelord69|(Unsheathing a genuine steel blade from beneath his coat) No more plastic swords. We end this today.
+Ruta|(Turning a dropped guard's badge over in her hand) Their subsidiary issues every disciplinary licence in this district. Mine included. Four years of standing in doorways, and I never once read the clause about who I was standing there for.
+Ninette|Ruta—
+Ruta|Clause fourteen. "The contractor shall not act against the interests of the corporation." I read it today. In the lobby. While you were fighting.`, `Ninette|The plaza is clear. Purp, find us a way up.
 Purp|The service elevator. Someone left the password as “password.” Corporate security, everyone.`, [enemy("Corporate Guard", "sentry"), enemy("Executive Sentry", "sentry"), enemy("Security Familiar", "cat")]),
   stage(4, 2, "Terms & Conditions", "Customer Retention Floor", `P.A. Automated Voice|By entering this facility, you consent to all applicable liquidation fees.
 Ynna|I am so done with fine print.
 Purp|The doors are tied to their retention system. We have to crash the security process.
-Solari|Consider this an independent review.`, `Purp|Retention process terminated. The doors are open.
+Solari|Consider this an independent review.
+Ruta|(Sitting on a crate, reading a sixty-page contract under a desk lamp) Clause fifteen. "This agreement is void upon a judicial finding that the corporation has violated district law."
+Purp|…Say that again.
+Ruta|They wrote their own exit clause. Page eleven.
+Ynna|You've been reading it this entire time?
+Ruta|I read everything. It is why they assigned me.`, `Purp|Retention process terminated. The doors are open.
 Ninette|I'm going to enjoy writing this complaint.`, [enemy("Retention Unit", "sentry"), enemy("Terms Enforcer", "sentry"), enemy("Clockwork Cat", "cat")]),
   stage(4, 3, "The Rate-Up Lie", "Behavioral Analytics Department", `Purp|Here it is. The system that changes pull rates based on bank balances.
 Ynna|All those “lucky” banners… they knew exactly what I would spend.
@@ -169,9 +211,15 @@ Ynna|No more rigged chances. Not for anyone.`, [enemy("Analytics Prime", "prime"
   stage(4, 4, "Upward, Together", "Executive Elevator", `Edgelord69|They're sending everything they have.
 Ninette|We didn't get this far to turn back.
 Solari|The ledger is on our side.
-Ynna|So are we. Together.`, `Purp|Top floor. The executive lock is down.
+Ynna|So are we. Together.
+Ruta|(Bracing the elevator doors open with her spear so the others can file in) My contract ended on the eighth floor. I read it twice to be sure.
+Ynna|Ruta, that's…
+Ruta|It is paperwork. Go up.`, `Purp|Top floor. The executive lock is down.
 Narrator|The elevator doors open onto a skyline framed in cold glass. One person waits at the end of the boardroom.`, [enemy("Executive Honor Guard", "enforcer", true), enemy("Corporate Guard", "sentry"), enemy("Corporate Guard", "sentry")], true),
   stage(4, 5, "The Executive Floor", "CEO Boardroom Overlooking the City", `Director Vane|Impressive. The student council, a disgraced hacker, and a renegade cleric. Do you really believe uploading a file changes anything? We own the banks. We own the servers.
+Ruta|(Stepping forward with the contract held open) Clause fifteen, Director. Violation of district law. You wrote it, your lawyers signed it, and the finding it describes is the audit you are trying to seize.
+Director Vane|(A pause exactly one second too long) A licensed contractor. Turning on the company that signs her pay.
+Ruta|You paid me to stand in doorways. You did not pay me to stand in this one.
 Solari|You own digital illusions! But the Divine Audit acknowledges only truth!
 Director Vane|(Heavy corporate armor deploys around him) Then perish under the weight of your own debt!`, `Director Vane|(Falling to his knees) You're too late… The central server in the basement core… is initiating a total wipe of all district assets. In ten minutes… your school, your records, and your futures… will cease to exist.
 Ninette|Purp. The core. Now.`, [enemy("Director Vane", "vane", true), enemy("Corporate Armor", "sentry")], true),
@@ -179,6 +227,9 @@ Ninette|Purp. The core. Now.`, [enemy("Director Vane", "vane", true), enemy("Cor
 Edgelord69|(Holding off swarms of security constructs, coat torn, standing firm) Keep moving! I'll hold the doorway!
 Ynna|Edgelord, no!
 Edgelord69|(Looks back with a quiet, genuine smile—no chuunibyou act left) Go, Ynna. Show them what real resolve looks like.`, `Ninette|He'll catch up. He has to.
+Ruta|(Reading the corridor readout on the wall) This level loses structural integrity in eleven minutes. He is not behind us.
+Purp|How could you possibly know that?
+Ruta|I counted the constructs. Two are missing from the ones that were following us. Something is stopping them. (Pauses) Somebody.
 Purp|The override terminal is three sectors below. Keep moving!
 Ynna|We're coming back for him. That's not negotiable.`, [enemy("Quantum Construct", "sentry"), enemy("Quantum Construct", "sentry"), enemy("Abyssal Familiar", "cat")]),
   stage(5, 2, "Fragments of Tomorrow", "Student Record Storage", `Narrator|Names and grades flicker across the walls. One by one, the records begin to disappear.
@@ -210,6 +261,7 @@ Ninette|(Smiles faintly, sliding a clean folder over) Just enough. And not a sin
 Solari|(Pokes head through door, adjusting mustache with a small smile) The ledger is balanced. Peace be upon this office.
 Penelope|(Carrying a truly heroic stack of empty plates) Breakfast is READY! I used a wok this time. Nobody got hurt. Statistically.
 Ruta|(Standing by the window, spear racked beside her) The new security contract is signed. It names the council, not a corporation.
+Ruta:smug|(Almost smiles — the first one anyone has seen) I read every page of this one. Twice.
 Narrator|Somewhere, a phone that no longer exists would have shown a banner ending in nine minutes. Nobody checks.
 Narrator|THE END — Thank you for being part of the council. Your playable roster and campaign save remain yours.`, [enemy("System Core Omega-Gacha", "terminal", true)], true),
 ];
