@@ -136,7 +136,10 @@ test("no animation outlasts the pose hold", () => {
     .filter((parsed) => parsed.duration > hold)
     .map((parsed) => `${parsed.name} ${parsed.duration}s > ${hold}s`);
   assert.deepEqual(overruns, [], `these animations are cut off before they finish: ${overruns.join(", ")}`);
-  assert.ok(hold > 0 && hold <= 1, `POSE_HOLD_MS looks wrong: ${POSE_HOLD_MS}`);
+  // Still a sanity band, not a target: it is here to catch a constant that is a
+  // typo. The move set was slowed by 40%, so the ceiling moved with it - the
+  // invariant that matters is the one above, that nothing outruns the hold.
+  assert.ok(hold > 0 && hold <= 1.5, `POSE_HOLD_MS looks wrong: ${POSE_HOLD_MS}`);
 });
 
 test("each character's body motion matches the weapon in their art", () => {

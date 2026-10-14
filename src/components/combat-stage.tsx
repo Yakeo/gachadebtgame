@@ -13,12 +13,21 @@ const oneShots = new Set(["attack", "skill", "guard", "ultimate", "hit", "counte
  *
  * Every choreography animation in combat.css has to finish inside this window
  * or it gets cut off mid-swing, so the number lives here as the single source
- * of truth and tests/ssr-attacks.test.mjs reads it back.
+ * of truth and tests/ssr-attacks.test.ts reads it back.
+ *
+ * The longest one-shot in the stylesheet is the slime pounce at 1.2s, which is
+ * what sets the ceiling. Raising it bought the whole move set 40% more time:
+ * a 0.7s attack is now a full second, and the enemies' answer is a leap you can
+ * follow from the wind-up to the landing.
  */
-export const POSE_HOLD_MS = 880;
+export const POSE_HOLD_MS = 1200;
 
 /**
  * The pause between a blow landing and the enemies answering it.
+ *
+ * Long enough for the struck creature's own flinch to finish - the beat exists
+ * to separate the two moments, so cutting short the reaction it is separating
+ * defeats the point. The slime squash is the shortest reaction at 0.75s.
  *
  * The engine resolves the whole exchange in one response - the struck enemy
  * reacts and the surviving enemies retaliate in the same payload. Drawn in the
@@ -26,7 +35,17 @@ export const POSE_HOLD_MS = 880;
  * easy to miss. Holding the hit for a beat and then letting the enemies pounce
  * gives the two moments their own space.
  */
-export const IMPACT_BEAT_MS = 460;
+export const IMPACT_BEAT_MS = 800;
+
+/**
+ * How long the enemies' answer stays on screen before the player can act again.
+ *
+ * Input used to come back the instant the counter pose was set, so the next
+ * command - or auto-battle's next tick - replaced the pose mid-leap and the
+ * answer was gone before it landed. Holding the beat for the length of the
+ * pounce lets it finish. Matches `slime-pounce` in combat.css.
+ */
+export const COUNTER_HOLD_MS = 1200;
 
 /** Enemies drawn as pixel art, which deform as one piece when they move. */
 const SLIME_IDS = new Set(["slime-blue", "slime-red", "slime-gold", "slime-cactus", "kingslime"]);
@@ -70,14 +89,14 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     battle.allies.forEach(ally => { opening[ally.id] = ally.hp > 0 ? "enter" : "down"; });
     battle.enemies.forEach(enemy => { opening[enemy.id] = enemy.hp > 0 ? "enter" : "down"; });
     setPoses(opening);
-    const timer = setTimeout(() => { if (!acting.current) setPoses(current => Object.fromEntries(Object.entries(current).map(([id, pose]) => [id, pose === "enter" ? "idle" : pose])) as Record<string, Pose>); }, 720);
+    const timer = setTimeout(() => { if (!acting.current) setPoses(current => Object.fromEntries(Object.entries(current).map(([id, pose]) => [id, pose === "enter" ? "idle" : pose])) as Record<string, Pose>); }, 1000);
     return () => clearTimeout(timer);
     // Entrance plays once per operation, not after every resolved action.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [battle.stageId]);
 
   useEffect(() => { if (battle.enemies[target]?.hp <= 0) { const living = battle.enemies.findIndex(enemy => enemy.hp > 0); if (living >= 0) setTarget(living); } }, [battle.enemies, target]);
-  useEffect(() => { if (!impact) return; const timer = setTimeout(() => setImpact(false), 1100); return () => clearTimeout(timer); }, [impact]);
+  useEffect(() => { if (!impact) return; const timer = setTimeout(() => setImpact(false), 1500); return () => clearTimeout(timer); }, [impact]);
   useEffect(() => {
     if (!Object.values(poses).some(pose => oneShots.has(pose))) return;
     const timer = setTimeout(() => setPoses(current => {
@@ -119,16 +138,31 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     // round rather than once per turn, so the turn number is what says whether
     // anyone is coming - not the command that was just issued.
     const roundEnded = nextBattle.turn > battle.turn && nextBattle.status === "active";
-    if (!roundEnded) return;
     setBeat(true);
+    if (!roundEnded) {
+      // Only the last ally in a round triggers the enemies' answer - the engine
+      // only advances the turn then. For every other command there is no beat
+      // to hang the hold on, and the buttons used to come back the instant the
+      // server replied: a quick click stamped on the swing that was still
+      // playing, which is the other half of "the animations don't show up".
+      // Hold for the pose window, so input returns as the animation ends.
+      await new Promise(resolve => setTimeout(resolve, POSE_HOLD_MS));
+      setImpact(false);
+      setBeat(false);
+      return;
+    }
     await new Promise(resolve => setTimeout(resolve, IMPACT_BEAT_MS));
-    setBeat(false);
     setImpact(false);
     setPoses(current => {
       const answering: Record<string, Pose> = { ...current };
       nextBattle.enemies.forEach(enemy => { if (enemy.hp > 0) answering[enemy.id] = "counter"; });
       return answering;
     });
+    // Keep input locked until that leap has landed. Releasing the buttons the
+    // instant the pose is set let a fast click - or auto-battle's next tick -
+    // overwrite it mid-air, which is another way the animations went unseen.
+    await new Promise(resolve => setTimeout(resolve, COUNTER_HOLD_MS));
+    setBeat(false);
   }, [action, active.id, battle.allies, battle.status, battle.turn, beat, busy, target]);
 
   useEffect(() => {
@@ -136,7 +170,10 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     const timer = setTimeout(() => {
       const healing = ["Support", "Healer"].includes(c.role) && battle.allies.some(ally => ally.hp > 0 && ally.hp < ally.maxHp * .65);
       void command(active.energy >= 100 ? "ultimate" : active.energy >= 20 && healing ? "skill" : "attack");
-    }, 1100);
+      // Short on purpose: the beat already holds input for the length of the
+      // animation, so this is only the breath between actions. A long timer
+      // here would stack on top of that hold and crawl.
+    }, 400);
     return () => clearTimeout(timer);
   }, [active.energy, auto, battle, beat, busy, c.role, command, log, retreat]);
   useEffect(() => {
