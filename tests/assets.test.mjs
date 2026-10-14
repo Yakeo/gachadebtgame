@@ -296,6 +296,11 @@ test("all sprites share one canvas aspect, so they scale alike", () => {
   const aspects = [];
   for (const file of walk("public/images", [".png"])) {
     if (file.includes("/faces/")) continue;
+    // Enemy sprites are a separate set with their own canvas and their own
+    // guarantees - tests/enemy-sprites.test.ts checks that all five share one
+    // canvas and one baseline. They are deliberately not forced onto the
+    // character roster's aspect: the King is meant to look bigger.
+    if (file.includes("/enemies/")) continue;
     const { width, height } = decodePng(file);
     aspects.push({ file, aspect: width / height });
   }
@@ -313,6 +318,7 @@ test("sprites render at a consistent height in the arena box", () => {
   // was fixed the spread was large enough to read as two different art styles.
   const heights = [];
   for (const file of walk("public/images", [".png"])) {
+    if (file.includes("/enemies/")) continue;   // see the aspect test above
     if (file.includes("/faces/")) continue;
     const image = decodePng(file);
     const { pixels, channels, width, height, palette } = image;

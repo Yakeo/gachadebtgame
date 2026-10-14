@@ -21,6 +21,22 @@ export function Battlefield({ src, alt, className = "" }: { src: string; alt: st
 export function ProgressBar({ value, max = 100, className = "" }: { value: number; max?: number; className?: string }) { return <div className={`progress-track ${className}`}><span style={{ width: `${Math.max(0, Math.min(100, value / max * 100))}%` }} /></div>; }
 export function Logo() { return <div className="brand" aria-label="Gacha Debt"><svg viewBox="0 0 56 58" aria-hidden="true"><path d="M25 2 52 16 43 47 16 57 2 31Z" fill="#2088ee"/><path d="m30 9-17 24h13l-5 15 24-27H30l7-12Z" fill="white"/><path d="M9 10 4 23M49 48l-9 5" stroke="#72c4ff" strokeWidth="3"/></svg><div><strong>GACHA<span>DEBT</span></strong><small>ONE PULL. ALL THE PROBLEMS.</small></div></div>; }
 export function Avatar({ id, className = "", label }: { id: string; className?: string; label?: string }) { const c = characterById(id); return <div className={`avatar ${className}`} style={{ "--character-color": c?.color || "#718dc0" } as CSSProperties}><Chibi id={id} label={label} /></div>; }
+/**
+ * Enemies drawn as pixel art rather than inline SVG.
+ *
+ * A PNG can be animated as a single piece - squashed, stretched and pounced -
+ * where an SVG body plus separate eyes and accessories could only ever jiggle
+ * as a whole. scripts/gen-slime-sprites.mjs draws these and owns their
+ * geometry; the palettes match the SVG shapes they replaced.
+ */
+export const enemyArt: Record<string, string> = {
+  "slime-blue": "/images/enemies/slime-blue.png",
+  "slime-red": "/images/enemies/slime-red.png",
+  "slime-gold": "/images/enemies/slime-gold.png",
+  "slime-cactus": "/images/enemies/slime-cactus.png",
+  kingslime: "/images/enemies/kingslime.png",
+};
+
 export const bestiary: Record<string, string> = {
   "slime-blue": "Blue Slime", "slime-red": "Red Slime", "slime-gold": "Gold Slime", "slime-cactus": "Cactus Slime",
   kingslime: "Crowned Slime", prime: "Clockwork Sentry Prime", terminal: "GachaCorp Server Terminal",
@@ -34,7 +50,7 @@ export function Chibi({ id, className = "", label }: { id: string; className?: s
   // shows a character (battle rig, story speaker, roster card, pull result,
   // avatar) goes through this component, so one branch covers them all.
   // Characters without art keep the inline SVG below.
-  const art = known ? c.splash : undefined;
+  const art = known ? c.splash : enemyArt[id];
   // Rendered as the sized element itself (class "chibi"), so every existing
   // width/height rule applies exactly as it did to the SVG; object-fit keeps
   // the figure from ever being stretched or cropped.
@@ -42,26 +58,6 @@ export function Chibi({ id, className = "", label }: { id: string; className?: s
   const eye = c.color;
   const monster = ["shroom", "bluecap", "reroom"].includes(id);
   if (monster) return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}><ellipse cx="80" cy="181" rx="44" ry="9" fill="#122948" opacity=".15"/><path d="M56 112Q40 180 68 180h24q28 0 12-68" fill="#fff0d8" stroke="#34435c" strokeWidth="3"/><path d="M23 111C17 48 136 30 139 109Q129 142 23 111Z" fill={c.color} stroke="#34435c" strokeWidth="3"/><ellipse cx="54" cy="85" rx="13" ry="10" fill="white" opacity=".8"/><ellipse cx="106" cy="81" rx="16" ry="12" fill="white" opacity=".8"/><path d="m70 164 10 5 10-5" fill="none" stroke="#34435c" strokeWidth="3"/><ellipse cx="65" cy="148" rx="6" ry="10" fill="#34435c"/><ellipse cx="96" cy="148" rx="6" ry="10" fill="#34435c"/><circle cx="64" cy="145" r="2" fill="white"/><circle cx="95" cy="145" r="2" fill="white"/></svg>;
-  const slime = (colors: Record<string, string>) => <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}>
-    <ellipse cx="80" cy="182" rx="50" ry="9" fill="#0c1a2c" opacity=".22"/>
-    <path d="M20 160V96q0-62 60-62t60 62v64q0 6-6 6H26q-6 0-6-6Z" fill={colors.edge}/>
-    <path d="M27 158V96q0-54 53-54t53 54v62q0 3-3 3H30q-3 0-3-3Z" fill={colors.body}/>
-    <path d="M42 58q12-12 26-14l-8 14q-10 2-18 0Z" fill={colors.light} opacity=".8"/>
-    <path d="M128 72v30l-8 3V74q4-4 8-2Z" fill={colors.light} opacity=".5"/>
-    <rect x="44" y="140" width="72" height="10" rx="5" fill={colors.edge} opacity=".75"/>
-  </svg>;
-  if (id === "slime-blue") return slime({ body: "#79b3ef", edge: "#4a86d8", light: "#b6d7ff" });
-  if (id === "slime-red") return slime({ body: "#b8474d", edge: "#8c2d34", light: "#e5848a" });
-  if (id === "slime-gold") return slime({ body: "#c99f28", edge: "#e3c44a", light: "#f2dd80" });
-  if (id === "slime-cactus") return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}>
-    <ellipse cx="80" cy="182" rx="50" ry="9" fill="#0c1a2c" opacity=".22"/>
-    <g transform="rotate(14 116 40)"><rect x="104" y="46" width="30" height="16" rx="2" fill="#a9793f"/><rect x="100" y="40" width="38" height="9" rx="2" fill="#7d5527"/><path d="M110 40q-4-26 8-34 14 6 8 34Z" fill="#5f9a4c"/><path d="M118 30q-16-8-20 4 12 8 20-4Z" fill="#6fae5a"/><path d="M118 26q16-8 20 4-12 8-20-4Z" fill="#6fae5a"/><path d="M113 16h3M124 12h3M110 24h3M127 22h3" stroke="#41573a" strokeWidth="2.4"/></g>
-    <path d="M20 160V96q0-62 60-62t60 62v64q0 6-6 6H26q-6 0-6-6Z" fill="#8c2d34"/>
-    <path d="M27 158V96q0-54 53-54t53 54v62q0 3-3 3H30q-3 0-3-3Z" fill="#b8474d"/>
-    <path d="M42 58q12-12 26-14l-8 14q-10 2-18 0Z" fill="#e5848a" opacity=".8"/>
-    <path d="M128 72v30l-8 3V74q4-4 8-2Z" fill="#e5848a" opacity=".5"/>
-    <rect x="44" y="140" width="72" height="10" rx="5" fill="#8c2d34" opacity=".8"/>
-  </svg>;
   if (id === "fragment") return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}>
     <ellipse cx="80" cy="186" rx="38" ry="8" fill="#0c1a2c" opacity=".2"/>
     <path d="M80 8 46 74l14 78 40 0 14-78Z" fill="#3a2c62" stroke="#1c1436" strokeWidth="3"/>
@@ -69,17 +65,6 @@ export function Chibi({ id, className = "", label }: { id: string; className?: s
     <path d="M66 74h28l-6 44H72Z" fill="#8d76e6" opacity=".6"/>
     <path d="M52 92l-16 22 12 30 12-24m48-28 16 22-12 30-12-24" fill="none" stroke="#6f57c4" strokeWidth="7" strokeLinecap="round"/>
     <circle cx="80" cy="52" r="7" fill="#c9b6ff"/><circle cx="80" cy="52" r="3" fill="#fff"/>
-  </svg>;
-  if (id === "kingslime") return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}>
-    <ellipse cx="80" cy="186" rx="56" ry="10" fill="#0c1a2c" opacity=".26"/>
-    <path d="M14 166V90q0-70 66-70t66 70v76q0 6-6 6H20q-6 0-6-6Z" fill="#5c3d94"/>
-    <path d="M22 164V90q0-62 58-62t58 62v74q0 3-3 3H25q-3 0-3-3Z" fill="#6d4aa8"/>
-    <path d="M36 48q14-14 30-16l-9 16q-12 2-21 0Z" fill="#a583d8" opacity=".85"/>
-    <path d="M132 66v34l-9 3V68q5-4 9-2Z" fill="#a583d8" opacity=".55"/>
-    <circle cx="52" cy="122" r="15" fill="#c0a2e0" opacity=".45"/><circle cx="104" cy="104" r="9" fill="#c0a2e0" opacity=".4"/><circle cx="96" cy="86" r="5" fill="#c0a2e0" opacity=".45"/>
-    <ellipse cx="48" cy="140" rx="17" ry="19" fill="#a06fbb"/><path d="M36 136q6-8 12 0" stroke="#7d4f92" strokeWidth="2.4" fill="none"/>
-    <rect x="30" y="150" width="94" height="11" rx="5" fill="#4b3178" opacity=".9"/>
-    <g transform="rotate(12 118 34)"><path d="M96 54q4-34 22-44 20 12 24 46-22-12-46-2Z" fill="#c9975c" stroke="#8a5f33" strokeWidth="3"/><path d="m100 46 8-22 6 20m10-22 8 22" stroke="#8a5f33" strokeWidth="2.6" fill="none"/><circle cx="104" cy="20" r="4" fill="#e0b57c"/><circle cx="120" cy="12" r="4" fill="#e0b57c"/><circle cx="134" cy="26" r="4" fill="#e0b57c"/></g>
   </svg>;
   if (id === "sentry") return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label="Clockwork sentry"><ellipse cx="80" cy="185" rx="49" ry="8" fill="#122948" opacity=".18"/><path d="m44 83-20 51 21 8m70-59 20 51-20 8" fill="#71869e" stroke="#28344c" strokeWidth="6"/><path d="m56 155-7 27h21l9-27m22 0 9 27H90l-9-27" fill="#4a5871"/><path d="m40 90 40-22 42 22-9 67-33 15-35-15Z" fill="#a6bfd6" stroke="#304157" strokeWidth="4"/><circle cx="80" cy="119" r="25" fill="#304157"/><circle cx="80" cy="119" r="16" fill="#4bc2f5"/><circle cx="80" cy="119" r="7" fill="white"/><path d="M50 67V42l30-15 29 15v27L80 80Z" fill="#a6bfd6" stroke="#304157" strokeWidth="4"/><path d="M61 51h38v12H61Z" fill="#253247"/><path d="M67 57h8m11 0h8" stroke="#50d6ff" strokeWidth="5"/><path d="M80 26V12m-6 0h12" stroke="#637d98" strokeWidth="4"/></svg>;
   if (id === "cat") return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label="Clockwork cat"><ellipse cx="80" cy="181" rx="42" ry="8" fill="#122948" opacity=".18"/><path d="M109 154q45-43 18-52" fill="none" stroke="#4e446c" strokeWidth="13" strokeLinecap="round"/><path d="M57 107q-30 71 11 72h28q33-4 8-72" fill="#4e446c"/><path d="m48 86-4-49 31 27 32-23 8 47q-2 39-32 40T48 86" fill="#635780" stroke="#2d2949" strokeWidth="3"/><ellipse cx="68" cy="94" rx="5" ry="10" fill="#a8e7f9"/><ellipse cx="96" cy="94" rx="5" ry="10" fill="#a8e7f9"/><path d="m75 108 7 6 7-6" fill="#eaaac9"/><path d="m49 63 21-47 35 45 15 9H34Z" fill="#2c2946"/><path d="m60 51 36-2 7 11-49 2Z" fill="#aa8ce2"/><circle cx="83" cy="150" r="17" fill="#ddc395" stroke="#2c2946" strokeWidth="3"/><path d="M83 138v12l8 5" fill="none" stroke="#504662" strokeWidth="3"/></svg>;

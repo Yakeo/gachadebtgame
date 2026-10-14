@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "art:manifest": "node scripts/gen-portrait-manifest.mjs",
+    "art:enemies": "node scripts/gen-slime-sprites.mjs",
     "art:verify": "node scripts/verify-deployed-art.mjs",
     "db:supabase": "node scripts/apply-supabase-schema.mjs",
     "db:diagnose": "node scripts/diagnose-supabase.mjs",
