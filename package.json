@@ -13,7 +13,7 @@
     "db:supabase": "node scripts/apply-supabase-schema.mjs",
     "db:diagnose": "node scripts/diagnose-supabase.mjs",
     "e2e": "node scripts/e2e-check.mjs",
-    "test": "npm run test:unit && npm run test:kits && npm run test:gacha && npm run test:expressions && npm run test:diag && npm run test:art",
+    "test": "tsx --test tests/*.test.ts tests/*.test.mjs",
     "test:unit": "tsx --test tests/game-engine.test.ts",
     "test:diag": "node --test tests/diagnostics.test.mjs",
     "test:art": "node --test tests/assets.test.mjs",
