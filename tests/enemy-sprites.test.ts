@@ -189,7 +189,9 @@ test("a command that does not end the round still holds for its own animation", 
     /setBeat\(true\);\s*if \(!roundEnded\) \{[\s\S]{0,900}?setTimeout\(resolve, POSE_HOLD_MS\)[\s\S]{0,300}?setBeat\(false\);/,
     "an ordinary command hands input back mid-animation");
   // auto-battle ticks between actions, not on top of their animations
-  const auto = Number(stage.match(/void command\([\s\S]{0,400}?\}, (\d+)\);/)[1]);
+  const tick = stage.match(/void command\([\s\S]{0,400}?\}, (\d+)\);/);
+  assert.ok(tick, "could not find the auto-battle tick");
+  const auto = Number(tick[1]);
   assert.ok(auto > 0 && auto < 1000, `the auto-battle tick looks wrong: ${auto}ms`);
 });
 
