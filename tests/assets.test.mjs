@@ -170,6 +170,23 @@ test("art referenced by the components is either present or reported", () => {
   assert.ok(true);
 });
 
+test("every chapter has its battlefield art", () => {
+  // Chapter 5 pointed at core.jpg for months and the file was never drawn, so
+  // the arena silently fell back to a plain background. A missing battlefield
+  // is a blank screen mid-fight, so the reference is asserted rather than
+  // merely reported.
+  const source = read("src/lib/campaign.ts");
+  const referenced = [...source.matchAll(/battlefield:\s*"(\/images\/[^"]+)"/g)].map((match) => match[1]);
+  assert.equal(referenced.length, 5, "expected one battlefield per chapter");
+  const missing = referenced.filter((url) => !existsSync(join(root, "public", url)));
+  assert.deepEqual(missing, [], `chapter art that is referenced but absent: ${missing.join(", ")}`);
+  for (const url of referenced) {
+    const bytes = statSync(join(root, "public", url)).size;
+    assert.ok(bytes > 40_000, `${url} is only ${bytes} bytes - too small to be arena art`);
+    assert.ok(bytes < 1_500_000, `${url} is ${bytes} bytes - too heavy to ship`);
+  }
+});
+
 test("every speaking character has all six expression portraits", () => {
   const source = read("src/lib/expressions.ts");
   // the speakerIds map: unquoted keys, plus quoted ones for two-word names

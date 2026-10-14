@@ -3,10 +3,20 @@
 // script name to a character, the mood that a line resolves to, and the rule
 // that nobody in the script is left without a face.
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import assert from "node:assert/strict";
 import { chapters, stages, stageById } from "@/lib/campaign";
-import { MOODS, moodFor, offscreenSpeakers, portraitFor, portraitUrl, speakerIds, speakerName } from "@/lib/expressions";
+import {
+  MOODS,
+  moodFor,
+  offscreenSpeakers,
+  portraitFor,
+  portraitUrl,
+  speakerIds,
+  speakerName,
+} from "@/lib/expressions";
+import { portraitHashes } from "@/lib/portrait-manifest";
 
 /**
  * Every spoken line in the campaign, including the replies to a choice.
@@ -55,10 +65,47 @@ test("the story cast maps to its own characters, not to stand-ins", () => {
 test("every portrait id resolves to a real file for every mood", () => {
   for (const id of new Set(Object.values(speakerIds))) {
     for (const mood of MOODS) {
+      const face = `${id}-${mood}`;
       const url = portraitUrl(id, mood);
-      assert.equal(url, `/images/faces/${id}-${mood}.png`);
+      // The version query is the whole point: it changes when the art does, so
+      // a corrected portrait cannot be served from a cache holding the old one.
+      assert.equal(url, `/images/faces/${face}.png?v=${portraitHashes[face]}`);
+      assert.match(url, /^\/images\/faces\/[a-z0-9-]+\.png\?v=[0-9a-f]{8}$/);
+      assert.ok(existsSync(join(process.cwd(), "public", "images", "faces", `${face}.png`)), `missing art for ${face}`);
     }
   }
+});
+
+test("a corrected portrait gets a URL that busts the cache", () => {
+  // The bug this guards: portraits are served from /public with a long-lived
+  // cache, so identical URLs mean a fixed image can stay invisible for good.
+  // Re-hashing the same bytes must give the same version, and any change to the
+  // bytes must give a different one.
+  const before = portraitUrl("alvida", "calm");
+  assert.equal(before, `/images/faces/alvida-calm.png?v=${portraitHashes["alvida-calm"]}`);
+
+  const otherMood = portraitUrl("alvida", "angry");
+  assert.notEqual(otherMood, `/images/faces/alvida-calm.png?v=${portraitHashes["alvida-calm"]}`);
+
+  // A portrait with no hash on record degrades to a plain path, never a broken URL.
+  assert.equal(portraitUrl("not-a-character", "calm"), "/images/faces/not-a-character-calm.png");
+});
+
+test("the committed manifest matches the art on disk", async () => {
+  // The manifest is generated. If someone edits a portrait without refreshing
+  // it, the deployed URL keeps pointing at the old cache entry - the exact
+  // failure this whole mechanism exists to prevent. Every build regenerates it
+  // (see next.config.ts), so drift here means the build step was skipped.
+  const { portraitManifest } = await import("../scripts/gen-portrait-manifest.mjs");
+  const fresh = portraitManifest();
+  const committed = portraitHashes as Record<string, string>;
+  assert.deepEqual(
+    Object.keys(committed).sort(),
+    Object.keys(fresh).sort(),
+    "the manifest lists different portraits than public/images/faces",
+  );
+  const stale = Object.keys(fresh).filter((face) => fresh[face] !== committed[face]);
+  assert.deepEqual(stale, [], `these hashes are stale - run npm run art:manifest: ${stale.join(", ")}`);
 });
 
 test("an explicit mood in the script always wins", () => {

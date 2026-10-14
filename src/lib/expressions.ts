@@ -1,4 +1,5 @@
 import { characters } from "./game-data";
+import { portraitHashes } from "./portrait-manifest";
 // Character portraits and the moods behind them.
 //
 // Every speaking character in the campaign has six illustrated expressions.
@@ -155,5 +156,10 @@ export function speakerName(speaker: string) {
 
 /** The URL for a character's expression portrait. */
 export function portraitUrl(id: string, mood: Mood) {
-  return `/images/faces/${id}-${mood}.png`;
+  const face = `${id}-${mood}`;
+  // The content hash makes the URL change whenever the art does. Portraits are
+  // served from /public with a long-lived cache, so without it a browser can
+  // keep showing a corrected portrait's old bytes at an unchanged address.
+  const version = portraitHashes[face];
+  return version ? `/images/faces/${face}.png?v=${version}` : `/images/faces/${face}.png`;
 }
