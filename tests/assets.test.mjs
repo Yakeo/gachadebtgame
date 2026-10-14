@@ -43,7 +43,7 @@ function pngInfo(path) {
  */
 function decodePng(path) {
   const buffer = readFileSync(join(root, path));
-  let offset = 8, width = 0, height = 0, bitDepth = 0, colorType = 0, palette = null;
+  let offset = 8, width = 0, height = 0, bitDepth = 0, colorType = 0, palette = null, transparency = null;
   const idat = [];
   while (offset < buffer.length) {
     const length = buffer.readUInt32BE(offset);
@@ -53,6 +53,7 @@ function decodePng(path) {
       width = body.readUInt32BE(0); height = body.readUInt32BE(4);
       bitDepth = body[8]; colorType = body[9];
     } else if (type === "PLTE") palette = Buffer.from(body);
+    else if (type === "tRNS") transparency = Buffer.from(body);
     else if (type === "IDAT") idat.push(Buffer.from(body));
     else if (type === "IEND") break;
     offset += 12 + length;
@@ -90,9 +91,17 @@ function decodePng(path) {
       // stride is width * 1, so indices read straight off `pixels`
       for (let x = 0; x < width; x++) used.add(pixels[y * width + x]);
     }
-    return { palette, used, pixels, width, height };
+    // tRNS is either a single transparent index or one alpha byte per palette
+    // entry; normalise to the two shapes the tests expect.
+    let alpha;
+    if (transparency) {
+      alpha = colorType === 3 && transparency.length === 1
+        ? transparency[0]
+        : Uint8Array.from(transparency);
+    }
+    return { palette, used, pixels, width, height, transparency: alpha };
   }
-  return { pixels, channels, width, height };
+  return { pixels, channels, width, height, transparency: null };
 }
 
 /** Saturated marker magenta: strong red, strong blue, almost no green. */
@@ -232,4 +241,85 @@ test("the character detail page layers illustration under model", () => {
   assert.match(view, /className="detail-splash"/, "the portrait slot should still render the model");
   const css = read("src/app/globals.css");
   assert.match(css, /\.detail-keyart-backdrop\{[^}]*object-fit:cover/, "the backdrop should cover its slot");
+});
+
+
+test("every sprite has working transparency", () => {
+  // Four sprites shipped with no tRNS chunk at all, so their keyed background
+  // rendered as a solid slab - Ynna arrived on a black square. A sprite that is
+  // ~100% opaque has no keyed background and is therefore broken.
+  const opaque = [];
+  for (const file of walk("public/images", [".png"])) {
+    if (file.includes("/faces/")) continue;          // portraits are drawn in a frame
+    const image = decodePng(file);
+    const { pixels, channels, width, height } = image;
+    let visible = 0;
+    if (image.palette) {
+      const transparent = new Set();
+      const raw = image.transparency;
+      if (typeof raw === "number") transparent.add(raw);
+      if (raw && typeof raw === "object" && !Array.isArray(raw) && raw.length) {
+        for (let i = 0; i < raw.length; i++) if (raw[i] === 0) transparent.add(i);
+      }
+      for (let i = 0; i < width * height; i++) if (!transparent.has(pixels[i])) visible++;
+    } else {
+      for (let i = 0; i < pixels.length; i += channels) if (pixels[i + 3] > 0) visible++;
+    }
+    const coverage = visible / (width * height);
+    if (coverage > 0.97) opaque.push(`${file} (${(coverage * 100).toFixed(0)}% opaque)`);
+  }
+  assert.deepEqual(opaque, [], `these sprites have lost their transparent background: ${opaque.join(", ")}`);
+});
+
+test("all sprites share one canvas aspect, so they scale alike", () => {
+  // `object-fit: contain` scales a wide canvas down further than a tall one, so
+  // sprites of different aspect ratios rendered at noticeably different heights
+  // even when their figures were the same size. Padding every figure onto a
+  // canvas of one aspect is what makes them consistent.
+  const aspects = [];
+  for (const file of walk("public/images", [".png"])) {
+    if (file.includes("/faces/")) continue;
+    const { width, height } = decodePng(file);
+    aspects.push({ file, aspect: width / height });
+  }
+  assert.ok(aspects.length >= 10, `expected the character sprites, found ${aspects.length}`);
+  const values = aspects.map(a => a.aspect);
+  const spread = Math.max(...values) - Math.min(...values);
+  assert.ok(spread < 0.02,
+    `sprite canvases vary from ${Math.min(...values).toFixed(3)} to ${Math.max(...values).toFixed(3)} ` +
+    `(spread ${spread.toFixed(3)}): ${aspects.map(a => `${a.file.split("/").pop()} ${a.aspect.toFixed(2)}`).join(", ")}`);
+});
+
+test("sprites render at a consistent height in the arena box", () => {
+  // The end-to-end check: simulate object-fit: contain in the 143x166 box the
+  // arena uses and confirm the figures come out the same height. Before this
+  // was fixed the spread was large enough to read as two different art styles.
+  const heights = [];
+  for (const file of walk("public/images", [".png"])) {
+    if (file.includes("/faces/")) continue;
+    const image = decodePng(file);
+    const { pixels, channels, width, height, palette } = image;
+    const transparent = new Set();
+    const raw = image.transparency;
+    if (typeof raw === "number") transparent.add(raw);
+    if (raw && typeof raw === "object" && !Array.isArray(raw) && raw.length) {
+      for (let i = 0; i < raw.length; i++) if (raw[i] === 0) transparent.add(i);
+    }
+    const scale = Math.min(143 / width, 166 / height);
+    let minY = height, maxY = -1;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = y * width + x;
+        const visible = palette ? !transparent.has(pixels[i]) : pixels[i * channels + 3] > 0;
+        if (visible) { if (y < minY) minY = y; if (y > maxY) maxY = y; break; }
+      }
+    }
+    if (maxY < 0) continue;
+    heights.push({ file, height: Math.round((maxY - minY + 1) * scale) });
+  }
+  const values = heights.map(h => h.height);
+  const spread = Math.max(...values) - Math.min(...values);
+  assert.ok(spread <= 4,
+    `rendered figure heights span ${Math.min(...values)}..${Math.max(...values)}px (spread ${spread}): ` +
+    heights.map(h => `${h.file.split("/").pop()} ${h.height}`).join(", "));
 });
