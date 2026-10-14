@@ -12,7 +12,16 @@ export type Mechanic =
   ;
 export type Character = {
   id: string; name: string; title: string; rarity: Rarity; element: string; role: string;
-  color: string; hair: string; splash?: string; mechanic?: Mechanic;
+  color: string; hair: string;
+  // `splash` is the in-game model: the pixel sprite drawn on the battlefield,
+  // in the roster and in the story. It is NOT the illustration.
+  splash?: string;
+  // `keyart` is the painted illustration - the expensive one. It is shown where
+  // there is room to appreciate it (character detail, recruit banner, pull
+  // reveal). Keeping the two separate is what lets the roster keep its pixel
+  // models while the character pages get real splash art.
+  keyart?: string;
+  mechanic?: Mechanic;
   hp: number; attack: number; defense: number;
   skill: string; ultimate: string; skillNote: string; ultimateNote: string;
   weapon: string; description: string;
@@ -20,7 +29,7 @@ export type Character = {
 export const characters: Character[] = [
   {
     id: "penelope", name: "Penelope", title: "Certified Kitchen Disaster", rarity: "SSR", element: "Flame", role: "Chaos",
-    color: "#ef6ec0", hair: "#e9eef2", splash: "/images/splash-penelope.png", mechanic: "chaos", weapon: "Cast-Iron Frying Pan",
+    color: "#ef6ec0", hair: "#e9eef2", splash: "/images/splash-penelope.png", keyart: "/images/keyart-penelope.jpg", mechanic: "chaos", weapon: "Cast-Iron Frying Pan",
     hp: 1080, attack: 188, defense: 42,
     skill: "Flambé Special", ultimate: "Kitchen Catastrophe",
     skillNote: "Serves every enemy a different portion with a wooden spoon and vibes, then either feeds the squad or puts the lid on it. She does not measure, and she will not be measuring.",
@@ -29,7 +38,7 @@ export const characters: Character[] = [
   },
   {
     id: "ruta", name: "Ruta", title: "The Unbroken Line", rarity: "SSR", element: "Steel", role: "Lancer",
-    color: "#e0574f", hair: "#8a5a3b", splash: "/images/splash-ruta.png", mechanic: "pierce", weapon: "Long Lance",
+    color: "#e0574f", hair: "#8a5a3b", splash: "/images/splash-ruta.png", keyart: "/images/keyart-ruta.jpg", mechanic: "pierce", weapon: "Long Lance",
     hp: 1320, attack: 182, defense: 78,
     skill: "Spiral Thrust", ultimate: "Grand Palisade",
     skillNote: "Two precise strikes on one target, and her reach does not always stop where she planned: the thrust sometimes keeps going down the whole line.",
@@ -38,7 +47,7 @@ export const characters: Character[] = [
   },
   {
     id: "purp", name: "Purp", title: "The Midnight Prodigy", rarity: "SSR", element: "Dark", role: "Caster",
-    color: "#9b6bed", hair: "#e4e2ea", splash: "/images/splash-purp.png", mechanic: "drain", weapon: "Floating Grimoire",
+    color: "#9b6bed", hair: "#e4e2ea", splash: "/images/splash-purp.png", keyart: "/images/keyart-purp.jpg", mechanic: "drain", weapon: "Floating Grimoire",
     hp: 980, attack: 205, defense: 36,
     skill: "Packet Loss", ultimate: "Grand Shadow Arcane",
     skillNote: "Arcane damage to every hostile, and the squad recovers part of what he took. His grimoire does not always close when the spell ends.",
@@ -47,7 +56,7 @@ export const characters: Character[] = [
   },
   {
     id: "edgelord", name: "Edgelord69", title: "Child of the Abyss", rarity: "SSR", element: "Dark", role: "Vanguard",
-    color: "#8f9fd4", hair: "#22242f", splash: "/images/splash-edgelord.png", mechanic: "riposte", weapon: "Steel Katana",
+    color: "#8f9fd4", hair: "#22242f", splash: "/images/splash-edgelord.png", keyart: "/images/keyart-edgelord.jpg", mechanic: "riposte", weapon: "Steel Katana",
     hp: 1420, attack: 172, defense: 72,
     skill: "Plastic Eclipse", ultimate: "No More Plastic Swords",
     skillNote: "Cuts straight through armor, and refunds a large share of the energy it costs. He monologues through the swing, and occasionally the monologue is the attack.",
@@ -56,7 +65,7 @@ export const characters: Character[] = [
   },
   {
     id: "ynna", name: "Ynna", title: "One More Pull", rarity: "SSR", element: "Wind", role: "Striker",
-    color: "#2895ef", hair: "#e7e8ff", splash: "/images/splash-ynna.png", mechanic: "rateup", weapon: "Blessed Smartphone",
+    color: "#2895ef", hair: "#e7e8ff", splash: "/images/splash-ynna.png", keyart: "/images/keyart-ynna.jpg", mechanic: "rateup", weapon: "Blessed Smartphone",
     hp: 1050, attack: 175, defense: 40,
     skill: "Rate-up Rush", ultimate: "All-In: Ten Pull!",
     skillNote: "Builds certainty with every swing: her crit chance climbs the longer she goes without one, then cashes it in.",
@@ -65,7 +74,7 @@ export const characters: Character[] = [
   },
   {
     id: "ninette", name: "Ninette", title: "Keeper of the Ledger", rarity: "SR", element: "Water", role: "Support",
-    color: "#30b8c5", hair: "#5a6684", splash: "/images/splash-ninette.png", mechanic: "audit", weapon: "Financial Binder",
+    color: "#30b8c5", hair: "#5a6684", splash: "/images/splash-ninette.png", keyart: "/images/keyart-ninette.jpg", mechanic: "audit", weapon: "Financial Binder",
     hp: 1250, attack: 130, defense: 65,
     skill: "Budget Recovery", ultimate: "Perfectly Balanced",
     skillNote: "Marks a target for audit - the whole squad then bills it 20% harder. This skill collects the open line items and heals the squad for the trouble.",
@@ -74,7 +83,7 @@ export const characters: Character[] = [
   },
   {
     id: "solari", name: "Solari", title: "The Holy Audit", rarity: "SSR", element: "Light", role: "Healer",
-    color: "#d7ad50", hair: "#f8e9b4", splash: "/images/splash-solari.png", mechanic: "sanctify", weapon: "Ceremonial Staff",
+    color: "#d7ad50", hair: "#f8e9b4", splash: "/images/splash-solari.png", keyart: "/images/keyart-solari.jpg", mechanic: "sanctify", weapon: "Ceremonial Staff",
     hp: 1150, attack: 150, defense: 55,
     skill: "Divine Reconciliation", ultimate: "Fiscal Purity",
     skillNote: "Reconciles the books and sanctifies the surplus: healing that exceeds a full health bar becomes a shield.",
@@ -83,7 +92,7 @@ export const characters: Character[] = [
   },
   {
     id: "escanooor", name: "Escanooor", title: "Disciplinary Head", rarity: "SSR", element: "Fire", role: "Guardian",
-    color: "#ee815b", hair: "#c66c3d", splash: "/images/splash-escanooor.png", mechanic: "detention", weapon: "Disciplinary Gauntlet",
+    color: "#ee815b", hair: "#c66c3d", splash: "/images/splash-escanooor.png", keyart: "/images/keyart-escanooor.jpg", mechanic: "detention", weapon: "Disciplinary Gauntlet",
     hp: 1650, attack: 165, defense: 90,
     skill: "Final Warning", ultimate: "Office Liquidation",
     skillNote: "Final Warning: a heavy strike that shields the entire squad with his own guard, not just himself.",
@@ -112,8 +121,8 @@ export const characters: Character[] = [
   { id: "bluecap", name: "Blue Cap", title: "Basement Bestie", rarity: "R", element: "Water", role: "Support", color: "#59a7da", hair: "#67b7eb", weapon: "Cooling Mist", hp: 850, attack: 110, defense: 45, skill: "Cooling Spores", ultimate: "Blue Bloom", skillNote: "Restores the whole squad's HP.", ultimateNote: "Restores the whole squad's HP.", description: "Purp's original roommate. A reliable little mushroom with impeccable taste in damp corners." },
   { id: "cat", name: "Clockwork Cat", title: "A Cursed Little Baby", rarity: "R", element: "Dark", role: "Striker", color: "#8b88b5", hair: "#45405e", weapon: "Clockwork Pounce", hp: 800, attack: 135, defense: 35, skill: "Tick-Tock Pounce", ultimate: "Nine Lives, No Fees", skillNote: "A single-target strike.", ultimateNote: "A single-target strike.", description: "An occult experiment with a clockwork heart. Accepts head pats, refuses overdue library fees." },
   { id: "reroom", name: "Reroom", title: "Tiny Temper", rarity: "R", element: "Fire", role: "Caster", color: "#e97878", hair: "#e97878", weapon: "Rage Spores", hp: 800, attack: 125, defense: 35, skill: "Rage Spores", ultimate: "Big Red Bloom", skillNote: "Arcane damage to all enemies.", ultimateNote: "Arcane damage to all enemies.", description: "A surprisingly angry mushroom. Please do not poke it with a ruler." },
-  { id: "vane", name: "Director Vane", title: "The Hostile Takeover", rarity: "SSR", element: "Light", role: "Caster", color: "#c9a04a", hair: "#c9c3bb", splash: "/images/splash-vane.png", mechanic: "takeover", weapon: "Signed Contract", hp: 1080, attack: 196, defense: 48, skill: "Acquisition Clauses", ultimate: "Hostile Takeover", skillNote: "Takes what the enemy has, then takes it back with them.", ultimateNote: "An outright acquisition - every hostile pays, and the squad is funded from the proceeds.", description: "GachaCorp's chief executive. He signs contracts the way other people breathe, and every clause has a hidden fee." },
-  { id: "sorcerer", name: "Mysterious Sorcerer", title: "The Fine Print", rarity: "SSR", element: "Dark", role: "Caster", color: "#6f5bd6", hair: "#4a3f7a", splash: "/images/splash-sorcerer.png", mechanic: "siphon", weapon: "Ledger of Debts", hp: 1000, attack: 190, defense: 42, skill: "Compound Interest", ultimate: "Unpaid Debts Take Form", skillNote: "Siphons a share of the damage he deals back into the ledger - and the ledger pays the squad.", ultimateNote: "Every debt comes due at once, and he pockets a portion of the total.", description: "Nobody has seen the face under the hood, and the faculty insists he has never enrolled. He keeps the whole ledger anyway." },
+  { id: "vane", name: "Director Vane", title: "The Hostile Takeover", rarity: "SSR", element: "Light", role: "Caster", color: "#c9a04a", hair: "#c9c3bb", splash: "/images/splash-vane.png", keyart: "/images/keyart-vane.jpg", mechanic: "takeover", weapon: "Signed Contract", hp: 1080, attack: 196, defense: 48, skill: "Acquisition Clauses", ultimate: "Hostile Takeover", skillNote: "Takes what the enemy has, then takes it back with them.", ultimateNote: "An outright acquisition - every hostile pays, and the squad is funded from the proceeds.", description: "GachaCorp's chief executive. He signs contracts the way other people breathe, and every clause has a hidden fee." },
+  { id: "sorcerer", name: "Mysterious Sorcerer", title: "The Fine Print", rarity: "SSR", element: "Dark", role: "Caster", color: "#6f5bd6", hair: "#4a3f7a", splash: "/images/splash-sorcerer.png", keyart: "/images/keyart-sorcerer.jpg", mechanic: "siphon", weapon: "Ledger of Debts", hp: 1000, attack: 190, defense: 42, skill: "Compound Interest", ultimate: "Unpaid Debts Take Form", skillNote: "Siphons a share of the damage he deals back into the ledger - and the ledger pays the squad.", ultimateNote: "Every debt comes due at once, and he pockets a portion of the total.", description: "Nobody has seen the face under the hood, and the faculty insists he has never enrolled. He keeps the whole ledger anyway." },
   { id: "sentry", name: "Sentry", title: "Engineering Project 07", rarity: "R", element: "Lightning", role: "Guardian", color: "#819bb6", hair: "#a7bed1", weapon: "Security Sweep", hp: 1150, attack: 95, defense: 80, skill: "Security Sweep", ultimate: "Maximum Protocol", skillNote: "A single-target strike.", ultimateNote: "A single-target strike.", description: "Built to protect the server. Now protects its friends. Still occasionally asks for library fees." },
 ];
 export const ssrFeaturedId = "penelope";
