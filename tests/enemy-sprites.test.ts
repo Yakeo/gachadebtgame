@@ -13,7 +13,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { POSE_HOLD_MS, IMPACT_BEAT_MS } from "@/components/combat-stage";
+import { POSE_HOLD_MS, IMPACT_BEAT_MS, COUNTER_HOLD_MS } from "@/components/combat-stage";
 import { spriteBytes, spriteRasters } from "../scripts/gen-slime-sprites.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -123,12 +123,12 @@ function slimeRule(pose: string) {
 
 test("slimes breathe, hop, gather, pounce, squash and melt", () => {
   const expected: Record<string, { name: string; seconds: number }> = {
-    idle: { name: "slime-idle", seconds: 2.5 },
-    attack: { name: "slime-hop", seconds: 0.7 },
-    skill: { name: "slime-gather", seconds: 0.72 },
-    counter: { name: "slime-pounce", seconds: 0.84 },
-    hit: { name: "slime-squash", seconds: 0.52 },
-    down: { name: "slime-melt", seconds: 0.8 },
+    idle: { name: "slime-idle", seconds: 3.5 },
+    attack: { name: "slime-hop", seconds: 1 },
+    skill: { name: "slime-gather", seconds: 1.05 },
+    counter: { name: "slime-pounce", seconds: 1.2 },
+    hit: { name: "slime-squash", seconds: 0.75 },
+    down: { name: "slime-melt", seconds: 1.1 },
   };
   for (const [pose, want] of Object.entries(expected)) {
     const declaration = slimeRule(pose);
@@ -168,7 +168,7 @@ test("the pounce crosses the arena, toward the squad", () => {
   assert.ok(travels.length >= 3, `expected the pounce to travel, found ${travels.length} moves`);
   assert.ok(travels.every(t => t.x < 0), "the pounce must travel toward the enemy's facing, not away");
   assert.ok(travels.some(t => t.y < -20), "the pounce should leave the ground");
-  assert.ok(Math.min(...travels.map(t => t.x)) <= -50, "the pounce should cross a real distance");
+  assert.ok(Math.min(...travels.map(t => t.x)) <= -70, "the pounce should cross a real distance");
   assert.match(css, /\.side-enemy\{--facing:1\}/, "enemies must face the squad");
 });
 
@@ -178,7 +178,54 @@ test("the pounce is slow enough to fit the hold it is given", () => {
   const pounce = Number(slimeRule("counter")!.match(/animation:[^;]*?([\d.]+)s/)![1]);
   assert.ok(pounce * 1000 <= POSE_HOLD_MS * 1.2,
     `the pounce runs ${pounce}s against a ${POSE_HOLD_MS / 1000}s hold`);
-  assert.ok(pounce >= 0.7, "the pounce was asked to be slowed down, not sped up");
+  assert.ok(pounce >= 1.1, "the pounce was asked to be slowed down, not sped up");
+});
+
+test("a command that does not end the round still holds for its own animation", () => {
+  // The engine only advances the turn on the last ally's action, so most
+  // commands have no round to hang the beat on. Without a hold there, the
+  // buttons returned while the attack was still swinging.
+  assert.match(stage,
+    /setBeat\(true\);\s*if \(!roundEnded\) \{[\s\S]{0,900}?setTimeout\(resolve, POSE_HOLD_MS\)[\s\S]{0,300}?setBeat\(false\);/,
+    "an ordinary command hands input back mid-animation");
+  // auto-battle ticks between actions, not on top of their animations
+  const auto = Number(stage.match(/void command\([\s\S]{0,400}?\}, (\d+)\);/)[1]);
+  assert.ok(auto > 0 && auto < 1000, `the auto-battle tick looks wrong: ${auto}ms`);
+});
+
+test("the answer gets to land before the player can move", () => {
+  // Input used to return the moment the counter pose was set, so the next
+  // command replaced the leap mid-air. The beat has to outlast the animation.
+  const pounce = Number(slimeRule("counter")!.match(/animation:[^;]*?([\d.]+)s/)![1]) * 1000;
+  assert.ok(COUNTER_HOLD_MS >= pounce,
+    `the pounce runs ${pounce}ms but input returns after ${COUNTER_HOLD_MS}ms`);
+  assert.match(stage, /setTimeout\(resolve, COUNTER_HOLD_MS\)/, "the counter hold is not being waited out");
+  // ...and it has to be released again, or the battle stops accepting input.
+  assert.match(stage, /await new Promise\(resolve => setTimeout\(resolve, COUNTER_HOLD_MS\)\);[\s\S]{0,200}?setBeat\(false\)/,
+    "the beat is never released after the counter");
+});
+
+test("no command animation outlasts the pose hold it is given", () => {
+  // The hold is what drops the pose class again. An animation longer than it
+  // is the original bug: the move gets cut off before the player sees it land.
+  // Only the poses the stage actually times out are on a hold. Victory and
+  // idle are not, so they are allowed to run long. Read the set out of the
+  // component so this cannot drift from it.
+  const oneShots = [...stage.match(/const oneShots = new Set\(\[([^\]]+)\]\)/)![1].matchAll(/"([a-z]+)"/g)].map(m => m[1]);
+  assert.ok(oneShots.length >= 5 && oneShots.includes("counter"), `could not read the one-shot poses: ${oneShots}`);
+  const rigRules = [...css.matchAll(/\.sprite-stage(\[data-character="[a-z0-9]+"\]|\[data-enemy="slime"\])\.pose-([a-z]+) \.sprite-rig\{animation:([^}]+)\}/g)];
+  assert.ok(rigRules.length >= 20, `expected the choreography rules, found ${rigRules.length}`);
+  const overruns = rigRules.map(([, scope, pose, declaration]) => {
+    const parts = declaration.trim().split(/\s+/);
+    const name = parts[0];
+    const time = parts.find(part => /^[\d.]+m?s$/.test(part))!;
+    const seconds = time.endsWith("ms") ? Number(time.slice(0, -2)) / 1000 : Number(time.slice(0, -1));
+    return { scope, pose, name, seconds };
+  })
+    .filter(({ pose }) => oneShots.includes(pose))
+    .filter(({ seconds }) => seconds * 1000 > POSE_HOLD_MS)
+    .map(({ scope, pose, name, seconds }) => `${scope} .pose-${pose} ${name} ${seconds}s > ${POSE_HOLD_MS / 1000}s`);
+  assert.deepEqual(overruns, [], `these animations are cut off before they finish: ${overruns.join(", ")}`);
 });
 
 test("a blow and its answer are two separate beats", () => {
