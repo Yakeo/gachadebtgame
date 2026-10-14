@@ -13,7 +13,7 @@
     "db:supabase": "node scripts/apply-supabase-schema.mjs",
     "db:diagnose": "node scripts/diagnose-supabase.mjs",
     "e2e": "node scripts/e2e-check.mjs",
-    "test": "npm run test:unit && npm run test:kits && npm run test:expressions && npm run test:diag && npm run test:art",
+    "test": "npm run test:unit && npm run test:kits && npm run test:gacha && npm run test:expressions && npm run test:diag && npm run test:art",
     "test:unit": "tsx --test tests/game-engine.test.ts",
     "test:diag": "node --test tests/diagnostics.test.mjs",
     "test:art": "node --test tests/assets.test.mjs",
@@ -22,7 +22,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "test:kits": "tsx --test tests/kits.test.ts",
-    "test:expressions": "tsx --test tests/expressions.test.ts"
+    "test:expressions": "tsx --test tests/expressions.test.ts",
+    "test:gacha": "tsx --test tests/gacha-pool.test.ts"
   },
   "dependencies": {
     "@playwright/test": "^1.64.0",

@@ -120,3 +120,23 @@ img.recruit-keyart{width:100%;left:0;height:100%;object-fit:contain;object-posit
   object-fit:cover;object-position:50% 10%;animation:keyart-in .6s ease both}
 .pull-result.rarity-SSR .result-art,.pull-result.rarity-UR .result-art{overflow:hidden}
 
+/* ---------------------------------------------------------------------------
+   The rates dialog lists the actual pool, not just the rarity tiers, so a
+   player can confirm any character is obtainable and see their real odds.
+   --------------------------------------------------------------------------- */
+.rates-pool{margin-top:20px;border-top:1px solid #e2ecf6;padding-top:16px}
+.rates-pool>h3{font-size:13px;letter-spacing:.4px;margin-bottom:6px}
+.rates-pool>p{font-size:10px;color:#8ba3b9;line-height:1.6;margin-bottom:14px;max-width:460px}
+.rates-pool-row{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0f6fc}
+.rates-pool-row:last-child{border-bottom:0}
+.rates-pool-row>.rarity-badge{flex-shrink:0;min-width:34px;text-align:center}
+.rates-pool-items{display:flex;flex-wrap:wrap;gap:6px}
+.rates-pool-item{display:inline-flex;align-items:center;gap:6px;background:#f4f9fe;border:1px solid #e0ecf7;
+  padding:4px 8px;border-radius:3px;font-size:10px}
+.rates-pool-item>b{font-weight:600;color:#3f5f80}
+.rates-pool-item>small{color:#8ba3b9;font-size:9px;font-variant-numeric:tabular-nums}
+.rates-pool-item>i{font-style:normal;font-size:7px;letter-spacing:.6px;background:#e8b64c;color:#4a3410;
+  padding:2px 4px;border-radius:2px}
+.rates-pool-item.featured{background:#fff8e6;border-color:#f0d79a}
+.rates-pool-item.featured>b{color:#8a6415}
+

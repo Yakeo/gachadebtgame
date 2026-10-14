@@ -126,6 +126,36 @@ export const characters: Character[] = [
   { id: "sentry", name: "Sentry", title: "Engineering Project 07", rarity: "R", element: "Lightning", role: "Guardian", color: "#819bb6", hair: "#a7bed1", weapon: "Security Sweep", hp: 1150, attack: 95, defense: 80, skill: "Security Sweep", ultimate: "Maximum Protocol", skillNote: "A single-target strike.", ultimateNote: "A single-target strike.", description: "Built to protect the server. Now protects its friends. Still occasionally asks for library fees." },
 ];
 export const ssrFeaturedId = "penelope";
+/**
+ * Pull probabilities. The engine and the "Rates & details" dialog both read
+ * these, so the odds a player is shown are the odds the engine rolls - they
+ * cannot drift apart.
+ */
+export const PULL_RATES = { UR: .001, SSR: .02, SR: .2, R: .779 } as const;
+export type PullRarity = keyof typeof PULL_RATES;
+/** Share of SSR hits that go to the featured character rather than the pool. */
+export const SSR_FEATURED_SHARE = .5;
+
+/** The characters available at a rarity, with the featured SSR out of the pool. */
+export function pullPool(rarity: string) {
+  return characters.filter(c => c.rarity === rarity && (rarity !== "SSR" || c.id !== ssrFeaturedId));
+}
+
+/**
+ * Per-pull odds for every obtainable character, in the same units the engine
+ * uses. The featured character takes SSR_FEATURED_SHARE of SSR hits and the
+ * pool splits the rest.
+ */
+export function pullOdds(): { id: string; rarity: Rarity; chance: number; featured: boolean }[] {
+  return characters.map(c => {
+    const featured = c.rarity === "SSR" && c.id === ssrFeaturedId;
+    const pool = pullPool(c.rarity);
+    const share = featured ? SSR_FEATURED_SHARE
+      : c.rarity === "SSR" ? (1 - SSR_FEATURED_SHARE) / pool.length
+      : 1 / pool.length;
+    return { id: c.id, rarity: c.rarity, chance: PULL_RATES[c.rarity as PullRarity] * share, featured };
+  });
+}
 export function characterById(id: string) { return characters.find(c => c.id === id) ?? characters[characters.length - 1]; }
 export type OwnedCharacter = { id: string; level: number; potential: number; duplicates: number };
 export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean; shield?: number; audited?: boolean; stunned?: boolean };
