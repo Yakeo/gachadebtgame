@@ -243,28 +243,89 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
           b.log.unshift(`${actor.name} guards, restores health, and gains 35 energy.`);
         }
       } else if (c.mechanic === "chaos") {
-        // Penelope. Nothing about her is settled in advance, including how useful she is.
+        // Penelope. Nothing about her is settled in advance, including how
+        // useful she is. Every single turn is a different bad idea, and the
+        // kitchen is not insured.
         if (command === "attack") {
-          const swing = .55 + random() * 1.45;
-          const flavors = ["pan-flops the handle end", "loses her grip mid-spin", "delivers a perfect sear", "swings the wrong pan", "absolutely launches it"];
+          // The swing is genuinely unknown until it lands: anything from a
+          // fumbled handle to a one-in-a-lifetime sear.
+          const swing = .45 + random() * 1.65;
+          const flavors = [
+            "pan-flops the handle end",
+            "loses her grip mid-spin",
+            "delivers a textbook sear",
+            "swings the wrong pan entirely",
+            "absolutely launches it",
+            "goes for the dramatic overhead",
+            "closes her eyes and hopes",
+            "hits it with the lid instead",
+            "spins first, aims later",
+            "swings with her eyes shut and her heart open",
+            "does something the culinary club will be hearing about",
+            "attempts a technique she saw once, badly",
+          ];
           const damage = strike(target, swing, { critical: random() < .22 });
           b.log.unshift(`Penelope ${flavors[Math.floor(random() * flavors.length)]} → ${target.name} −${damage.toLocaleString()} HP`);
+          // Sometimes the pan comes off the wall, off the floor, off the
+          // chandelier - and lands on somebody else on the way back.
+          if (random() < .22) {
+            const others = living().filter(e => e !== target);
+            if (others.length) {
+              const ricochet = others[Math.floor(random() * others.length)];
+              const extra = strike(ricochet, .6);
+              b.log.unshift(`...and the pan ricochets off the ceiling into ${ricochet.name} for ${extra.toLocaleString()} more.`);
+            }
+          }
+          // Extreme clumsiness tax: she clips herself. It is not much, and
+          // honestly it is the least the squad expected.
+          if (random() < .12) {
+            const ow = Math.max(1, Math.round(actor.attack * .05));
+            actor.hp = Math.max(1, actor.hp - ow);   // never actually finishes her off
+            b.log.unshift(`Penelope clips her own shin on the follow-through for ${ow} damage. She is fine. She is always fine.`);
+          }
         } else if (command === "skill") {
+          // Every enemy gets a different amount, because she is measuring
+          // with a wooden spoon and vibes.
           const total = strikeAll(1.5, {}, 1.1);
-          b.log.unshift(`Penelope: ${label} → ${living().length + 1} targets for ${total.toLocaleString()} total damage.`);
-          mendSquad(Math.round(actor.attack * (.5 + random() * 1.4)), "somebody ate it");
+          b.log.unshift(`Penelope: ${label} → she fed every one of them a different portion: ${total.toLocaleString()} total damage.`);
+          const ladle = random();
+          if (ladle < .25) {
+            // A pot lid, deployed as a shield. Nobody asked. It works.
+            b.allies.filter(a => a.hp > 0).forEach(a => { a.shield = Math.min(Math.round(a.maxHp * .5), (a.shield ?? 0) + Math.round(actor.defense * 2)); });
+            b.log.unshift(`${label}: she puts the LID on it - the squad is shielded and mildly embarrassed.`);
+          } else {
+            mendSquad(Math.round(actor.attack * (.5 + random() * 1.4)), "somebody ate it");
+          }
         } else {
+          // The ultimate. Five outcomes, one of which is good on purpose.
           const roll = random();
-          if (roll < .4) {
+          if (roll < .3) {
             const total = strikeAll(3.2, { critical: true });
             b.log.unshift(`Penelope: ${label} — THE WHOLE STOVE GOES UP! ${total.toLocaleString()} total damage.`);
-          } else if (roll < .75) {
+          } else if (roll < .55) {
             b.allies.filter(a => a.hp > 0).forEach(a => { a.hp = a.maxHp; });
-            b.log.unshift(`Penelope: ${label} — she catered the whole fight. The squad is fully restored!`);
-          } else {
+            b.log.unshift(`Penelope: ${label} — she catered the entire fight. The squad is fully restored and nobody asked how.`);
+          } else if (roll < .8) {
+            // The pan leaves the arena and comes back on its own schedule.
             const total = strikeAll(4.5, { critical: true }, 2.5);
             b.allies.filter(a => a.hp > 0).forEach(a => { a.hp = Math.min(a.maxHp, a.hp + Math.round(a.maxHp * .5)); });
-            b.log.unshift(`Penelope: ${label} — EVERYTHING AT ONCE! ${total.toLocaleString()} damage and the squad recovers!`);
+            b.log.unshift(`Penelope: ${label} — THE PAN COMES BACK ON ITS OWN! ${total.toLocaleString()} damage, and the squad recovers.`);
+          } else if (roll < .93) {
+            // She panics, which reads as inspiration. Everyone on the squad
+            // gets a full charge out of sheer secondhand adrenaline.
+            const total = strikeAll(1.8);
+            b.allies.filter(a => a.hp > 0).forEach(a => { a.energy = 100; });
+            b.log.unshift(`Penelope: ${label} — SHE SCREAMS AND SWINGS AT EVERYTHING. ${total.toLocaleString()} damage, and the entire squad is fully charged out of pure adrenaline.`);
+          } else {
+            // The jackpot. Perfect timing, perfect heat, perfect pan.
+            const total = strikeAll(4, { critical: true, ignoreDefense: true });
+            b.allies.filter(a => a.hp > 0).forEach(a => {
+              a.hp = a.maxHp;
+              a.shield = Math.min(Math.round(a.maxHp * .6), (a.shield ?? 0) + Math.round(a.maxHp * .3));
+              a.energy = Math.max(a.energy, 80);
+            });
+            b.streak = 0;
+            b.log.unshift(`Penelope: ${label} — A PERFECT SOUFFLÉ. ${total.toLocaleString()} damage through all armor, the squad is fully restored, shielded, and energised. Nobody will ever be able to explain this.`);
           }
         }
       } else if (c.mechanic === "rateup") {
@@ -397,6 +458,13 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
           const primary = strike(target, 1, { critical: random() < .16 });
           let splashTotal = 0;
           for (const enemy of living()) if (enemy !== target) splashTotal += strike(enemy, .4);
+          // Her reach occasionally surprises even her: the thrust keeps going
+          // straight down the line and skewers whoever was standing behind.
+          if (random() < .18) {
+            let chain = 0;
+            for (const enemy of living()) chain += strike(enemy, .7);
+            b.log.unshift(`Ruta: the lance keeps going - nobody told it to stop. ${chain.toLocaleString()} more to everything down the line.`);
+          }
           b.log.unshift(`Ruta: ${label} → ${target.name} −${primary.toLocaleString()} HP${splashTotal ? `, reach catches the rest for ${splashTotal.toLocaleString()}` : ""}.`);
         }
       } else if (c.mechanic === "drain") {
@@ -406,6 +474,14 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
           const share = Math.round(damage * .12);
           b.allies.filter(a => a.hp > 0).forEach(a => { a.hp = Math.min(a.maxHp, a.hp + share); });
           b.log.unshift(`Purp: ${label} → ${target.name} −${damage.toLocaleString()} HP, siphons ${share.toLocaleString()} back to the squad.`);
+          // The grimoire runs ahead of him sometimes: it keeps drinking after
+          // the spell is over and hands the surplus to whoever is nearest.
+          if (random() < .18) {
+            const leak = strikeAll(.55);
+            const surplus = Math.round(leak * .35);
+            b.allies.filter(a => a.hp > 0).forEach(a => { a.hp = Math.min(a.maxHp, a.hp + surplus); });
+            b.log.unshift(`Purp: the grimoire will not close. It leaks arcane runoff into everything for ${leak.toLocaleString()} damage and hands ${surplus.toLocaleString()} back. He apologises to nobody.`);
+          }
         } else {
           const total = strikeAll(command === "ultimate" ? 2.4 : 1.35);
           const share = Math.round(total * (command === "ultimate" ? .5 : .3));
@@ -425,6 +501,12 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
         } else {
           const damage = strike(target, 1.05, { ignoreDefense: random() < .5, critical: random() < .2 });
           b.log.unshift(`Edgelord69: ${label} → ${target.name} −${damage.toLocaleString()} HP.`);
+          // He talks during the swing. Occasionally the talking is the attack.
+          if (random() < .18) {
+            const segue = target.hp > 0 ? strike(target, .8, { ignoreDefense: true }) : 0;
+            actor.energy = Math.min(100, actor.energy + 15);
+            b.log.unshift(`Edgelord69: "...and THAT is why they call me—" he is still cutting. ${segue.toLocaleString()} more, armor ignored, and he gets 15 energy back for the monologue.`);
+          }
         }
       } else if ((c.role === "Support" || c.role === "Healer") && command !== "attack") {
         mendSquad(Math.round(actor.attack * (command === "ultimate" ? 3 : 1.6)), label);

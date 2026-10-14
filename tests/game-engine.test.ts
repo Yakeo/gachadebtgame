@@ -115,19 +115,23 @@ function readyStage(id: string, clearedCount: number, squad: string[], random: (
   return started;
 }
 
-test("Penelope's chaos ultimate resolves three distinct outcomes", () => {
+test("Penelope's chaos ultimate resolves five distinct outcomes", () => {
   const outcomes: string[] = [];
-  for (const roll of [.05, .5, .9]) {
+  for (const roll of [.05, .35, .6, .85, .97]) {
     const random = () => roll;
     let current = readyStage("1-1", 0, ["penelope"], random);
     current = applyGameAction(current, { action: "act", command: "ultimate", target: 0 }, random).state;
     const log = current.battle?.log.join(" ") ?? "";
-    if (/catered the whole fight/.test(log)) outcomes.push("heal");
-    else if (/EVERYTHING AT ONCE/.test(log)) outcomes.push("mixed");
+    if (/catered the entire fight/.test(log)) outcomes.push("heal");
+    else if (/PAN COMES BACK ON ITS OWN/.test(log)) outcomes.push("pan");
+    else if (/SHE SCREAMS/.test(log)) outcomes.push("scream");
+    else if (/SOUFFL/i.test(log)) outcomes.push("souffle");
     else if (/STOVE GOES UP/.test(log)) outcomes.push("damage");
     else outcomes.push("none:" + log);
   }
-  assert.deepEqual(outcomes, ["damage", "heal", "mixed"]);
+  // each roll must land a different outcome: five branches, five results
+  assert.deepEqual(outcomes, ["damage", "heal", "pan", "scream", "souffle"]);
+  assert.equal(new Set(outcomes).size, 5);
 });
 
 test("Penelope's pan swing is randomized every attack", () => {

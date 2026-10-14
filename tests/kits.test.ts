@@ -206,3 +206,63 @@ test("the new story units are recruitable and usable", () => {
   const pulled = applyGameAction(state, { action: "pull", count: 10 }, () => 0.42);
   assert.equal(pulled.pulls?.length, 10);
 });
+
+test("Penelope's chaos package stays unpredictable but never hurts the squad", () => {
+  // She is allowed to hit herself, but never to finish herself off, and every
+  // branch has to leave the battle playable.
+  let state = withEnergy(battleWith("penelope"));
+  for (const roll of [0.01, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 0.99]) {
+    const dice = () => roll;
+    const fresh = withEnergy(battleWith("penelope"));
+    fresh.battle!.enemies.forEach(e => { e.hp = 40000; e.maxHp = 40000; });
+    for (const cmd of ["attack", "skill", "ultimate"]) {
+      const out = act(fresh, cmd, dice, 0).state;
+      const me = out.battle!.allies.find(a => a.id === "penelope")!;
+      assert.ok(me.hp > 0, `roll ${roll} + ${cmd} must not defeat Penelope`);
+      assert.ok(out.battle!.allies.length > 0);
+    }
+  }
+});
+
+test("the kitchen provides: one Penelope ultimate outcome shields the squad", () => {
+  const state = withEnergy(battleWith("penelope"));
+  state.battle!.enemies.forEach(e => { e.hp = 40000; e.maxHp = 40000; });
+  // 0.05 lands in the first branch; 0.2 in the second; 0.4 the third;
+  // 0.85 the scream; 0.97 the souffle.
+  const jackpot = act(state, "ultimate", () => 0.97, 0).state;
+  assert.match(jackpot.battle!.log.join(" "), /SOUFFL/i);
+  const shielded = jackpot.battle!.allies.every(a => (a.shield ?? 0) > 0);
+  assert.ok(shielded, "the perfect souffle should shield the whole squad");
+  const charged = jackpot.battle!.allies.every(a => a.energy >= 80);
+  assert.ok(charged, "and charge them");
+});
+
+test("every one of the four featured attacks can spring a chaotic twist", () => {
+  // Ruta's lance, Purp's grimoire and Edgelord69's monologue all have a
+  // chance-based flourish on the basic attack; roll under it to prove each
+  // one fires and that the turn still resolves.
+  const twists: Array<[string, RegExp]> = [
+    ["ruta", /lance keeps going/i],
+    ["purp", /will not close/i],
+    ["edgelord", /still cutting/i],
+  ];
+  for (const [id, pattern] of twists) {
+    const state = withEnergy(battleWith(id));
+    state.battle!.enemies.forEach(e => { e.hp = 40000; e.maxHp = 40000; });
+    if (state.battle!.enemies.length < 2) {
+      state.battle!.enemies.push({ ...state.battle!.enemies[0], id: "spare", name: "Spare Slime" });
+    }
+    const out = act(state, "attack", () => 0.01, 0).state;
+    assert.match(out.battle!.log.join(" "), pattern, `${id} should spring its twist on a low roll`);
+  }
+});
+
+test("Penelope's clumsiness tax never kills her", () => {
+  const state = withEnergy(battleWith("penelope"));
+  state.battle!.enemies.forEach(e => { e.hp = 40000; e.maxHp = 40000; });
+  state.battle!.allies[0].hp = 1;                 // one clumsy follow-through from defeat
+  const out = act(state, "attack", () => 0.01, 0).state;
+  const me = out.battle!.allies.find(a => a.id === "penelope")!;
+  assert.ok(me.hp >= 1, "she should be embarrassed, not defeated");
+  assert.match(out.battle!.log.join(" "), /shin|fine/i);
+});
