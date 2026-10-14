@@ -111,131 +111,165 @@ function shade(hex, amount) {
 }
 
 /**
- * The shared slime body, exactly the shape and palette the SVG used, plus eyes.
- * `extras` runs after the body and before the rim clean-up so accessories can
- * overlap the shoulders the way the cactus and crown do.
+ * The shared slime body.
+ *
+ * The supplied designs are wide and squat rather than domed: a broad arc over
+ * near-vertical sides, about 1.35 times as wide as it is tall, with a flat
+ * base. Four bands make one up - a bright rim, a fill, a darker shadow across
+ * the base, and a pale gloss streak down the right flank - so the fill is a
+ * parameter rather than something derived from the rim. Red, gold and purple
+ * all run darker on the inside; the blue design is the one that runs lighter.
+ *
+ * `extras` runs after the body and before the eyes. Anything the slime carries
+ * has to be drawn here rather than before: painted before the body it is
+ * covered up, and the cactus ends up floating above its shoulder with nothing
+ * joining it to the creature.
  */
-function slimeBody(g, { edge, body, light, extras }) {
-  // Squatter than the old SVG shape, which is how the supplied art draws them:
-  // a little wider than it is tall, with the crown of the dome flattened off.
-  const cx = 19.5;
-  dome(g, { cx, rx: 16, top: 12, bottom: 41, color: edge });    // rim
-  dome(g, { cx, rx: 15, top: 13, bottom: 40, color: body });    // fill
+function slimeBody(g, { rim, body, dark, light, extras }) {
+  const cx = 20, rx = 18, top = 14, bottom = 41;   // bottom row 41 -> screen y167
 
-  // highlight on the upper left, as a short diagonal streak
-  for (let i = 0; i < 10; i++) {
-    const x = 9 + i, y = 18 - Math.floor(i / 3.5);
-    g.set(x, y, light); g.set(x, y + 1, light);
+  dome(g, { cx, rx, top, bottom, color: rim });
+  dome(g, { cx, rx: rx - 1, top: top + 1, bottom: bottom - 1, color: body });
+
+  // Shadow across the base, inset far enough that the bright rim still shows
+  // beneath it - the designs read as lit from the front, so the lit edge has to
+  // survive. The flanks darken a little as well, which stops the band floating.
+  rect(g, 6, 37, 33, 39, dark);
+  rect(g, 5, 34, 5, 39, dark);
+  rect(g, 34, 34, 34, 39, dark);
+
+  // Gloss: a short dash high on the left, then the stepped streak down the right
+  // flank. The dash sits just above the eye line and the streak starts level
+  // with it, which is where the supplied art puts both.
+  for (let i = 0; i < 3; i++) g.set(8 + i, 19 - i, light);
+  for (const [x, y0, length] of [[33, 23, 3], [32, 28, 3], [33, 33, 2]]) {
+    for (let i = 0; i < length; i++) g.set(x, y0 + i, light);
   }
-  // the streak running down the right flank
-  line(g, 31, 20, 31, 30, light, 2);
-  line(g, 33, 22, 33, 27, shade(light, -0.25), 1);
 
-  // shadow band across the base, before any accessory lands on top of it
-  rect(g, 12, 35, 27, 36, shade(body, -0.28));
-
-  // accessories next: the cactus, crown, helm and companion all overlap the body
+  // The cactus, the crown, whatever else this one is carrying.
   if (extras) extras(g);
 
-  // Eyes last, so nothing paints over them. A shallow flattened peak reads as
-  // a contented squint; a valley in the same place reads as an angry brow, so
-  // the shape is deliberately low at the edges and high in the middle.
-  const eye = shade(edge, -0.45);
-  for (const x0 of [10, 22]) {
-    g.set(x0, 26, eye);
-    g.set(x0 + 1, 25, eye); g.set(x0 + 2, 25, eye);
-    g.set(x0 + 3, 26, eye);
+  // Closed, contented eyes: a zigzag two humps wide, a quarter of the way down
+  // the body. Drawn last so that no accessory can sit on top of the face.
+  for (const x0 of [11, 23]) {
+    for (let i = 0; i < 6; i++) g.set(x0 + i, 22 + (i % 2 ? 0 : 1), dark);
   }
 }
 
 /* --------------------------------------------------------------- the five */
 const SPRITES = {
-  "slime-blue": { edge: "#4a86d8", body: "#79b3ef", light: "#b6d7ff" },
-  "slime-red": { edge: "#8c2d34", body: "#b8474d", light: "#e5848a" },
-  "slime-gold": { edge: "#e3c44a", body: "#c99f28", light: "#f2dd80" },
+  "slime-blue": { rim: "#4a93e8", body: "#6cb0f5", dark: "#2d63b0", light: "#cfe8ff" },
+  "slime-red": { rim: "#c0453f", body: "#9c3a3a", dark: "#6b1d1d", light: "#e0a0a0" },
+  "slime-gold": { rim: "#f0c419", body: "#ab8b1c", dark: "#6f5a10", light: "#f7e6a0" },
 };
 
+/**
+ * Cactloom: a cactus in a banded pot, planted into his top right shoulder.
+ *
+ * The assembly is drawn flat in its own coordinates and then rotated about the
+ * pot, which is how the supplied art has it - leaning, not standing up. The
+ * trunk carries a chequer of two greens rather than flat fill, and a row of
+ * spines down each flank: at sprite size a plain green column reads as a
+ * rectangle, and the texture is what makes it a cactus.
+ */
 function drawCactloom(g) {
-  const palette = { edge: "#8c2d34", body: "#b8474d", light: "#e5848a" };
-  // Sized to fit the canvas: the supplied art puts the cactus in the top right
-  // with the wings out, which clips if it is drawn any larger.
+  const palette = { rim: "#c0453f", body: "#9c3a3a", dark: "#6b1d1d", light: "#e0a0a0" };
   const parts = [];
   const put = (x, y, color) => parts.push({ x, y, color });
 
-  // tapered pot
-  for (let y = 0; y < 9; y++) {
-    const inset = Math.floor(y / 3.5);
-    for (let x = -1 + inset; x < 8 - inset; x++) put(x, y, y < 2 ? "#8c6132" : "#b8874a");
+  // Pot: wider at the lip than the foot, with three banded weave rows.
+  for (let y = 0; y < 10; y++) {
+    const inset = Math.floor(y / 3.4);
+    for (let x = -5 + inset; x < 7 - inset; x++) {
+      const banded = y === 2 || y === 5 || y === 8;
+      const edge = x === -5 + inset || x === 6 - inset;
+      put(x, y, banded ? "#8a6132" : edge ? "#a9793f" : "#c8a05a");
+    }
   }
-  for (let y = -2; y < 0; y++) for (let x = -2; x < 9; x++) put(x, y, "#a9793f");
+  for (let y = -2; y < 0; y++) for (let x = -6; x < 8; x++) put(x, y, y === -2 ? "#e0c088" : "#6f4d28");
 
-  // trunk
-  for (let y = -16; y < 0; y++) for (let x = 0; x < 6; x++) put(x, y, x < 2 ? "#4e8340" : "#5f9a4c");
-  // left arm, elbowing up
-  for (let y = -11; y < -7; y++) for (let x = -3; x < 1; x++) put(x, y, "#5f9a4c");
-  for (let y = -14; y < -11; y++) for (let x = -3; x < 0; x++) put(x, y, "#5f9a4c");
-  // right arm
-  for (let y = -13; y < -9; y++) for (let x = 6; x < 10; x++) put(x, y, "#5f9a4c");
-  for (let y = -16; y < -13; y++) for (let x = 7; x < 10; x++) put(x, y, "#5f9a4c");
+  // Trunk, with the chequer the designs use instead of flat green.
+  for (let y = -19; y < 0; y++) {
+    for (let x = -2; x < 4; x++) put(x, y, (x + y) % 4 === 0 ? "#2f7a30" : "#4aa844");
+  }
+  // Left arm, elbowing out and up; right arm, shorter.
+  for (let y = -13; y < -10; y++) for (let x = -6; x < -2; x++) put(x, y, "#4aa844");
+  for (let y = -17; y < -13; y++) for (let x = -6; x < -3; x++) put(x, y, "#4aa844");
+  for (let y = -16; y < -13; y++) for (let x = 4; x < 8; x++) put(x, y, "#4aa844");
+  for (let y = -20; y < -16; y++) for (let x = 5; x < 8; x++) put(x, y, "#4aa844");
 
-  // the little wings it is trying to look threatening with
-  for (let y = -12; y < -8; y++) for (let x = -6; x < -3; x++) put(x, y, y < -10 ? "#d5dae2" : "#b9c0ca");
-  for (let y = -15; y < -11; y++) for (let x = 10; x < 13; x++) put(x, y, y < -13 ? "#d5dae2" : "#b9c0ca");
+  // Spines: a tick every other row down both flanks, plus a few on the arms.
+  for (let y = -19; y < 0; y += 2) { put(-3, y, "#24531f"); put(4, y, "#24531f"); }
+  for (const [x, y] of [[-7, -11], [8, -14], [-7, -15], [8, -17], [0, -20], [2, -20]]) put(x, y, "#24531f");
 
-  // needles, then a face
-  for (const [x, y] of [[1, -14], [4, -12], [2, -8], [5, -15]]) put(x, y, "#3f5a36");
-  put(1, -6, "#3b3f4a"); put(4, -6, "#3b3f4a"); put(2, -5, "#3b3f4a"); put(3, -5, "#3b3f4a");
+  // A face, so it has somewhere to be smug from.
+  put(0, -16, "#1c3f18"); put(2, -16, "#1c3f18"); put(1, -15, "#1c3f18");
 
-  // +21, not +24: the right wing was reaching past the canvas edge and being
-  // cut off. Sprites are asserted unclipped by tests/enemy-sprites.test.mjs.
-  for (const p of rotate(parts, 2, 0, 14)) g.set(p.x + 21, p.y + 22, p.color);
-
-  slimeBody(g, { ...palette, extras: null });
+  // A 14 degree lean at +24, not 21 at +25: the rotation swings the tall right
+  // arm outward, and at 21 degrees its tip reached the canvas edge and was
+  // clipped. tests/enemy-sprites.test.mjs asserts none of them touch it.
+  const extras = (grid) => {
+    for (const p of rotate(parts, 1, 0, 14)) grid.set(p.x + 24, p.y + 22, p.color);
+  };
+  slimeBody(g, { ...palette, extras });
 }
 
+/**
+ * King Slooom: the crown, and the things you can see through him.
+ *
+ * The interiors are the interesting part of this design - a little pink slime
+ * and a pale loaf suspended in the body, which is what makes him read as
+ * translucent rather than just purple. They are mixed toward his own purple, so
+ * they look like they are inside the jelly instead of stuck to the front, and
+ * drawn before the face so the eyes stay legible on top of the clutter.
+ */
 function drawKingSlooom(g) {
-  const palette = { edge: "#5c3d94", body: "#6d4aa8", light: "#a583d8" };
+  const palette = { rim: "#a05fe0", body: "#6b3fa0", dark: "#3f2266", light: "#d0a8f0" };
   const extras = (grid) => {
-    // The little pink slime keeping him company, with its own rim so it reads
-    // as a separate creature rather than a smudge of his own colour.
-    dome(grid, { cx: 11, rx: 7, top: 27, bottom: 40, color: "#8f5573" });
-    dome(grid, { cx: 11, rx: 6, top: 28, bottom: 39, color: "#c0779f" });
-    grid.set(7, 32, "#6d3f56"); grid.set(11, 32, "#6d3f56");
-    rect(grid, 7, 37, 15, 38, "#8f5573");
-
-    // A crown with real prongs: a solid band and three tapering points, so it
-    // reads as a crown at sprite size instead of a row of antennae.
-    for (let x = 17; x <= 33; x++) { grid.set(x, 16, "#8a6134"); grid.set(x, 15, "#c99a55"); grid.set(x, 14, "#e0b877"); }
-    for (const x of [18, 24, 30]) {
-      const heights = [7, 6, 5, 4, 3, 2, 1];
-      heights.forEach((height, i) => {
-        const width = Math.max(1, 5 - i);
-        for (let w = 0; w < width; w++) grid.set(x + w, 13 - i, i % 2 ? "#e0b877" : "#f0d69c");
-      });
-      grid.set(x + 1, 5, "#fff0c4");
+    // The pale loaf on the right, with a rim of its own.
+    for (let y = 30; y <= 37; y++) {
+      const dy = (y - 33.5) / 3.6;
+      if (Math.abs(dy) > 1) continue;
+      const half = Math.round(6 * Math.sqrt(1 - dy * dy));
+      for (let x = 24 - half; x <= 24 + half; x++) grid.set(x, y, "#7a6aa8");
     }
-
-    // The helm he is wearing slightly wrong: a compact grey dome with a brim
-    // under it, sitting on the right shoulder. Kept small - at sprite size a
-    // large helmet reads as a second head.
-    for (let y = 24; y <= 36; y++) {
-      const dy = (y - 32) / 8;
+    for (let y = 31; y <= 36; y++) {
+      const dy = (y - 33.5) / 3.2;
       if (Math.abs(dy) > 1) continue;
       const half = Math.round(5 * Math.sqrt(1 - dy * dy));
-      for (let x = 32 - half; x <= 32; x++) grid.set(x, y, "#b0a8c4");
+      for (let x = 24 - half; x <= 24 + half; x++) grid.set(x, y, "#9587b8");
     }
-    for (let y = 26; y <= 34; y++) {
-      const dy = (y - 32) / 6;
-      if (Math.abs(dy) > 1) continue;
-      const half = Math.round(4 * Math.sqrt(1 - dy * dy));
-      for (let x = 31 - half; x <= 31; x++) grid.set(x, y, "#c6bfd6");
+
+    // The little pink slime keeping him company, lower left.
+    dome(grid, { cx: 10, rx: 7, top: 29, bottom: 39, color: "#7d3a5c" });
+    dome(grid, { cx: 10, rx: 6, top: 30, bottom: 38, color: "#9c4f73" });
+    rect(grid, 6, 35, 14, 36, "#65304c");
+    for (const x of [8, 12]) { grid.set(x, 33, "#542840"); grid.set(x + 1, 32, "#542840"); }
+
+    // Two of the pebbles he has been swallowing.
+    ellipse(grid, 19, 28, 2, 2, "#8a7fb0");
+    ellipse(grid, 16, 32, 1.5, 1.5, "#7a6aa8");
+
+    // Crown: three points over a banded circlet, perched on the upper right of
+    // the head and leaning outward the way the supplied art has it. Drawn as an
+    // accessory so it sits on the head rather than disappearing behind it, and
+    // outlined darkly enough to separate from the purple it stands on.
+    const crown = [];
+    const put = (x, y, color) => crown.push({ x, y, color });
+    for (let x = -9; x <= 9; x++) {
+      put(x, 0, "#5c3d16");
+      put(x, -1, "#c9922e");
+      put(x, -2, x % 3 === 0 ? "#e8c98a" : "#a87526");
     }
-    for (let x = 25; x <= 33; x++) { grid.set(x, 32, "#8a82a6"); grid.set(x, 33, "#6f6889"); }
-    for (let x = 26; x <= 32; x++) grid.set(x, 36, "#8a82a6");           // brim
-    grid.set(28, 28, "#f0d69c");
-    // two of the little boulders he has been carrying around
-    ellipse(grid, 23, 29, 2, 2, "#b0a8c4");
-    ellipse(grid, 19, 34, 1.5, 1.5, "#a49bbd");
+    for (const x of [-7, -1, 5]) {
+      for (let i = 0; i < 8; i++) {
+        const width = Math.max(1, 3 - Math.floor(i / 3));
+        for (let w = 0; w < width; w++) put(x + w, -3 - i, (i + w) % 2 ? "#c9922e" : "#e8c98a");
+      }
+      put(x, -11, "#5c3d16");
+      put(x + 1, -11, "#e8c98a");
+    }
+    for (const p of rotate(crown, 0, 0, 20)) grid.set(p.x + 25, p.y + 14, p.color);
   };
   slimeBody(g, { ...palette, extras });
 }
@@ -251,7 +285,7 @@ function render(sprite) {
   const g = createGrid();
   if (sprite.kind === "cactloom") drawCactloom(g);
   else if (sprite.kind === "kingslime") drawKingSlooom(g);
-  else slimeBody(g, { edge: sprite.edge, body: sprite.body, light: sprite.light, extras: null });
+  else slimeBody(g, { ...sprite, extras: null });
 
   // scale up by whole pixels, nearest neighbour, into the final canvas
   const width = W * SCALE, height = H * SCALE;
