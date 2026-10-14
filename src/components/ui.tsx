@@ -5,6 +5,19 @@ import { characters, characterById } from "@/lib/game-data";
 export function Gem({ size = 17 }: { size?: number }) { return <Diamond size={size} className="gem-icon" fill="currentColor" strokeWidth={1.3} />; }
 export function Credit({ size = 17 }: { size?: number }) { return <Coins size={size} className="credit-icon" />; }
 export function Spinner() { return <LoaderCircle size={17} className="spin" />; }
+/**
+ * A full-bleed location image. Every chapter has its own arena art; if one is
+ * ever missing the academy courtyard stands in rather than a broken image
+ * icon, which is what this game looked like for far too long.
+ */
+export function Battlefield({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+  return <img src={src} alt={alt} className={className} onError={event => {
+    const image = event.currentTarget;
+    if (image.dataset.fallenBack) return;
+    image.dataset.fallenBack = "1";
+    image.src = "/images/academy.jpg";
+  }} />;
+}
 export function ProgressBar({ value, max = 100, className = "" }: { value: number; max?: number; className?: string }) { return <div className={`progress-track ${className}`}><span style={{ width: `${Math.max(0, Math.min(100, value / max * 100))}%` }} /></div>; }
 export function Logo() { return <div className="brand" aria-label="Gacha Debt"><svg viewBox="0 0 56 58" aria-hidden="true"><path d="M25 2 52 16 43 47 16 57 2 31Z" fill="#2088ee"/><path d="m30 9-17 24h13l-5 15 24-27H30l7-12Z" fill="white"/><path d="M9 10 4 23M49 48l-9 5" stroke="#72c4ff" strokeWidth="3"/></svg><div><strong>GACHA<span>DEBT</span></strong><small>ONE PULL. ALL THE PROBLEMS.</small></div></div>; }
 export function Avatar({ id, className = "", label }: { id: string; className?: string; label?: string }) { const c = characterById(id); return <div className={`avatar ${className}`} style={{ "--character-color": c?.color || "#718dc0" } as CSSProperties}><Chibi id={id} label={label} /></div>; }
