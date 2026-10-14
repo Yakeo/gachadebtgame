@@ -15,14 +15,29 @@ const oneShots = new Set(["attack", "skill", "guard", "ultimate", "hit", "counte
  * or it gets cut off mid-swing, so the number lives here as the single source
  * of truth and tests/ssr-attacks.test.mjs reads it back.
  */
-export const POSE_HOLD_MS = 780;
+export const POSE_HOLD_MS = 880;
+
+/**
+ * The pause between a blow landing and the enemies answering it.
+ *
+ * The engine resolves the whole exchange in one response - the struck enemy
+ * reacts and the surviving enemies retaliate in the same payload. Drawn in the
+ * same frame, that reads as one blurry event, which is why the animations were
+ * easy to miss. Holding the hit for a beat and then letting the enemies pounce
+ * gives the two moments their own space.
+ */
+export const IMPACT_BEAT_MS = 460;
+
+/** Enemies drawn as pixel art, which deform as one piece when they move. */
+const SLIME_IDS = new Set(["slime-blue", "slime-red", "slime-gold", "slime-cactus", "kingslime"]);
 
 function CombatSprite({ id, label, pose, side }: { id: string; label?: string; pose: Pose; side: "ally" | "enemy" }) {
   // The character's own colour drives their attack effects, so Penelope's
   // impact reads pink and Escanooor's reads ember orange. Enemies keep the
   // stylesheet default: their ids are sprite names, not members of the cast.
   const known = side === "ally" && characters.some(character => character.id === id);
-  return <div className={`sprite-stage pose-${pose} side-${side}`} data-character={id} data-anim={pose}
+  return <div className={`sprite-stage pose-${pose} side-${side}`} data-character={id}
+    data-enemy={SLIME_IDS.has(id) ? "slime" : undefined} data-anim={pose}
     style={known ? { "--character-color": characterById(id).color } as CSSProperties : undefined}>
     <div className="sprite-fx" aria-hidden="true"><i /><i /><i /><i /><i /></div>
     <div className="sprite-rig"><Chibi id={id} label={label} className="sprite-art" /></div>
@@ -41,6 +56,9 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
   // on, not who threw it, so the client tracks the attacker itself and hands
   // their colour down to the target's impact effect.
   const [impactColor, setImpactColor] = useState<string | null>(null);
+  // True while the enemies are answering, so a second command cannot be issued
+  // over the top of the retaliation.
+  const [beat, setBeat] = useState(false);
   const active = battle.allies[Math.max(0, battle.active)];
   const c = characterById(active.id);
   const poseFor = (id: string, hp: number): Pose => hp <= 0 ? "down" : poses[id] || "idle";
@@ -59,7 +77,7 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
   }, [battle.stageId]);
 
   useEffect(() => { if (battle.enemies[target]?.hp <= 0) { const living = battle.enemies.findIndex(enemy => enemy.hp > 0); if (living >= 0) setTarget(living); } }, [battle.enemies, target]);
-  useEffect(() => { if (!impact) return; const timer = setTimeout(() => setImpact(false), 900); return () => clearTimeout(timer); }, [impact]);
+  useEffect(() => { if (!impact) return; const timer = setTimeout(() => setImpact(false), 1100); return () => clearTimeout(timer); }, [impact]);
   useEffect(() => {
     if (!Object.values(poses).some(pose => oneShots.has(pose))) return;
     const timer = setTimeout(() => setPoses(current => {
@@ -70,7 +88,7 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
   }, [poses]);
 
   const command = useCallback(async (cmd: string) => {
-    if (busy || battle.status !== "active") return;
+    if (busy || beat || battle.status !== "active") return;
     acting.current = true;
     const pose = (cmd === "attack" || cmd === "skill" || cmd === "guard" || cmd === "ultimate" ? cmd : "attack") as Pose;
     setImpactColor(c.color);
@@ -78,22 +96,49 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     const result = await action("act", { command: cmd, target }, true);
     const nextBattle = result?.state.battle;
     if (!nextBattle) return;
+
+    // Beat one: the blow. Only the enemy that was actually struck reacts, and
+    // any ally whose HP dropped was hit by the retaliation. Marking everyone
+    // else as "counter" is what made a whole row of enemies flinch at once.
+    const hurt = (id: string) => {
+      const before = battle.allies.find(ally => ally.id === id)?.hp ?? 0;
+      return (nextBattle.allies.find(ally => ally.id === id)?.hp ?? 0) < before;
+    };
     const next: Record<string, Pose> = {};
-    nextBattle.allies.forEach(ally => { next[ally.id] = ally.hp <= 0 ? "down" : ally.id === active.id ? pose : "idle"; });
-    nextBattle.enemies.forEach(enemy => { next[enemy.id] = enemy.hp <= 0 ? "down" : nextBattle.lastHit?.target === enemy.id ? "hit" : "counter"; });
+    nextBattle.allies.forEach(ally => {
+      next[ally.id] = ally.hp <= 0 ? "down" : ally.id === active.id ? pose : hurt(ally.id) ? "hit" : "idle";
+    });
+    nextBattle.enemies.forEach(enemy => {
+      next[enemy.id] = enemy.hp <= 0 ? "down" : nextBattle.lastHit?.target === enemy.id ? "hit" : "idle";
+    });
     if (nextBattle.status === "victory") nextBattle.allies.forEach(ally => { if (ally.hp > 0) next[ally.id] = "victory"; });
     setPoses(next);
     setImpact(true);
-  }, [action, active.id, battle.status, busy, target]);
+
+    // Beat two: anybody still standing answers. The engine retaliates once per
+    // round rather than once per turn, so the turn number is what says whether
+    // anyone is coming - not the command that was just issued.
+    const roundEnded = nextBattle.turn > battle.turn && nextBattle.status === "active";
+    if (!roundEnded) return;
+    setBeat(true);
+    await new Promise(resolve => setTimeout(resolve, IMPACT_BEAT_MS));
+    setBeat(false);
+    setImpact(false);
+    setPoses(current => {
+      const answering: Record<string, Pose> = { ...current };
+      nextBattle.enemies.forEach(enemy => { if (enemy.hp > 0) answering[enemy.id] = "counter"; });
+      return answering;
+    });
+  }, [action, active.id, battle.allies, battle.status, battle.turn, beat, busy, target]);
 
   useEffect(() => {
-    if (!auto || busy || battle.status !== "active" || retreat || log) return;
+    if (!auto || busy || beat || battle.status !== "active" || retreat || log) return;
     const timer = setTimeout(() => {
       const healing = ["Support", "Healer"].includes(c.role) && battle.allies.some(ally => ally.hp > 0 && ally.hp < ally.maxHp * .65);
       void command(active.energy >= 100 ? "ultimate" : active.energy >= 20 && healing ? "skill" : "attack");
     }, 1100);
     return () => clearTimeout(timer);
-  }, [active.energy, auto, battle, busy, c.role, command, log, retreat]);
+  }, [active.energy, auto, battle, beat, busy, c.role, command, log, retreat]);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.target as HTMLElement).closest("input,select") || retreat || log) return;
@@ -109,13 +154,13 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     <div className="battle-header"><div><span className="battle-operation">OPERATION {stage.id}</span><h1>{stage.title}</h1></div><div className="battle-turn"><span>TURN</span><strong>{String(battle.turn).padStart(2, "0")}</strong></div><div className="battle-header-actions"><button className={auto ? "active" : ""} onClick={() => setAuto(!auto)} disabled={battle.status !== "active"}>{auto ? <Pause size={15} /> : <FastForward size={15} />} AUTO {auto ? "ON" : "OFF"}</button><button onClick={() => setLog(true)}><History size={16} />LOG</button><button onClick={() => setRetreat(true)} disabled={busy}><Flag size={16} />RETREAT</button></div></div>
     <div className={`battle-arena chapter-${stage.chapter}`}><Battlefield src={battlefieldFor(stage.chapter)} alt={`The battlefield at ${stage.location.toLowerCase()}`} /><div className="arena-shade" /><div className="arena-grid" /><div className="arena-topline"><span><Radio size={12} /> TACTICAL LINK ESTABLISHED</span><span>{battle.enemies.filter(enemy => enemy.hp > 0).length} HOSTILES REMAINING</span></div><div className="battle-versus" aria-hidden="true">VS<span>COUNCIL / CORPORATE</span></div>
       <div className="combat-teams">
-        <div className="combat-units enemy-team">{battle.enemies.map((enemy, index) => <button key={enemy.id} data-hit={impact && battle.lastHit?.target === enemy.id ? "on" : undefined} className={`combat-unit enemy-unit ${target === index ? "targeted" : ""} ${enemy.hp <= 0 ? "defeated" : ""}`} disabled={enemy.hp <= 0 || busy || battle.status !== "active"} onClick={() => setTarget(index)} aria-label={`Target ${enemy.name}, ${enemy.hp.toLocaleString()} HP`}><div className="combat-unit-label">{enemy.boss && <Crown size={12} />}<span>{enemy.name}{enemy.level ? <b className="enemy-level">LV {enemy.level}</b> : null}</span><ProgressBar value={enemy.hp} max={enemy.maxHp} className="enemy-health" /><small>{enemy.hp.toLocaleString()} / {enemy.maxHp.toLocaleString()}</small></div><div className={`combat-unit-art ${enemy.boss ? "is-boss" : ""}`}><div className="unit-ground" /><CombatSprite id={enemy.sprite ?? stage.enemies[index].sprite} label={enemy.name} pose={poseFor(enemy.id, enemy.hp)} side="enemy" />{target === index && enemy.hp > 0 && <span className="target-reticle"><Target size={26} /></span>}{impact && battle.lastHit?.target === enemy.id && <span className={`floating-damage ${battle.lastHit.critical ? "critical" : ""}`}>{battle.lastHit.critical && <small>CRITICAL!</small>}{battle.lastHit.amount.toLocaleString()}</span>}</div>{target === index && enemy.hp > 0 && <span className="target-label">TARGET</span>}</button>)}</div>
+        <div className="combat-units enemy-team">{battle.enemies.map((enemy, index) => <button key={enemy.id} data-hit={impact && battle.lastHit?.target === enemy.id ? "on" : undefined} className={`combat-unit enemy-unit ${target === index ? "targeted" : ""} ${enemy.hp <= 0 ? "defeated" : ""}`} disabled={enemy.hp <= 0 || busy || beat || battle.status !== "active"} onClick={() => setTarget(index)} aria-label={`Target ${enemy.name}, ${enemy.hp.toLocaleString()} HP`}><div className="combat-unit-label">{enemy.boss && <Crown size={12} />}<span>{enemy.name}{enemy.level ? <b className="enemy-level">LV {enemy.level}</b> : null}</span><ProgressBar value={enemy.hp} max={enemy.maxHp} className="enemy-health" /><small>{enemy.hp.toLocaleString()} / {enemy.maxHp.toLocaleString()}</small></div><div className={`combat-unit-art ${enemy.boss ? "is-boss" : ""}`}><div className="unit-ground" /><CombatSprite id={enemy.sprite ?? stage.enemies[index].sprite} label={enemy.name} pose={poseFor(enemy.id, enemy.hp)} side="enemy" />{target === index && enemy.hp > 0 && <span className="target-reticle"><Target size={26} /></span>}{impact && battle.lastHit?.target === enemy.id && <span className={`floating-damage ${battle.lastHit.critical ? "critical" : ""}`}>{battle.lastHit.critical && <small>CRITICAL!</small>}{battle.lastHit.amount.toLocaleString()}</span>}</div>{target === index && enemy.hp > 0 && <span className="target-label">TARGET</span>}</button>)}</div>
         <div className="combat-units ally-team">{battle.allies.map((ally, index) => <div key={ally.id} className={`combat-unit ally-unit ${battle.active === index ? "current" : ""} ${ally.hp <= 0 ? "defeated" : ""}`}><div className="ally-ready-label">{ally.hp <= 0 ? "DOWN" : poseFor(ally.id, ally.hp) !== "idle" ? "ACTING" : battle.active === index ? "YOUR TURN" : "READY"}</div><div className="combat-unit-art"><div className="unit-ground" /><CombatSprite id={ally.id} pose={poseFor(ally.id, ally.hp)} side="ally" /></div><strong className="ally-name">{ally.name}</strong>{ally.guard && <span className="guard-indicator"><Shield size={13} />GUARD</span>}</div>)}</div>
       </div>
       <div className="arena-bottom-line"><span>{stage.location}</span><span>SELECT AN ENEMY. MAKE YOUR MOVE.</span></div>
     </div>
     <div className="battle-dashboard"><div className="ally-hud">{battle.allies.map((ally, index) => <div key={ally.id} className={`ally-hud-card ${battle.active === index ? "active" : ""} ${ally.hp <= 0 ? "down" : ""}`}><Avatar id={ally.id} /><div><strong>{ally.name}{battle.active === index && <span>ACT</span>}</strong><div className="hud-hp"><small>HP</small><span>{ally.hp.toLocaleString()}<b>/{ally.maxHp.toLocaleString()}</b></span></div><ProgressBar value={ally.hp} max={ally.maxHp} /><div className="hud-energy"><Zap size={10} /><ProgressBar value={ally.energy} /><small>{ally.energy}%</small></div></div></div>)}</div>
-      <div className="command-center"><div className="current-actor"><span className="eyebrow">{busy ? "RESOLVING COMMAND" : "YOUR MOVE"}</span><strong>{active.name}<span>’s turn.</span></strong><small>{auto ? "Auto-combat is active." : "Choose wisely. Or dramatically."}</small></div><div className="combat-commands"><button className="command attack" disabled={busy || battle.status !== "active"} onClick={() => command("attack")}><span className="command-key">1</span><Swords size={24} /><div><strong>Attack</strong><small>+35 ENERGY</small></div><span className="command-arrow">↗</span></button><button className="command skill" disabled={busy || battle.status !== "active" || active.energy < 20} onClick={() => command("skill")} title={c.skill}><span className="command-key">2</span><WandSparkles size={24} /><div><strong>Skill</strong><small>20 ENERGY</small></div><span className="command-arrow">↗</span></button><button className="command guard" disabled={busy || battle.status !== "active"} onClick={() => command("guard")}><span className="command-key">3</span><Shield size={24} /><div><strong>Guard</strong><small>HEAL + DEFEND</small></div><span className="command-arrow">↗</span></button><button className="command ultimate" disabled={busy || battle.status !== "active" || active.energy < 100} onClick={() => command("ultimate")} title={c.ultimate}><span className="command-key">4</span><Sparkles size={24} /><div><strong>Ultimate</strong><small>{active.energy < 100 ? `${active.energy} / 100 ENERGY` : "READY TO UNLEASH"}</small></div><span className="command-arrow">↗</span></button></div></div>
+      <div className="command-center"><div className="current-actor"><span className="eyebrow">{busy || beat ? "RESOLVING COMMAND" : "YOUR MOVE"}</span><strong>{active.name}<span>’s turn.</span></strong><small>{auto ? "Auto-combat is active." : "Choose wisely. Or dramatically."}</small></div><div className="combat-commands"><button className="command attack" disabled={busy || beat || battle.status !== "active"} onClick={() => command("attack")}><span className="command-key">1</span><Swords size={24} /><div><strong>Attack</strong><small>+35 ENERGY</small></div><span className="command-arrow">↗</span></button><button className="command skill" disabled={busy || beat || battle.status !== "active" || active.energy < 20} onClick={() => command("skill")} title={c.skill}><span className="command-key">2</span><WandSparkles size={24} /><div><strong>Skill</strong><small>20 ENERGY</small></div><span className="command-arrow">↗</span></button><button className="command guard" disabled={busy || beat || battle.status !== "active"} onClick={() => command("guard")}><span className="command-key">3</span><Shield size={24} /><div><strong>Guard</strong><small>HEAL + DEFEND</small></div><span className="command-arrow">↗</span></button><button className="command ultimate" disabled={busy || beat || battle.status !== "active" || active.energy < 100} onClick={() => command("ultimate")} title={c.ultimate}><span className="command-key">4</span><Sparkles size={24} /><div><strong>Ultimate</strong><small>{active.energy < 100 ? `${active.energy} / 100 ENERGY` : "READY TO UNLEASH"}</small></div><span className="command-arrow">↗</span></button></div></div>
       <div className="battle-log-line"><span>{busy ? <Spinner /> : <ChevronRight size={15} />}</span><p aria-live="polite">{battle.log[0]}</p><button onClick={() => setLog(true)}>Full combat log <History size={13} /></button></div>
     </div>
     {battle.status !== "active" && <div className="battle-result-overlay"><div className={`battle-result ${battle.status}`}><span className="eyebrow">{battle.status === "victory" ? "COUNCIL OPERATIONS / SUCCESS" : "COUNCIL OPERATIONS / REGROUP"}</span><div className="victory-stars">{battle.status === "victory" ? [0, 1, 2].map(i => <Star key={i} size={35} fill="currentColor" style={{ animationDelay: `${i * 180}ms` }} />) : <Shield size={55} />}</div><h2>{battle.status === "victory" ? <>Operation<br /><span>complete.</span></> : <>Not the<br /><span>last chapter.</span></>}</h2><p>{battle.status === "victory" ? "A little teamwork. A very big difference." : "A tactical retreat isn't the end. Upgrade your squad, then try again."}</p>{battle.status === "victory" && <div className="victory-rewards">{firstClear && <span><Gem size={22} /><strong>200</strong><small>GEMS</small></span>}<span><Credit size={23} /><strong>{firstClear ? "1,500" : "300"}</strong><small>CREDITS</small></span><span><Flag size={22} /><strong>{battle.turn}</strong><small>TURNS</small></span></div>}<button className="primary-button full-width" onClick={battle.status === "victory" ? onStory : onRetreat}>{battle.status === "victory" ? <><BookOpen size={18} />Continue the story <ArrowRight size={18} /></> : <><ArrowLeft size={17} />Return to the campaign</>}</button><small className="battle-result-note">{battle.status === "victory" ? "Complete the after-battle story to collect your rewards." : "Your characters recover fully between operations."}</small></div></div>}
