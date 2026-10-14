@@ -16,6 +16,15 @@ export const bestiary: Record<string, string> = {
 export function Chibi({ id, className = "", label }: { id: string; className?: string; label?: string }) {
   const known = !!characters.some(c => c.id === id);
   const c = known ? characterById(id) : characterById("sentry");
+  // Shipped pixel art wins over the placeholder drawing. Every surface that
+  // shows a character (battle rig, story speaker, roster card, pull result,
+  // avatar) goes through this component, so one branch covers them all.
+  // Characters without art keep the inline SVG below.
+  const art = known ? c.splash : undefined;
+  // Rendered as the sized element itself (class "chibi"), so every existing
+  // width/height rule applies exactly as it did to the SVG; object-fit keeps
+  // the figure from ever being stretched or cropped.
+  if (art) return <img className={`chibi ${className}`} src={art} alt={label ?? c.name} draggable={false} decoding="async" />;
   const eye = c.color;
   const monster = ["shroom", "bluecap", "reroom"].includes(id);
   if (monster) return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}><ellipse cx="80" cy="181" rx="44" ry="9" fill="#122948" opacity=".15"/><path d="M56 112Q40 180 68 180h24q28 0 12-68" fill="#fff0d8" stroke="#34435c" strokeWidth="3"/><path d="M23 111C17 48 136 30 139 109Q129 142 23 111Z" fill={c.color} stroke="#34435c" strokeWidth="3"/><ellipse cx="54" cy="85" rx="13" ry="10" fill="white" opacity=".8"/><ellipse cx="106" cy="81" rx="16" ry="12" fill="white" opacity=".8"/><path d="m70 164 10 5 10-5" fill="none" stroke="#34435c" strokeWidth="3"/><ellipse cx="65" cy="148" rx="6" ry="10" fill="#34435c"/><ellipse cx="96" cy="148" rx="6" ry="10" fill="#34435c"/><circle cx="64" cy="145" r="2" fill="white"/><circle cx="95" cy="145" r="2" fill="white"/></svg>;

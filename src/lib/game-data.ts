@@ -10,7 +10,7 @@ export type Character = {
 export const characters: Character[] = [
   {
     id: "penelope", name: "Penelope", title: "Certified Kitchen Disaster", rarity: "SSR", element: "Flame", role: "Chaos",
-    color: "#ef6ec0", hair: "#e9eef2", splash: "/images/splash-penelope.jpg", mechanic: "chaos", weapon: "Cast-Iron Frying Pan",
+    color: "#ef6ec0", hair: "#e9eef2", splash: "/images/splash-penelope.png", mechanic: "chaos", weapon: "Cast-Iron Frying Pan",
     hp: 1080, attack: 188, defense: 42,
     skill: "Flambé Special", ultimate: "Kitchen Catastrophe",
     skillNote: "Hits every enemy with a different random amount, then feeds the squad a random amount of HP. She does not measure.",
@@ -19,7 +19,7 @@ export const characters: Character[] = [
   },
   {
     id: "ruta", name: "Ruta", title: "The Unbroken Line", rarity: "SSR", element: "Steel", role: "Lancer",
-    color: "#e0574f", hair: "#8a5a3b", splash: "/images/splash-ruta.jpg", mechanic: "pierce", weapon: "Long Lance",
+    color: "#e0574f", hair: "#8a5a3b", splash: "/images/splash-ruta.png", mechanic: "pierce", weapon: "Long Lance",
     hp: 1320, attack: 182, defense: 78,
     skill: "Spiral Thrust", ultimate: "Grand Palisade",
     skillNote: "Two precise strikes on one target. Reach gives her a second attack that most units simply do not get.",
@@ -28,7 +28,7 @@ export const characters: Character[] = [
   },
   {
     id: "purp", name: "Purp", title: "The Midnight Prodigy", rarity: "SSR", element: "Dark", role: "Caster",
-    color: "#9b6bed", hair: "#e4e2ea", splash: "/images/splash-purp.jpg", mechanic: "drain", weapon: "Floating Grimoire",
+    color: "#9b6bed", hair: "#e4e2ea", splash: "/images/splash-purp.png", mechanic: "drain", weapon: "Floating Grimoire",
     hp: 980, attack: 205, defense: 36,
     skill: "Packet Loss", ultimate: "Grand Shadow Arcane",
     skillNote: "Arcane damage to every hostile, and the squad recovers part of what he took. He calls it routing.",
@@ -37,7 +37,7 @@ export const characters: Character[] = [
   },
   {
     id: "edgelord", name: "Edgelord69", title: "Child of the Abyss", rarity: "SSR", element: "Dark", role: "Vanguard",
-    color: "#8f9fd4", hair: "#22242f", splash: "/images/splash-edgelord.jpg", mechanic: "riposte", weapon: "Steel Katana",
+    color: "#8f9fd4", hair: "#22242f", splash: "/images/splash-edgelord.png", mechanic: "riposte", weapon: "Steel Katana",
     hp: 1420, attack: 172, defense: 72,
     skill: "Plastic Eclipse", ultimate: "No More Plastic Swords",
     skillNote: "Cuts straight through armor, and refunds a large share of the energy it costs. He intends to keep swinging.",

@@ -226,11 +226,18 @@ Note that Supabase shows connection strings with a `[YOUR-PASSWORD]`
 placeholder — pasting that into a secret without substituting the real
 password is the single most common cause of this failure.
 
-## Pre-existing note (not a deploy blocker)
+## Art assets (not a deploy blocker)
 
-The repo references key art at `public/images/*.jpg`
-(`council-keyart.jpg`, `academy.jpg`, `splash-*.jpg`, `midnight-banner.jpg`)
-but ships no `public/` folder, so those `<img>`s 404 (broken-image icon over
-the CSS gradients) until the art is dropped in with those file names, as the
-README's "Change the game" table describes. The game logic, auth, and saves
-are unaffected.
+Character art ships in `public/images/` as `splash-<id>.png`
+(`splash-penelope.png`, `splash-ruta.png`, `splash-purp.png`,
+`splash-edgelord.png`). `Chibi` in `src/components/ui.tsx` renders that art
+whenever a character has a `splash` path in `src/lib/game-data.ts`, and falls
+back to its inline SVG drawing otherwise. That single component feeds battle
+rigs, story speakers, roster cards, pull results, and avatars.
+
+Only the two background images are still missing — `council-keyart.jpg`
+(boot screen, home scene, chapter 1 story) and `academy.jpg` (battle arena,
+story chapters 2-5, campaign tiles) — so those slots fall back to the CSS
+gradients. `npm run test:art` (part of `npm test`) fails the suite if a
+character's declared art is missing or suspiciously small, and lists any
+background art still to be drawn.
