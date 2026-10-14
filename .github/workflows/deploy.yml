@@ -40,6 +40,14 @@ jobs:
 
       - run: npm ci
 
+      # Gate the deploy on the suite. The manifest-drift test in
+      # tests/expressions.test.ts is what stops a corrected portrait shipping
+      # behind a stale cache hash, so this guards the art as much as the engine.
+      - name: Typecheck and test
+        run: |
+          npm run typecheck
+          npm test
+
       # Reports which secrets exist and whether their shape is usable, without
       # ever printing a secret. Runs even when the deploy later fails, so the
       # run page always shows the configuration it worked with.
@@ -129,3 +137,10 @@ jobs:
           done
           curl -s -o /dev/null -w "homepage: %{http_code}\n" -m 15 "$URL/"
           if [ -n "$GITHUB_STEP_SUMMARY" ]; then echo "Live at $URL" >> "$GITHUB_STEP_SUMMARY"; fi
+
+      # A green deploy does not prove the *art* is live: portraits are cached
+      # against a URL that only changes thanks to the content hash. This fetches
+      # every portrait back through that hashed URL and compares the bytes to
+      # the build, so "deployed" and "being served" are the same statement.
+      - name: Verify deployed portraits match the build
+        run: node scripts/verify-deployed-art.mjs "https://$PRODUCTION_DOMAIN" alvida
