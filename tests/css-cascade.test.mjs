@@ -1,19 +1,27 @@
 /**
  * Guard the recruit banner against silent cascade defeats.
  *
- * The banner art is styled by a class-only rule, and a stale element-qualified
- * rule further up the stylesheet once outranked it without any visible error:
- * the page simply rendered wrong. Asserting on the source text is not enough to
- * catch that, so this resolves the cascade for real - it parses the stylesheet,
- * matches the selectors against the banner elements, sorts by specificity and
- * source order, and checks which declaration actually wins.
+ * The banner has now been broken twice by stylesheet problems, both times the
+ * same way: the art lost its positioning and fell back into normal flow, where
+ * a 572x1024 image pushed the copy, the pity bar and both recruit buttons off
+ * the screen. The page kept working, it just had nothing on it.
  *
- * Selectors this cannot model (pseudo-classes, attribute selectors, ...) are
- * skipped rather than guessed at.
+ * So the art's layout moved inline, where no class can outrank it, and the
+ * stylesheet kept only the look. These tests check the split actually holds:
+ * that the inline styles take the art out of flow, that the content paints in
+ * front of it, and that the stylesheet has not quietly grown a competing
+ * position rule that would win in some state.
+ *
+ * Asserting on source text is not enough for the cascade half, so that part
+ * resolves for real - it parses the stylesheet, matches selectors against the
+ * banner elements, sorts by specificity and source order, and reports which
+ * declaration actually wins. Selectors it cannot model (pseudo-classes,
+ * attribute selectors, ...) are skipped rather than guessed at.
  */
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { RECRUIT_ART_FIGURE, RECRUIT_ART_WASH, RECRUIT_CONTENT_Z } from "../src/lib/recruit-art.ts";
 
 const CSS = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
 
@@ -136,23 +144,48 @@ function resolve(element, width = 1440) {
 const view = { tag: "section", classes: ["recruit-view"], parent: null };
 const element = (tag, classes) => ({ tag, classes, parent: view });
 
-test("the banner backdrop actually receives its positioning", () => {
+/**
+ * React inline styles use camelCase (`objectFit`); the stylesheet and the
+ * cascade resolver use kebab-case (`object-fit`). Normalise so the two can be
+ * compared and merged as one computed style.
+ */
+function inlineToCss(inline) {
+  const out = {};
+  for (const [key, value] of Object.entries(inline ?? {})) {
+    out[key.startsWith("--") ? key : key.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`)] = value;
+  }
+  return out;
+}
+
+/** What the browser computes for an element: inline styles win, then the cascade. */
+function computed(classes, inline) {
+  return { ...resolve(element("img", classes)), ...inlineToCss(inline) };
+}
+
+test("the banner backdrop is taken out of flow by its inline style", () => {
   // The backdrop selector was once mangled into `.recruit-view>img .x`, which
-  // matches nothing, so the image rendered unstyled and inline - the banner
-  // visibly broke. Matching the real element is the whole point of this test.
-  const style = resolve(element("img", ["recruit-keyart-backdrop"]));
+  // matches nothing, so the image rendered inline at full size and pushed the
+  // page apart. The layout no longer depends on that selector matching.
+  const style = computed(["recruit-keyart-backdrop"], RECRUIT_ART_WASH);
   assert.equal(style.position, "absolute", "backdrop must be taken out of flow");
   assert.equal(style["object-fit"], "cover");
-  assert.ok(/blur/.test(style.filter ?? ""), `expected a blur filter, got ${style.filter}`);
-  assert.equal(style["z-index"], "-4");
+  assert.equal(style.inset, 0, "backdrop must cover the banner");
+  assert.equal(style["z-index"], -4);
+  // the look is still the stylesheet's job
+  const look = resolve(element("img", ["recruit-keyart-backdrop"]));
+  assert.ok(/blur/.test(look.filter ?? ""), `expected a blur filter, got ${look.filter}`);
 });
 
-test("no element-qualified rule outranks the banner figure", () => {
-  const style = resolve(element("img", ["recruit-keyart"]));
+test("the banner figure is anchored, unscaled and inert", () => {
+  const style = computed(["recruit-keyart"], RECRUIT_ART_FIGURE);
+  assert.equal(style.position, "absolute", "figure must be taken out of flow");
   assert.equal(style["object-fit"], "contain", "the figure must not be stretched across the banner");
-  assert.equal(style["image-rendering"], "auto", "keyart is not pixel art");
+  assert.equal(style.right, 0, "the figure anchors to the right of the banner");
   assert.equal(style["max-width"], "70%");
   assert.equal(style["pointer-events"], "none");
+  // `image-rendering` is cosmetic and still comes from the stylesheet
+  assert.equal(resolve(element("img", ["recruit-keyart"]))["image-rendering"], "auto",
+    "keyart is not pixel art");
 });
 
 test("the banner layers stack in the intended order", () => {
@@ -161,13 +194,13 @@ test("the banner layers stack in the intended order", () => {
   // perfectly usable but flat, which is exactly the kind of regression that
   // slips through a review - so pin the order, not a single magic number.
   const layers = [
-    ["wash", element("img", ["recruit-keyart-backdrop"])],
-    ["illustration", element("img", ["recruit-keyart"])],
-    ["gradient", element("div", ["recruit-gradient"])],
-    ["grid", element("div", ["recruit-grid"])],
-    ["copy", element("div", ["recruit-copy"])],
-  ].map(([name, el]) => {
-    const raw = resolve(el)["z-index"];
+    ["wash", computed(["recruit-keyart-backdrop"], RECRUIT_ART_WASH)],
+    ["illustration", computed(["recruit-keyart"], RECRUIT_ART_FIGURE)],
+    ["gradient", resolve(element("div", ["recruit-gradient"]))],
+    ["grid", resolve(element("div", ["recruit-grid"]))],
+    ["copy", resolve(element("div", ["recruit-copy"]))],
+  ].map(([name, style]) => {
+    const raw = style["z-index"];
     const value = raw === undefined || raw === "auto" ? 0 : Number(raw);
     assert.ok(Number.isFinite(value), `${name} has an unusable z-index: ${raw}`);
     return { name, value };
@@ -203,7 +236,41 @@ test("only one rule set can style the banner art", () => {
 });
 
 test("media queries evaluate without breaking the desktop rules", () => {
-  const narrow = resolve(element("img", ["recruit-keyart"]), 640);
-  assert.equal(narrow["max-width"], "88%", "the narrow-screen override must still reach the element");
-  assert.equal(narrow.position, "absolute");
+  const narrow = computed(["recruit-keyart"], RECRUIT_ART_FIGURE);
+  assert.equal(narrow.position, "absolute", "the element stays out of flow at any width");
+  const narrowCss = resolve(element("img", ["recruit-keyart"]), 640);
+  assert.equal(narrowCss["max-width"], "88%", "the narrow-screen override must still reach the element");
+});
+
+test("the stylesheet cannot compete with the inline layout", () => {
+  // The whole point of moving the layout inline is that a class rule can no
+  // longer take it away. If the stylesheet ever grows a competing position or
+  // object-fit rule for the art, the insurance is gone - fail loudly here.
+  const contested = ["position", "object-fit", "width", "height"];
+  for (const classes of [["recruit-keyart"], ["recruit-keyart-backdrop"]]) {
+    const fromCss = resolve(element("img", classes));
+    for (const property of contested) {
+      assert.equal(fromCss[property], undefined,
+        `.${classes[0]} sets "${property}" in the stylesheet; it must come from ` +
+        `src/lib/recruit-art.ts instead, or a cascade defeat can push the page apart again`);
+    }
+  }
+});
+
+test("the banner survives a stylesheet that fails to load", () => {
+  // The failure this guards against, stated directly: with no stylesheet at
+  // all, the only thing keeping a 572x1024 image out of the document flow is
+  // the inline style. That is the entire reason the layout lives there.
+  for (const [name, style] of [["wash", RECRUIT_ART_WASH], ["figure", RECRUIT_ART_FIGURE]]) {
+    assert.equal(style.position, "absolute",
+      `the ${name} must be out of flow even with no stylesheet at all`);
+    assert.equal(style.pointerEvents, "none",
+      `the ${name} must not intercept clicks on the recruit buttons`);
+  }
+  assert.equal(RECRUIT_ART_WASH.zIndex, -4);
+  assert.equal(RECRUIT_ART_FIGURE.zIndex, -3);
+  assert.ok(RECRUIT_ART_FIGURE.maxWidth,
+    "the figure needs a bound so it cannot cover the copy if positioning is ever lost");
+  assert.ok(RECRUIT_ART_FIGURE.zIndex < RECRUIT_CONTENT_Z,
+    "the art must paint behind the copy");
 });
