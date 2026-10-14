@@ -152,8 +152,34 @@ test("no element-qualified rule outranks the banner figure", () => {
   assert.equal(style["object-fit"], "contain", "the figure must not be stretched across the banner");
   assert.equal(style["image-rendering"], "auto", "keyart is not pixel art");
   assert.equal(style["max-width"], "70%");
-  assert.equal(style["z-index"], "0");
   assert.equal(style["pointer-events"], "none");
+});
+
+test("the banner layers stack in the intended order", () => {
+  // The illustration must sit *below* the gradient and grid: they are what tint
+  // it and give the banner its depth. Painting it on top leaves the page
+  // perfectly usable but flat, which is exactly the kind of regression that
+  // slips through a review - so pin the order, not a single magic number.
+  const layers = [
+    ["wash", element("img", ["recruit-keyart-backdrop"])],
+    ["illustration", element("img", ["recruit-keyart"])],
+    ["gradient", element("div", ["recruit-gradient"])],
+    ["grid", element("div", ["recruit-grid"])],
+    ["copy", element("div", ["recruit-copy"])],
+  ].map(([name, el]) => {
+    const raw = resolve(el)["z-index"];
+    const value = raw === undefined || raw === "auto" ? 0 : Number(raw);
+    assert.ok(Number.isFinite(value), `${name} has an unusable z-index: ${raw}`);
+    return { name, value };
+  });
+
+  for (let i = 1; i < layers.length; i++) {
+    const behind = layers[i - 1], front = layers[i];
+    assert.ok(front.value >= behind.value,
+      `${front.name} (z-index ${front.value}) is painted behind ${behind.name} ` +
+      `(z-index ${behind.value}); expected back-to-front order ` +
+      layers.map(l => `${l.name} ${l.value}`).join(" < "));
+  }
 });
 
 test("only one rule set can style the banner art", () => {
