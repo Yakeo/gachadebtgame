@@ -231,12 +231,26 @@ git push -u origin main
 | Account and Google login | `src/lib/auth.ts` and `src/app/api/auth/` |
 | Database tables | `src/db/schema.ts` |
 | Menus, recruitment, and roster screens | `src/components/` |
-| Temporary key art | `public/images/` |
-| Temporary character drawings | `Chibi` in `src/components/ui.tsx` |
+| Key art (backgrounds) | `public/images/` |
+| Character art | `public/images/splash-<id>.png` — drop in art and it appears everywhere |
+| Placeholder drawings | `Chibi` in `src/components/ui.tsx` (fallback when a character has no art) |
 
 After changing `src/db/schema.ts`, run `npx drizzle-kit push` again.
 
-The current character drawings are placeholders. Replace `public/images/council-keyart.jpg`, `public/images/midnight-banner.jpg`, and `public/images/academy.jpg`, then replace the `Chibi` drawings with your own art. Keep the same file names or update the image paths in the components.
+Character art: the four SSR sprites ship in `public/images/` as
+`splash-penelope.png`, `splash-ruta.png`, `splash-purp.png`, and
+`splash-edgelord.png`, referenced by the `splash` field in
+`src/lib/game-data.ts`. To add art for another character, drop a transparent
+PNG at `public/images/splash-<id>.png` and add that `splash` field — `Chibi`
+renders it in battle, in the story, on the roster, in pull results, and in
+avatars automatically. Only the four SSRs have art so far; every other
+character uses the `Chibi` drawing.
+
+Background art is still missing: `public/images/council-keyart.jpg`
+(boot screen, home scene) and `public/images/academy.jpg` (battle arena,
+story backgrounds, campaign tiles). Until those two files exist, those
+slots show the CSS gradients instead. Keep the same names or update the
+paths in the components. `npm run test:art` lists anything still missing.
 
 ## If something fails
 

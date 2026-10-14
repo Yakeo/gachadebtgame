@@ -24,6 +24,12 @@ jobs:
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       PROJECT_NAME: gachadebtgame
+      # The stable production domain. Verification must use this, never the
+      # per-deployment URL that `vercel deploy` prints: those throwaway URLs
+      # answer 404 DEPLOYMENT_NOT_FOUND (that false failure is what turned runs
+      # 3 and 4 red while the site itself was healthy). APP_URL is also set to
+      # this domain *before* deploying, so Google's redirect URI stays stable.
+      PRODUCTION_DOMAIN: gachadebtgame.vercel.app
     steps:
       - uses: actions/checkout@v4
 
@@ -87,40 +93,39 @@ jobs:
               echo "skipped $1 (empty)"
             fi
           }
+          set_env APP_URL "https://$PRODUCTION_DOMAIN"
           set_env DATABASE_URL "$SUPABASE_DATABASE_URL"
           set_env DIRECT_URL "$SUPABASE_SESSION_URL"
           set_env GOOGLE_CLIENT_ID "$GOOGLE_CLIENT_ID"
           set_env GOOGLE_CLIENT_SECRET "$GOOGLE_CLIENT_SECRET"
 
       - name: Deploy to Vercel (production)
-        id: deploy1
+        id: deploy
         run: |
           vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
           vercel build --prod --token "$VERCEL_TOKEN"
           URL=$(vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
-          echo "First deployment: $URL"
-
-      - name: Set APP_URL and redeploy
-        id: deploy2
-        run: |
-          APP_URL="${{ steps.deploy1.outputs.url }}"
-          vercel env add APP_URL production --value "$APP_URL" --force --yes --token "$VERCEL_TOKEN"
-          vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
-          vercel build --prod --token "$VERCEL_TOKEN"
-          URL=$(vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN")
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
-          echo "Production URL: $URL" >> "$GITHUB_STEP_SUMMARY"
+          [ -n "$GITHUB_STEP_SUMMARY" ] && echo "Deployed deployment $URL" >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: Verify /api/health and homepage
+        # The deployment URL is passed through the environment on purpose: an
+        # ${{ }} expression inside a quoted shell string expands to nothing if
+        # the step is ever run by hand, and `${...}` reads as a bad substitution.
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
         run: |
-          URL="${{ steps.deploy2.outputs.url }}"
+          URL="https://$PRODUCTION_DOMAIN"
+          echo "Verifying $URL/api/health (deployment: $DEPLOYMENT_URL)"
           for i in $(seq 1 30); do
             HEALTH=$(curl -s -m 10 "$URL/api/health" || true)
             echo "attempt $i: $HEALTH"
             if [ "$HEALTH" = '{"ok":true}' ]; then echo "health OK"; break; fi
-            if [ "$i" = "30" ]; then echo "health check FAILED"; exit 1; fi
+            if [ "$i" = "30" ]; then
+              echo "::error title=Live site is not healthy::$URL/api/health did not return {\"ok\":true} within 5 minutes. Check Vercel runtime logs; the database env vars are the usual cause (DEPLOYMENT.md section 6)."
+              exit 1
+            fi
             sleep 10
           done
           curl -s -o /dev/null -w "homepage: %{http_code}\n" -m 15 "$URL/"
-          echo "Live at $URL" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$GITHUB_STEP_SUMMARY" ]; then echo "Live at $URL" >> "$GITHUB_STEP_SUMMARY"; fi

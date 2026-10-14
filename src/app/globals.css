@@ -57,3 +57,17 @@
 .combat-unit-art.is-boss .sprite-rig{animation-duration:3.1s}
 .combat-unit-art.is-boss .unit-ground{height:26px;left:0;right:0}
 .combat-unit.enemy-unit:has(.is-boss){max-width:196px}
+
+/* ── Shipped character art ───────────────────────────────────────────────────
+   public/images/splash-*.png: 3072² pixel art (RGBA), downscaled exactly 3× to
+   keep the pixel grid, then cropped to the figure. Chibi renders these in place
+   of its SVG for any character that has art, so battle rigs, story speakers,
+   roster cards, pull results and avatars all use the same files. */
+img.chibi{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;filter:drop-shadow(0 6px 10px #1d234030);user-select:none}
+/* The detail portrait frame is wide and tall; contain keeps the whole figure. */
+.detail-splash{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;filter:drop-shadow(0 10px 14px #374f6326)}
+/* Featured banner: a tall sprite anchored bottom-right, not a full-bleed backdrop. */
+.featured-banner>img.banner-sprite{object-fit:contain;object-position:right bottom;filter:drop-shadow(0 8px 14px #0a10305c)}
+/* Recruit screen: the sprite is transparent pixel art, so it stands on the
+   right instead of being stretched across the whole backdrop. */
+img.recruit-keyart{width:100%;left:0;height:100%;object-fit:contain;object-position:right bottom;image-rendering:pixelated;opacity:1;filter:drop-shadow(0 14px 22px #0d24422e)}
