@@ -3,9 +3,10 @@
 // script name to a character, the mood that a line resolves to, and the rule
 // that nobody in the script is left without a face.
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { chapters, stages, stageById } from "@/lib/campaign";
-import { MOODS, moodFor, offscreenSpeakers, portraitFor, portraitUrl, speakerIds } from "@/lib/expressions";
+import { MOODS, moodFor, offscreenSpeakers, portraitFor, portraitUrl, speakerIds, speakerName } from "@/lib/expressions";
 
 /** Every speaker who appears anywhere in the campaign. */
 function allSpeakers() {
@@ -15,7 +16,10 @@ function allSpeakers() {
 }
 
 test("every speaker in the campaign has a portrait or is deliberately off-screen", () => {
-  const missing = allSpeakers().filter(speaker => !speakerIds[speaker] && !offscreenSpeakers.has(speaker));
+  // Compare on the display name: a speaker written as `Ruta:smug` is still Ruta.
+  const missing = allSpeakers()
+    .map(speakerName)
+    .filter(speaker => !speakerIds[speaker] && !offscreenSpeakers.has(speaker));
   assert.deepEqual(missing, [], `these speakers would render no portrait: ${missing.join(", ")}`);
 });
 
@@ -95,3 +99,64 @@ test("every chapter is present and speaks with the cast", () => {
     assert.ok(speakers.has(Object.keys(speakerIds).find(name => speakerIds[name] === id)!), `${id} never speaks`);
   }
 });
+
+
+test("Ruta has a role across the whole campaign, not a cameo", () => {
+  // She was the second-least-used speaker in the game despite being one of the
+  // four canonical designs. Her arc runs enforcer -> quiet accomplice -> ally
+  // -> the one whose contract is the trap -> the one who reads her way out, so
+  // she belongs in every chapter.
+  const lines = [];
+  const scenes = new Set<string>();
+  const chapters = new Set<number>();
+  for (const stage of stages) {
+    for (const line of [...stage.pre, ...stage.post]) {
+      if (speakerName(line.speaker) !== "Ruta") continue;
+      lines.push(line);
+      scenes.add(stage.id);
+      chapters.add(stage.chapter);
+    }
+  }
+  assert.ok(lines.length >= 30, `Ruta has only ${lines.length} lines; her role should be substantial`);
+  assert.ok(scenes.size >= 9, `Ruta appears in only ${scenes.size} scenes`);
+  assert.deepEqual([...chapters].sort(), [1, 2, 3, 4, 5], "Ruta should appear in every chapter");
+});
+
+test("Ruta never raises her voice", () => {
+  // Her defining trait, stated in her own bio: "she never once raised her
+  // voice". Most of her lines should therefore read calm, and any line that
+  // does not must have been asked for deliberately with a forced mood.
+  const moods: string[] = [];
+  for (const stage of stages) {
+    for (const line of [...stage.pre, ...stage.post]) {
+      if (speakerName(line.speaker) !== "Ruta") continue;
+      moods.push(line.speaker.includes(":") ? "forced" : portraitFor(line.speaker, line.text).mood);
+    }
+  }
+  const calm = moods.filter(m => m === "calm").length;
+  assert.ok(calm / moods.length >= 0.8,
+    `only ${calm} of ${moods.length} of Ruta's lines read calm — she should stay level`);
+  assert.ok(moods.filter(m => m === "angry").length === 0, "Ruta should never be written as shouting");
+});
+
+test("a forced mood is stripped from the nameplate", () => {
+  // `Ruta:smug|line` pins the face for one line. The nameplate must still read
+  // "Ruta" — before this was handled the suffix leaked into the UI.
+  assert.equal(speakerName("Ruta:smug"), "Ruta");
+  assert.equal(speakerName("Purp:angry"), "Purp");
+  // a colon that is not a mood is part of the name and must survive
+  assert.equal(speakerName("P.A. Automated Voice"), "P.A. Automated Voice");
+  assert.equal(speakerName("Server Core:nonsense"), "Server Core:nonsense");
+  // and the forced mood itself still resolves
+  const forced = portraitFor("Ruta:smug", "Line that would otherwise read angry!");
+  assert.equal(forced.id, "ruta");
+  assert.equal(forced.mood, "smug");
+});
+
+test("the story screen renders the stripped speaker name", () => {
+  const source = read("src/components/story-battle.tsx");
+  assert.match(source, /speakerName\(line\.speaker\)/,
+    "the nameplate must use speakerName() so a forced mood never shows up in the UI");
+});
+
+function read(p: string) { return readFileSync(new URL(`../${p}`, import.meta.url), "utf8"); }

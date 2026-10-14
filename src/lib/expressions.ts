@@ -118,6 +118,17 @@ export function portraitFor(speaker: string, text: string): { id: string | null;
   return { id, mood: explicit ?? moodFor(text) };
 }
 
+/**
+ * The speaker's display name, with any forced-mood suffix removed. A writer can
+ * write `Ruta:smug|line` to pin the face for that line, and the nameplate still
+ * reads "Ruta". A colon that is not followed by a mood is left alone, so names
+ * containing punctuation survive.
+ */
+export function speakerName(speaker: string) {
+  const [name, forced] = speaker.split(":");
+  return (MOODS as readonly string[]).includes((forced ?? "").trim()) ? name.trim() : speaker;
+}
+
 /** The URL for a character's expression portrait. */
 export function portraitUrl(id: string, mood: Mood) {
   return `/images/faces/${id}-${mood}.png`;
