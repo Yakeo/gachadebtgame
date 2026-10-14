@@ -380,3 +380,86 @@ test("no portrait carries chroma-key residue", () => {
   assert.deepEqual(offenders, [],
     `these portraits still contain keyed-out green: ${offenders.join(", ")}`);
 });
+
+test("no portrait has loose key-colour specks on its silhouette", () => {
+  // Removing the green was only half the job. The same cut left the other half
+  // of the key behind: single saturated cyan pixels stranded along the edge of
+  // the sprite. They are invisible against some backdrops and read as coloured
+  // grit against others, so the first fix looked complete and was not.
+  //
+  // The hard part is not finding saturated cyan, it is not deleting a
+  // character's own blue. Ynna's cyan pixels sit on her blue iris, her hairclip
+  // and the trim of her uniform - they are the drawing. So a pixel only counts
+  // as residue when the ordinary art around it is not blue at all: measured
+  // across the set, Alvida's specks sit on brown hair (neighbour blueness ~25)
+  // while every one of Ynna's sits on blue (166 and up). The thresholds below
+  // sit in the empty space between those two populations.
+  const offenders = [];
+
+  for (const file of walk("public/images/faces", [".png"])) {
+    const image = decodePng(file);
+    const { pixels, channels, width, height, palette } = image;
+    const transparent = new Set();
+    const raw = image.transparency;
+    if (typeof raw === "number") transparent.add(raw);
+    if (raw && typeof raw === "object" && !Array.isArray(raw) && raw.length) {
+      for (let i = 0; i < raw.length; i++) if (raw[i] === 0) transparent.add(i);
+    }
+
+    const size = width * height;
+    const r = new Uint8Array(size), g = new Uint8Array(size), b = new Uint8Array(size);
+    const visible = new Uint8Array(size), solid = new Uint8Array(size);
+    for (let i = 0; i < size; i++) {
+      if (palette) {
+        if (transparent.has(pixels[i])) continue;
+        r[i] = palette[pixels[i] * 3]; g[i] = palette[pixels[i] * 3 + 1]; b[i] = palette[pixels[i] * 3 + 2];
+        solid[i] = 1;   // a palette entry is opaque or it is the transparent index
+      } else {
+        const alpha = pixels[i * channels + 3];
+        if (alpha === 0) continue;
+        r[i] = pixels[i * channels]; g[i] = pixels[i * channels + 1]; b[i] = pixels[i * channels + 2];
+        // Only fully opaque pixels count as art to sample from: a half-faded
+        // pixel is a blend of the drawing and the backdrop behind it.
+        if (alpha >= 200) solid[i] = 1;
+      }
+      visible[i] = 1;
+    }
+
+    // saturated pixels of either key colour
+    const isKey = (i) => visible[i] === 1 &&
+      ((b[i] > 200 && g[i] > 200 && r[i] < 120) || (g[i] > 200 && r[i] < 120 && b[i] < 120));
+    // "transparent enough to be an edge" - partial alpha counts, so a half-faded
+    // speck still registers as sitting on the silhouette
+    const isEdge = (i) => {
+      if (palette) return transparent.has(pixels[i]);
+      return pixels[i * channels + 3] < 200;
+    };
+
+    let specks = 0;
+    for (let i = 0; i < size; i++) {
+      if (!isKey(i)) continue;
+      const x = i % width, y = (i - x) / width;
+      let touchesEdge = false, support = 0, blue = 0;
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          const j = ny * width + nx;
+          if (isEdge(j)) touchesEdge = true;
+          else if (solid[j] === 1 && !isKey(j)) {
+            support++;
+            if (b[j] - r[j] > 30) blue++;
+          }
+        }
+      }
+      if (!touchesEdge) continue;
+      if (support < 4) continue;                    // not enough solid art to judge
+      if (blue / support >= 0.5) continue;          // it is the character's own blue
+      specks++;
+    }
+    if (specks > 0) offenders.push(`${file} (${specks} px)`);
+  }
+
+  assert.deepEqual(offenders, [],
+    `these portraits have key-colour specks on the silhouette: ${offenders.join(", ")}`);
+});

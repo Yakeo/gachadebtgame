@@ -5,12 +5,12 @@
 // a corrected portrait is served from a cache that still holds the old bytes.
 
 export const portraitHashes: Record<string, string> = {
-  "alvida-angry": "40bb62a7",
-  "alvida-calm": "855137aa",
-  "alvida-happy": "d2725238",
-  "alvida-sad": "2290aa26",
-  "alvida-shocked": "4587b524",
-  "alvida-smug": "d13e7012",
+  "alvida-angry": "e92ff543",
+  "alvida-calm": "3fe6a6e3",
+  "alvida-happy": "6956d42e",
+  "alvida-sad": "036d4816",
+  "alvida-shocked": "af8634a7",
+  "alvida-smug": "5b8b729d",
   "edgelord-angry": "0624044d",
   "edgelord-calm": "d7298f05",
   "edgelord-happy": "67ed7430",
