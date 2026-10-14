@@ -117,13 +117,19 @@ img.chibi{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;
  * is exactly what went wrong here: a stale `img.recruit-keyart` rule, written
  * when the banner was pixel-art, kept winning the cascade and stretched the
  * image across the whole width.
+ *
+ * The layers stack, back to front: wash (-4), illustration (-3), gradient (-2),
+ * grid (-1), and the copy on top at z-index 2. The illustration has to sit
+ * *below* the gradient and grid - they are what tint it and give the banner its
+ * depth. Raising it above them leaves the page working but flat, which is a
+ * quiet regression rather than an obvious one, so it is pinned by a test.
  */
 .recruit-view>img.recruit-keyart-backdrop{position:absolute;inset:0;z-index:-4;width:100%;height:100%;
   object-fit:cover;object-position:62% 16%;transform:scale(1.15);
   filter:blur(34px) saturate(1.2) brightness(.9);pointer-events:none}
 .recruit-view>img.recruit-keyart{position:absolute;top:0;right:0;bottom:0;left:auto;
   height:100%;width:auto;max-width:70%;object-fit:contain;object-position:right center;
-  z-index:0;image-rendering:auto;pointer-events:none;
+  z-index:-3;image-rendering:auto;pointer-events:none;
   filter:drop-shadow(0 14px 22px #0d24422e)}
 @media (max-width:900px){
   .recruit-view>img.recruit-keyart{max-width:88%;opacity:.92}
