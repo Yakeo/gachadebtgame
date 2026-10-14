@@ -195,7 +195,10 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       const living = () => b.enemies.filter(e => e.hp > 0);
       const strike = (enemy: Combatant, mult: number, options: { ignoreDefense?: boolean; critical?: boolean } = {}) => {
         const scale = enemy.maxHp > 10000 ? (b.stageId === "5-5" ? 2500 : 1000) : 1;
-        const raw = actor.attack * mult * (options.critical ? 1.5 : 1) * (owned.potential >= 3 ? 1.1 : 1);
+        // Ninette's audit: an open line item on a target pays the whole squad
+        // 20% more until somebody collects it.
+        const audited = enemy.audited ? 1.2 : 1;
+        const raw = actor.attack * mult * audited * (options.critical ? 1.5 : 1) * (owned.potential >= 3 ? 1.1 : 1);
         const defense = options.ignoreDefense ? 0 : enemy.defense;
         const damage = Math.max(1, Math.round((raw - defense) * scale));
         enemy.hp = Math.max(0, enemy.hp - damage);
@@ -207,15 +210,38 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
         for (const enemy of living()) total += strike(enemy, mult - (variance ? random() * variance : 0), options);
         return total;
       };
-      const mendSquad = (amount: number, note: string) => {
-        b.allies.filter(a => a.hp > 0).forEach(a => { a.hp = Math.min(a.maxHp, a.hp + amount); });
-        b.log.unshift(`${actor.name}: ${note} → the squad recovers ${amount.toLocaleString()} HP.`);
+      const mendSquad = (amount: number, note: string, shieldOverflow = false) => {
+        let healed = 0, shielded = 0;
+        b.allies.filter(a => a.hp > 0).forEach(a => {
+          const before = a.hp;
+          a.hp = Math.min(a.maxHp, a.hp + amount);
+          healed += a.hp - before;
+          // Sanctify: a healed ally that is already at full keeps the surplus
+          // as a shield instead of wasting it.
+          if (shieldOverflow && a.hp === a.maxHp && amount > a.hp - before) {
+            const surplus = Math.round((amount - (a.hp - before)) * .6);
+            if (surplus > 0) { a.shield = Math.min(Math.round(a.maxHp * .6), (a.shield ?? 0) + surplus); shielded += surplus; }
+          }
+        });
+        b.log.unshift(`${actor.name}: ${note} → the squad recovers ${healed.toLocaleString()} HP${shielded ? ` and ${shielded.toLocaleString()} of it is sanctified into shields` : ""}.`);
+      };
+      // Every point of damage the squad lands, tracked for siphons and audits.
+      let dealt = 0;
+      const strikeCounted = (enemy: Combatant, mult: number, options: { ignoreDefense?: boolean; critical?: boolean } = {}) => {
+        const damage = strike(enemy, mult, options);
+        dealt += damage;
+        return damage;
       };
       const label = command === "ultimate" ? c.ultimate : command === "skill" ? c.skill : "Attack";
       if (command === "guard") {
         actor.guard = true;
         actor.hp = Math.min(actor.maxHp, actor.hp + Math.round(actor.maxHp * .08));
-        b.log.unshift(`${actor.name} guards, restores health, and gains 35 energy.`);
+        if (c.mechanic === "detention") {
+          b.allies.filter(a => a.hp > 0).forEach(a => { a.shield = Math.min(Math.round(a.maxHp * .5), (a.shield ?? 0) + Math.round(actor.defense * 1.2)); });
+          b.log.unshift(`${actor.name} holds the line — the whole squad gains his guard, and 35 energy.`);
+        } else {
+          b.log.unshift(`${actor.name} guards, restores health, and gains 35 energy.`);
+        }
       } else if (c.mechanic === "chaos") {
         // Penelope. Nothing about her is settled in advance, including how useful she is.
         if (command === "attack") {
@@ -241,6 +267,123 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
             b.log.unshift(`Penelope: ${label} — EVERYTHING AT ONCE! ${total.toLocaleString()} damage and the squad recovers!`);
           }
         }
+      } else if (c.mechanic === "rateup") {
+        // Ynna. The pity counter, weaponised: certainty builds while she goes
+        // without a crit, and resets the moment one lands.
+        const streak = b.streak ?? 0;
+        const critChance = Math.min(.75, .14 + streak * .12);
+        if (command === "ultimate") {
+          const damage = strikeCounted(target, 3.6, { critical: true });
+          b.streak = 0;
+          if (target.hp === 0) actor.energy = Math.min(100, actor.energy + 20);
+          b.log.unshift(`Ynna: ${label} → the guaranteed pull lands! ${target.name} −${damage.toLocaleString()} HP${target.hp === 0 ? ", and the refund covers her next one" : ""}.`);
+        } else {
+          const critical = random() < critChance;
+          const damage = strikeCounted(target, command === "skill" ? 1.9 : 1.12, { critical });
+          b.streak = critical ? 0 : streak + 1;
+          if (command === "skill") actor.energy = Math.min(100, actor.energy + 15);
+          b.log.unshift(`Ynna: ${label} → ${target.name} −${damage.toLocaleString()} HP${critical ? " · CRITICAL! Rate-up satisfied, the counter resets" : ` · ${Math.round(critChance * 100)}% rate-up and climbing`}.`);
+        }
+      } else if (c.mechanic === "sanctify") {
+        // Solari. Nothing is wasted on the holy ledger.
+        if (command === "ultimate") {
+          const fallen = b.allies.find(a => a.hp <= 0);
+          if (fallen) {
+            fallen.hp = Math.round(fallen.maxHp * .5);
+            fallen.shield = Math.round(fallen.maxHp * .25);
+            b.log.unshift(`Solari: ${label} — ${fallen.name} is audited back onto the payroll at half strength!`);
+          } else {
+            b.log.unshift(`Solari: ${label} — no one has fallen, so the miracle is spent on the living.`);
+          }
+          mendSquad(Math.round(actor.attack * 2), "fiscal purity", true);
+        } else if (command === "skill") {
+          mendSquad(Math.round(actor.attack * 1.5), label, true);
+        } else {
+          const damage = strikeCounted(target, 1.15);
+          const shield = Math.round(damage * .35);
+          actor.shield = (actor.shield ?? 0) + shield;
+          b.log.unshift(`Solari: ${label} → ${target.name} −${damage.toLocaleString()} HP, and ${shield.toLocaleString()} is set aside as a shield.`);
+        }
+      } else if (c.mechanic === "detention") {
+        // Escanooor. His guard covers the room, not just himself.
+        if (command === "ultimate") {
+          const damage = strikeCounted(target, 3.2, { critical: true });
+          target.stunned = true;
+          b.log.unshift(`Escanooor: ${label} → ${target.name} −${damage.toLocaleString()} HP and detained. It will not act next turn.`);
+        } else if (command === "skill") {
+          const damage = strikeCounted(target, 2.1);
+          b.allies.filter(a => a.hp > 0).forEach(a => { a.shield = Math.min(Math.round(a.maxHp * .5), (a.shield ?? 0) + Math.round(actor.defense * 1.4)); });
+          const mark = target.audited ? " The mark on it pays out." : "";
+          b.log.unshift(`Escanooor: ${label} → ${target.name} −${damage.toLocaleString()} HP. The squad is covered by his guard.${mark}`);
+          if (target.audited) {                       // he collects open marks too
+            target.hp = Math.max(0, target.hp - Math.round(actor.attack * .8));
+            target.audited = false;
+          }
+        } else {
+          const damage = strikeCounted(target, 1.15, { ignoreDefense: random() < .3 });
+          b.log.unshift(`Escanooor: ${label} → ${target.name} −${damage.toLocaleString()} HP.`);
+        }
+      } else if (c.mechanic === "audit") {
+        // Ninette. She does not out-damage anyone; she finds the number that
+        // was always there, and everyone else collects it.
+        if (command === "ultimate") {
+          const audited = b.enemies.filter(e => e.audited && e.hp > 0);
+          let total = 0;
+          for (const enemy of audited) {
+            total += strikeCounted(enemy, 3, { critical: true });
+            enemy.audited = false;
+          }
+          b.allies.filter(a => a.hp > 0).forEach(a => { a.energy = Math.min(100, a.energy + 25); });
+          b.log.unshift(total
+            ? `Ninette: ${label} — every audited line item pays out. ${total.toLocaleString()} total damage and the squad is refunded 25 energy each.`
+            : `Ninette: ${label} — the books were already clean. Nothing to collect, but the squad is refunded 25 energy each.`);
+          mendSquad(Math.round(actor.attack * 1.2), "the ledger balances", false);
+        } else if (command === "skill") {
+          mendSquad(Math.round(actor.attack * 1.6), label, false);
+          const audited = b.enemies.filter(e => e.audited && e.hp > 0);
+          let total = 0;
+          for (const enemy of audited) { total += strikeCounted(enemy, 1.2); enemy.audited = false; }
+          if (total) b.log.unshift(`Ninette: ${audited.length} audited target${audited.length > 1 ? "s" : ""} pay out ${total.toLocaleString()} more, and the line items close.`);
+        } else {
+          const damage = strikeCounted(target, .9);
+          target.audited = true;
+          b.log.unshift(`Ninette: ${label} → ${target.name} −${damage.toLocaleString()} HP and marked. Every payout the squad lands on it from now on collects more.`);
+        }
+      } else if (c.mechanic === "takeover") {
+        // Director Vane. He does not generate anything; he acquires it.
+        if (command === "ultimate") {
+          const total = b.enemies.filter(e => e.hp > 0).reduce((sum, e) => sum + strikeCounted(e, 2.3, { ignoreDefense: true }), 0);
+          const skim = Math.round(total * .25);
+          state.credits += skim;
+          b.log.unshift(`Director Vane: ${label} — every hostile is acquired for ${total.toLocaleString()} total damage. The proceeds bank ${skim.toLocaleString()} credits.`);
+        } else if (command === "skill") {
+          const damage = strikeCounted(target, 1.5);
+          const stolen = Math.min(target.energy, 30);
+          target.energy -= stolen;
+          actor.energy = Math.min(100, actor.energy + stolen);
+          b.log.unshift(`Director Vane: ${label} → ${target.name} −${damage.toLocaleString()} HP. He acquires ${stolen} of its charge.`);
+        } else {
+          const damage = strikeCounted(target, 1.05);
+          const rev = Math.round(damage * .06);
+          state.credits += rev;
+          b.log.unshift(`Director Vane: ${label} → ${target.name} −${damage.toLocaleString()} HP, billed as ${rev.toLocaleString()} credits.`);
+        }
+      } else if (c.mechanic === "siphon") {
+        // The Mysterious Sorcerer. His damage is a loan; the squad is the
+        // beneficiary, and he keeps the interest.
+        const rate = command === "ultimate" ? .45 : command === "skill" ? .3 : .18;
+        if (command === "ultimate") {
+          const total = b.enemies.filter(e => e.hp > 0).reduce((sum, e) => sum + strikeCounted(e, 2.4), 0);
+          b.log.unshift(`Sorcerer: ${label} → all debts come due: ${total.toLocaleString()} total damage.`);
+        } else if (command === "skill") {
+          const total = strikeCounted(target, 1.7);
+          b.log.unshift(`Sorcerer: ${label} → ${target.name} −${total.toLocaleString()} HP, interest compounding.`);
+        } else {
+          const damage = strikeCounted(target, 1.1);
+          b.log.unshift(`Sorcerer: ${label} → ${target.name} −${damage.toLocaleString()} HP.`);
+        }
+        const interest = Math.round(dealt * rate);
+        mendSquad(interest, "the ledger pays out", false);
       } else if (c.mechanic === "pierce") {
         // Ruta. Her reach is the mechanic: nothing standing near her target is spared.
         if (command === "skill") {
@@ -299,13 +442,25 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
         if (next >= 0) b.active = next;
         else {
           for (const enemy of b.enemies.filter(e => e.hp > 0)) {
+            if (enemy.stunned) {
+              enemy.stunned = false;
+              b.log.unshift(`${enemy.name} is still in detention and loses its turn.`);
+              continue;
+            }
             const living = b.allies.filter(a => a.hp > 0);
             if (!living.length) break;
             const victim = living[Math.floor(random() * living.length)];
-            const damage = Math.max(1, Math.round((enemy.attack - victim.defense * .35) * (victim.guard ? .35 : 1)));
+            let damage = Math.max(1, Math.round((enemy.attack - victim.defense * .35) * (victim.guard ? .35 : 1)));
+            let absorbed = 0;
+            if (victim.shield) {                       // Sanctify shields eat damage first
+              absorbed = Math.min(victim.shield, damage);
+              victim.shield -= absorbed;
+              damage -= absorbed;
+              if (victim.shield <= 0) victim.shield = undefined;
+            }
             victim.hp = Math.max(0, victim.hp - damage);
             victim.energy = Math.min(100, victim.energy + 12);
-            b.log.unshift(`${enemy.name}: ${moveFor(enemy.sprite ?? "", random)} → ${victim.name} −${damage.toLocaleString()} HP${victim.guard ? " (guarded)" : ""}.`);
+            b.log.unshift(`${enemy.name}: ${moveFor(enemy.sprite ?? "", random)} → ${victim.name} −${damage.toLocaleString()} HP${absorbed ? ` (${absorbed.toLocaleString()} absorbed by a shield)` : victim.guard ? " (guarded)" : ""}.`);
           }
           b.turn++;
           b.active = b.allies.findIndex(a => a.hp > 0);

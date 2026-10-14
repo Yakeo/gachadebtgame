@@ -1,5 +1,15 @@
 export type Rarity = "R" | "SR" | "SSR" | "UR";
-export type Mechanic = "standard" | "chaos" | "pierce" | "drain" | "riposte";
+export type Mechanic =
+  | "standard" | "chaos" | "pierce" | "drain" | "riposte"
+  // Story-cast kits. Each one changes how a turn resolves rather than just
+  // scaling a number, which is what keeps the roster from feeling interchangeable.
+  | "rateup"    // Ynna:            crit chance builds every action, resets when it lands
+  | "sanctify"  // Solari:          healing past full becomes a shield
+  | "detention" // Escanooor:       guarding hardens the whole squad
+  | "audit"     // Ninette:         marks a target, the squad cashes in on it
+  | "takeover"  // Director Vane:   takes what the enemy has and banks it
+  | "siphon"    // Sorcerer:        copies a share of every point of damage dealt
+  ;
 export type Character = {
   id: string; name: string; title: string; rarity: Rarity; element: string; role: string;
   color: string; hair: string; splash?: string; mechanic?: Mechanic;
@@ -46,37 +56,38 @@ export const characters: Character[] = [
   },
   {
     id: "ynna", name: "Ynna", title: "One More Pull", rarity: "SSR", element: "Wind", role: "Striker",
-    color: "#2895ef", hair: "#e7e8ff", weapon: "Blessed Smartphone",
+    color: "#2895ef", hair: "#e7e8ff", splash: "/images/splash-ynna.png", mechanic: "rateup", weapon: "Blessed Smartphone",
     hp: 1050, attack: 175, defense: 40,
     skill: "Rate-up Rush", ultimate: "All-In: Ten Pull!",
-    skillNote: "A fast single-target strike that builds a lot of energy back.",
-    ultimateNote: "Ten hits at once, resolved as one enormous blow.",
+    skillNote: "Builds certainty with every swing: her crit chance climbs the longer she goes without one, then cashes it in.",
+    ultimateNote: "The pity counter comes due. Ten hits land as one blow that always crits, and refunds energy on a kill.",
     description: "The council treasurer. An optimist, a loyal friend, and an absolute menace to the semester budget.",
   },
   {
     id: "ninette", name: "Ninette", title: "Keeper of the Ledger", rarity: "SR", element: "Water", role: "Support",
-    color: "#30b8c5", hair: "#5a6684", weapon: "Financial Binder",
+    color: "#30b8c5", hair: "#5a6684", splash: "/images/splash-ninette.png", mechanic: "audit", weapon: "Financial Binder",
     hp: 1250, attack: 130, defense: 65,
-    skill: "Budget Recovery", ultimateNote: "", ultimate: "Perfectly Balanced",
-    skillNote: "Restores the whole squad's HP.",
+    skill: "Budget Recovery", ultimate: "Perfectly Balanced",
+    skillNote: "Marks a target for audit - the whole squad then bills it 20% harder. This skill collects the open line items and heals the squad for the trouble.",
+    ultimateNote: "Every audited target is collected at once at triple rate, and the whole squad is refunded 25 energy.",
     description: "The exhausted student council president. His spreadsheets are impeccable. His blood pressure is not.",
   },
   {
     id: "solari", name: "Solari", title: "The Holy Audit", rarity: "SSR", element: "Light", role: "Healer",
-    color: "#d7ad50", hair: "#f8e9b4", weapon: "Ceremonial Staff",
+    color: "#d7ad50", hair: "#f8e9b4", splash: "/images/splash-solari.png", mechanic: "sanctify", weapon: "Ceremonial Staff",
     hp: 1150, attack: 150, defense: 55,
     skill: "Divine Reconciliation", ultimate: "Fiscal Purity",
-    skillNote: "Restores the whole squad's HP.",
-    ultimateNote: "A very large restoration for the entire squad.",
+    skillNote: "Reconciles the books and sanctifies the surplus: healing that exceeds a full health bar becomes a shield.",
+    ultimateNote: "Fiscal purity - the dead are audited back onto the payroll. Revives a fallen ally and shields everyone.",
     description: "Supreme Arbiter of Fiscal Purity. Carries an oversized staff, an impeccable mustache, and absolutely no tolerance for financial heresy.",
   },
   {
     id: "escanooor", name: "Escanooor", title: "Disciplinary Head", rarity: "SSR", element: "Fire", role: "Guardian",
-    color: "#ee815b", hair: "#c66c3d", weapon: "Disciplinary Gauntlet",
+    color: "#ee815b", hair: "#c66c3d", splash: "/images/splash-escanooor.png", mechanic: "detention", weapon: "Disciplinary Gauntlet",
     hp: 1650, attack: 165, defense: 90,
     skill: "Final Warning", ultimate: "Office Liquidation",
-    skillNote: "A heavy single-target strike.",
-    ultimateNote: "A devastating single-target strike.",
+    skillNote: "Final Warning: a heavy strike that shields the entire squad with his own guard, not just himself.",
+    ultimateNote: "Office Liquidation: a critical 3.2x strike that detains the target - a detained enemy is locked out and loses its next turn entirely.",
     description: "He gave the council a deadline, not a death sentence. There may be more to his ultimatum than it seems.",
   },
   {
@@ -101,13 +112,15 @@ export const characters: Character[] = [
   { id: "bluecap", name: "Blue Cap", title: "Basement Bestie", rarity: "R", element: "Water", role: "Support", color: "#59a7da", hair: "#67b7eb", weapon: "Cooling Mist", hp: 850, attack: 110, defense: 45, skill: "Cooling Spores", ultimate: "Blue Bloom", skillNote: "Restores the whole squad's HP.", ultimateNote: "Restores the whole squad's HP.", description: "Purp's original roommate. A reliable little mushroom with impeccable taste in damp corners." },
   { id: "cat", name: "Clockwork Cat", title: "A Cursed Little Baby", rarity: "R", element: "Dark", role: "Striker", color: "#8b88b5", hair: "#45405e", weapon: "Clockwork Pounce", hp: 800, attack: 135, defense: 35, skill: "Tick-Tock Pounce", ultimate: "Nine Lives, No Fees", skillNote: "A single-target strike.", ultimateNote: "A single-target strike.", description: "An occult experiment with a clockwork heart. Accepts head pats, refuses overdue library fees." },
   { id: "reroom", name: "Reroom", title: "Tiny Temper", rarity: "R", element: "Fire", role: "Caster", color: "#e97878", hair: "#e97878", weapon: "Rage Spores", hp: 800, attack: 125, defense: 35, skill: "Rage Spores", ultimate: "Big Red Bloom", skillNote: "Arcane damage to all enemies.", ultimateNote: "Arcane damage to all enemies.", description: "A surprisingly angry mushroom. Please do not poke it with a ruler." },
+  { id: "vane", name: "Director Vane", title: "The Hostile Takeover", rarity: "SSR", element: "Light", role: "Caster", color: "#c9a04a", hair: "#c9c3bb", splash: "/images/splash-vane.png", mechanic: "takeover", weapon: "Signed Contract", hp: 1080, attack: 196, defense: 48, skill: "Acquisition Clauses", ultimate: "Hostile Takeover", skillNote: "Takes what the enemy has, then takes it back with them.", ultimateNote: "An outright acquisition - every hostile pays, and the squad is funded from the proceeds.", description: "GachaCorp's chief executive. He signs contracts the way other people breathe, and every clause has a hidden fee." },
+  { id: "sorcerer", name: "Mysterious Sorcerer", title: "The Fine Print", rarity: "SSR", element: "Dark", role: "Caster", color: "#6f5bd6", hair: "#4a3f7a", splash: "/images/splash-sorcerer.png", mechanic: "siphon", weapon: "Ledger of Debts", hp: 1000, attack: 190, defense: 42, skill: "Compound Interest", ultimate: "Unpaid Debts Take Form", skillNote: "Siphons a share of the damage he deals back into the ledger - and the ledger pays the squad.", ultimateNote: "Every debt comes due at once, and he pockets a portion of the total.", description: "Nobody has seen the face under the hood, and the faculty insists he has never enrolled. He keeps the whole ledger anyway." },
   { id: "sentry", name: "Sentry", title: "Engineering Project 07", rarity: "R", element: "Lightning", role: "Guardian", color: "#819bb6", hair: "#a7bed1", weapon: "Security Sweep", hp: 1150, attack: 95, defense: 80, skill: "Security Sweep", ultimate: "Maximum Protocol", skillNote: "A single-target strike.", ultimateNote: "A single-target strike.", description: "Built to protect the server. Now protects its friends. Still occasionally asks for library fees." },
 ];
 export const ssrFeaturedId = "penelope";
 export function characterById(id: string) { return characters.find(c => c.id === id) ?? characters[characters.length - 1]; }
 export type OwnedCharacter = { id: string; level: number; potential: number; duplicates: number };
-export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean };
-export type Battle = { stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean } };
+export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean; shield?: number; audited?: boolean; stunned?: boolean };
+export type Battle = { stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
 export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[] };
 export type Player = { id: string; name: string; email: string | null; guest: boolean };
 export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guaranteed: boolean };
