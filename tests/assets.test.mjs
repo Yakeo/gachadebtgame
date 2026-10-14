@@ -72,6 +72,26 @@ test("art referenced by the components is either present or reported", () => {
   assert.ok(true);
 });
 
+test("every speaking character has all six expression portraits", () => {
+  const source = read("src/lib/expressions.ts");
+  // the speakerIds map: unquoted keys, plus quoted ones for two-word names
+  const map = source.slice(source.indexOf("speakerIds"), source.indexOf("};", source.indexOf("speakerIds")));
+  const ids = [...map.matchAll(/:\s*"([a-z]+)"/g)].map(match => match[1]);
+  const moods = [...source.matchAll(/"(calm|happy|angry|shocked|sad|smug)"/g)].map(m => m[1]);
+  const wanted = [...new Set(moods)];
+  assert.ok(ids.length >= 8, `expected at least 8 speaking characters, found ${ids.length}`);
+  assert.equal(wanted.length, 6, `expected 6 moods, found ${wanted.join(",")}`);
+  for (const id of ids) {
+    for (const mood of wanted) {
+      const file = `public/images/faces/${id}-${mood}.png`;
+      assert.ok(existsSync(join(root, file)), `${file} is missing`);
+      const { width, height } = pngInfo(file);
+      // a portrait only has to be big enough to hold a face
+      assert.ok(width >= 200 && height >= 200, `${file} is only ${width}x${height}`);
+    }
+  }
+});
+
 test("every shipped character PNG is reasonably light", () => {
   for (const file of walk("public/images", [".png"])) {
     const { size } = statSync(join(root, file));
