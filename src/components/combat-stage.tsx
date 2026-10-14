@@ -1,17 +1,30 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronRight, Crown, FastForward, Flag, History, Pause, Radio, Shield, Sparkles, Star, Swords, Target, WandSparkles, Zap } from "lucide-react";
-import { characterById, type Battle } from "@/lib/game-data";
+import { characterById, characters, type Battle } from "@/lib/game-data";
 import { battlefieldFor, type Stage } from "@/lib/campaign";
 import { useGame } from "./game-context";
 import { Avatar, Battlefield, Chibi, Credit, Gem, Modal, ProgressBar, Spinner } from "./ui";
 
 type Pose = "idle" | "enter" | "attack" | "skill" | "guard" | "ultimate" | "hit" | "counter" | "down" | "victory";
 const oneShots = new Set(["attack", "skill", "guard", "ultimate", "hit", "counter", "enter"]);
+/**
+ * How long a one-shot pose is held before the rig returns to idle.
+ *
+ * Every choreography animation in combat.css has to finish inside this window
+ * or it gets cut off mid-swing, so the number lives here as the single source
+ * of truth and tests/ssr-attacks.test.mjs reads it back.
+ */
+export const POSE_HOLD_MS = 780;
 
 function CombatSprite({ id, label, pose, side }: { id: string; label?: string; pose: Pose; side: "ally" | "enemy" }) {
-  return <div className={`sprite-stage pose-${pose} side-${side}`} data-character={id} data-anim={pose}>
-    <div className="sprite-fx" aria-hidden="true"><i /><i /><i /></div>
+  // The character's own colour drives their attack effects, so Penelope's
+  // impact reads pink and Escanooor's reads ember orange. Enemies keep the
+  // stylesheet default: their ids are sprite names, not members of the cast.
+  const known = side === "ally" && characters.some(character => character.id === id);
+  return <div className={`sprite-stage pose-${pose} side-${side}`} data-character={id} data-anim={pose}
+    style={known ? { "--character-color": characterById(id).color } as CSSProperties : undefined}>
+    <div className="sprite-fx" aria-hidden="true"><i /><i /><i /><i /><i /></div>
     <div className="sprite-rig"><Chibi id={id} label={label} className="sprite-art" /></div>
   </div>;
 }
@@ -24,6 +37,10 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
   const [impact, setImpact] = useState(false);
   const [log, setLog] = useState(false);
   const [poses, setPoses] = useState<Record<string, Pose>>({});
+  // The colour of whoever just swung. The engine reports what a blow landed
+  // on, not who threw it, so the client tracks the attacker itself and hands
+  // their colour down to the target's impact effect.
+  const [impactColor, setImpactColor] = useState<string | null>(null);
   const active = battle.allies[Math.max(0, battle.active)];
   const c = characterById(active.id);
   const poseFor = (id: string, hp: number): Pose => hp <= 0 ? "down" : poses[id] || "idle";
@@ -48,7 +65,7 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     const timer = setTimeout(() => setPoses(current => {
       if (!Object.values(current).some(pose => oneShots.has(pose))) return current;
       return Object.fromEntries(Object.entries(current).map(([id, pose]) => [id, oneShots.has(pose) ? "idle" : pose])) as Record<string, Pose>;
-    }), 780);
+    }), POSE_HOLD_MS);
     return () => clearTimeout(timer);
   }, [poses]);
 
@@ -56,6 +73,7 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     if (busy || battle.status !== "active") return;
     acting.current = true;
     const pose = (cmd === "attack" || cmd === "skill" || cmd === "guard" || cmd === "ultimate" ? cmd : "attack") as Pose;
+    setImpactColor(c.color);
     setPoses(current => ({ ...current, [active.id]: pose }));
     const result = await action("act", { command: cmd, target }, true);
     const nextBattle = result?.state.battle;
@@ -87,11 +105,11 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
   }, [command, log, retreat]);
 
   const firstClear = !state.cleared.includes(stage.id);
-  return <section className={`battle-screen ${impact ? "has-impact" : ""}`}>
+  return <section className={`battle-screen ${impact ? "has-impact" : ""}`} style={{ "--impact-color": impactColor } as CSSProperties}>
     <div className="battle-header"><div><span className="battle-operation">OPERATION {stage.id}</span><h1>{stage.title}</h1></div><div className="battle-turn"><span>TURN</span><strong>{String(battle.turn).padStart(2, "0")}</strong></div><div className="battle-header-actions"><button className={auto ? "active" : ""} onClick={() => setAuto(!auto)} disabled={battle.status !== "active"}>{auto ? <Pause size={15} /> : <FastForward size={15} />} AUTO {auto ? "ON" : "OFF"}</button><button onClick={() => setLog(true)}><History size={16} />LOG</button><button onClick={() => setRetreat(true)} disabled={busy}><Flag size={16} />RETREAT</button></div></div>
     <div className={`battle-arena chapter-${stage.chapter}`}><Battlefield src={battlefieldFor(stage.chapter)} alt={`The battlefield at ${stage.location.toLowerCase()}`} /><div className="arena-shade" /><div className="arena-grid" /><div className="arena-topline"><span><Radio size={12} /> TACTICAL LINK ESTABLISHED</span><span>{battle.enemies.filter(enemy => enemy.hp > 0).length} HOSTILES REMAINING</span></div><div className="battle-versus" aria-hidden="true">VS<span>COUNCIL / CORPORATE</span></div>
       <div className="combat-teams">
-        <div className="combat-units enemy-team">{battle.enemies.map((enemy, index) => <button key={enemy.id} className={`combat-unit enemy-unit ${target === index ? "targeted" : ""} ${enemy.hp <= 0 ? "defeated" : ""}`} disabled={enemy.hp <= 0 || busy || battle.status !== "active"} onClick={() => setTarget(index)} aria-label={`Target ${enemy.name}, ${enemy.hp.toLocaleString()} HP`}><div className="combat-unit-label">{enemy.boss && <Crown size={12} />}<span>{enemy.name}{enemy.level ? <b className="enemy-level">LV {enemy.level}</b> : null}</span><ProgressBar value={enemy.hp} max={enemy.maxHp} className="enemy-health" /><small>{enemy.hp.toLocaleString()} / {enemy.maxHp.toLocaleString()}</small></div><div className={`combat-unit-art ${enemy.boss ? "is-boss" : ""}`}><div className="unit-ground" /><CombatSprite id={enemy.sprite ?? stage.enemies[index].sprite} label={enemy.name} pose={poseFor(enemy.id, enemy.hp)} side="enemy" />{target === index && enemy.hp > 0 && <span className="target-reticle"><Target size={26} /></span>}{impact && battle.lastHit?.target === enemy.id && <span className={`floating-damage ${battle.lastHit.critical ? "critical" : ""}`}>{battle.lastHit.critical && <small>CRITICAL!</small>}{battle.lastHit.amount.toLocaleString()}</span>}</div>{target === index && enemy.hp > 0 && <span className="target-label">TARGET</span>}</button>)}</div>
+        <div className="combat-units enemy-team">{battle.enemies.map((enemy, index) => <button key={enemy.id} data-hit={impact && battle.lastHit?.target === enemy.id ? "on" : undefined} className={`combat-unit enemy-unit ${target === index ? "targeted" : ""} ${enemy.hp <= 0 ? "defeated" : ""}`} disabled={enemy.hp <= 0 || busy || battle.status !== "active"} onClick={() => setTarget(index)} aria-label={`Target ${enemy.name}, ${enemy.hp.toLocaleString()} HP`}><div className="combat-unit-label">{enemy.boss && <Crown size={12} />}<span>{enemy.name}{enemy.level ? <b className="enemy-level">LV {enemy.level}</b> : null}</span><ProgressBar value={enemy.hp} max={enemy.maxHp} className="enemy-health" /><small>{enemy.hp.toLocaleString()} / {enemy.maxHp.toLocaleString()}</small></div><div className={`combat-unit-art ${enemy.boss ? "is-boss" : ""}`}><div className="unit-ground" /><CombatSprite id={enemy.sprite ?? stage.enemies[index].sprite} label={enemy.name} pose={poseFor(enemy.id, enemy.hp)} side="enemy" />{target === index && enemy.hp > 0 && <span className="target-reticle"><Target size={26} /></span>}{impact && battle.lastHit?.target === enemy.id && <span className={`floating-damage ${battle.lastHit.critical ? "critical" : ""}`}>{battle.lastHit.critical && <small>CRITICAL!</small>}{battle.lastHit.amount.toLocaleString()}</span>}</div>{target === index && enemy.hp > 0 && <span className="target-label">TARGET</span>}</button>)}</div>
         <div className="combat-units ally-team">{battle.allies.map((ally, index) => <div key={ally.id} className={`combat-unit ally-unit ${battle.active === index ? "current" : ""} ${ally.hp <= 0 ? "defeated" : ""}`}><div className="ally-ready-label">{ally.hp <= 0 ? "DOWN" : poseFor(ally.id, ally.hp) !== "idle" ? "ACTING" : battle.active === index ? "YOUR TURN" : "READY"}</div><div className="combat-unit-art"><div className="unit-ground" /><CombatSprite id={ally.id} pose={poseFor(ally.id, ally.hp)} side="ally" /></div><strong className="ally-name">{ally.name}</strong>{ally.guard && <span className="guard-indicator"><Shield size={13} />GUARD</span>}</div>)}</div>
       </div>
       <div className="arena-bottom-line"><span>{stage.location}</span><span>SELECT AN ENEMY. MAKE YOUR MOVE.</span></div>
