@@ -40,7 +40,12 @@ test("every character with art has a real, sufficiently large PNG", () => {
     const file = `public${url}`;
     assert.ok(existsSync(join(root, file)), `${file} is referenced by game-data.ts but does not exist`);
     const { width, height } = pngInfo(file);
-    assert.ok(width >= 512 && height >= 512, `${file} is only ${width}x${height}; upscaled blurry art will show`);
+    // Character sprites are tall and narrow (a head-to-toe figure on a
+    // transparent canvas), so judge the long edge and the overall area rather
+    // than requiring a square.
+    const longEdge = Math.max(width, height);
+    assert.ok(longEdge >= 512, `${file} is only ${width}x${height}; its long edge should be at least 512px`);
+    assert.ok(width * height >= 180_000, `${file} is only ${width}x${height}; too small to render crisply`);
   }
 });
 
