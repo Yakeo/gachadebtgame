@@ -86,3 +86,37 @@ img.recruit-keyart{width:100%;left:0;height:100%;object-fit:contain;object-posit
 .battle-arena.chapter-4>img{filter:saturate(.95) brightness(.78)}
 .battle-arena.chapter-5{--arena-tint:#15556d90;--arena-floor:#0e2a3dd6}
 .battle-arena.chapter-5>img{filter:saturate(.92) brightness(.8)}
+
+/* ---------------------------------------------------------------------------
+   Character key art.
+
+   The roster, the battlefield and the story all draw the pixel model
+   (`splash-*.png`). These rules are for the painted illustration
+   (`keyart-*.jpg`), which is shown only where there is room to enjoy it:
+   the character detail page and the recruit banner. The model and the
+   illustration are deliberately separate files - replacing the sprite with an
+   illustration would destroy the game's pixel-art identity.
+   --------------------------------------------------------------------------- */
+/* The illustration fills the hero; the pixel model sits on top of it in the
+   portrait slot, so both survive. */
+.detail-keyart-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  object-position:50% 16%;z-index:-1;animation:keyart-in .55s ease both}
+/* the scrim already present keeps the name and title readable over the art */
+.character-detail-hero.has-keyart>.character-hero-scrim{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--character-color) 30%,#0b1c33e0) 0%,#0b1c3399 42%,transparent 72%),
+             linear-gradient(0deg,#0b1c33cc,transparent 55%)}
+.character-detail-hero.has-keyart>.portrait-grid{opacity:.25}
+
+/* the recruit banner shows the featured character's illustration full-bleed */
+.recruit-view>img.recruit-keyart{object-fit:cover;object-position:60% 18%}
+
+/* pull reveal: the moment a new character arrives, show the illustration */
+.pull-reveal-art{width:100%;height:100%;object-fit:cover;object-position:50% 14%;display:block}
+
+@keyframes keyart-in{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.detail-keyart{animation:none}}
+/* A high-rarity pull arrives as its painted illustration. */
+.result-art>.pull-keyart{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:50% 10%;animation:keyart-in .6s ease both}
+.pull-result.rarity-SSR .result-art,.pull-result.rarity-UR .result-art{overflow:hidden}
+
