@@ -1,5 +1,5 @@
 import { characterById, characters, initialState, missionProgress, missions, pullPool, PULL_RATES, SSR_FEATURED_SHARE, ssrFeaturedId, stats, type Battle, type Combatant, type GameState, type PullResult } from "./game-data";
-import { stageById, stages } from "./campaign";
+import { choicePointById, stageById, stages } from "./campaign";
 
 // Enemy pressure is driven by how far into the campaign the stage sits, not by
 // chapter number alone, so difficulty climbs monotonically across all 25 stages.
@@ -46,11 +46,25 @@ export function regenerateEnergy(state: GameState) {
 }
 export function applyGameAction(original: GameState, input: Record<string, unknown>, random: () => number) {
   const state = regenerateEnergy(structuredClone(original));
+  // Saves written before the campaign had choices simply do not have the field.
+  if (!state.choices) state.choices = {};
   let message = "Progress saved.";
   let pulls: PullResult[] | undefined;
   const id = typeof input.id === "string" ? input.id : "";
   switch (input.action) {
     case "init": break;
+    case "choose": {
+      // A story decision. Recording it is what lets a later scene look back.
+      const point = choicePointById(id);
+      if (!point) throw new Error("That decision does not exist.");
+      const option = typeof input.option === "string" ? input.option : "";
+      if (!point.options.some(o => o.id === option)) throw new Error("That is not one of the options.");
+      // Re-deciding an earlier scene keeps the newest answer: the archive is
+      // replayable, and a replay should be able to change the record.
+      state.choices = { ...(state.choices ?? {}), [id]: option };
+      message = "Decision recorded.";
+      break;
+    }
     case "pull": {
       const count = input.count === 10 ? 10 : input.count === 1 ? 1 : 0;
       if (!count) throw new Error("Choose a single pull or a ten-pull.");

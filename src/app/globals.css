@@ -196,3 +196,20 @@ img.chibi{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;
   .story-portrait.is-listener{height:min(40vh,300px);opacity:.68}
 }
 
+/* ---------------------------------------------------------------------------
+   Decisions.
+
+   A choice point renders in the dialogue box in place of a line of speech, so
+   the player makes the call at the moment the scene asks for it rather than at
+   the end of a scene. The chosen option stays on screen afterwards, marked, so
+   the transcript reads as a record of what you actually said.
+   --------------------------------------------------------------------------- */
+.story-dialogue-box.at-choice{padding-bottom:18px}
+.story-choices>button{position:relative;transition:transform .12s ease,background .12s ease,border-color .12s ease}
+.story-choices>button:hover:not(:disabled){background:#f4f9ff;border-color:#7cb6ee;transform:translateX(3px)}
+.story-choices>button:disabled{cursor:default}
+.story-choices>button.picked{background:#e3f2e8;border-color:#7fc79a;color:#2f7a52}
+.story-choices>button.picked>span{background:#7fc79a33;color:#2f7a52}
+.story-choices>button.picked>span::after{content:" · CHOSEN"}
+.story-choices>button:disabled:not(.picked){opacity:.45}
+

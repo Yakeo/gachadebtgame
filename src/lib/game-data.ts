@@ -160,11 +160,11 @@ export function characterById(id: string) { return characters.find(c => c.id ===
 export type OwnedCharacter = { id: string; level: number; potential: number; duplicates: number };
 export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean; shield?: number; audited?: boolean; stunned?: boolean };
 export type Battle = { stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
-export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[] };
+export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[]; choices: Record<string, string> };
 export type Player = { id: string; name: string; email: string | null; guest: boolean };
 export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guaranteed: boolean };
 export function initialState(): GameState {
-  return { gems: 4800, credits: 25000, energy: 120, energyAt: Date.now(), pity: 0, totalPulls: 0, roster: ["ynna", "ninette", "edgelord"].map(id => ({ id, level: 1, potential: 0, duplicates: 0 })), squad: ["ynna", "ninette", "edgelord"], cleared: [], claimed: [], lastDaily: null, battle: null, pullHistory: [] };
+  return { gems: 4800, credits: 25000, energy: 120, energyAt: Date.now(), pity: 0, totalPulls: 0, roster: ["ynna", "ninette", "edgelord"].map(id => ({ id, level: 1, potential: 0, duplicates: 0 })), squad: ["ynna", "ninette", "edgelord"], cleared: [], claimed: [], lastDaily: null, battle: null, pullHistory: [], choices: {} };
 }
 export function stats(owned: OwnedCharacter) {
   const c = characterById(owned.id);

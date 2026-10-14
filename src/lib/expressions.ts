@@ -1,3 +1,4 @@
+import { characters } from "./game-data";
 // Character portraits and the moods behind them.
 //
 // Every speaking character in the campaign has six illustrated expressions.
@@ -22,11 +23,34 @@ export const speakerIds: Record<string, string> = {
   Ruta: "ruta",
   "Director Vane": "vane",
   "Mysterious Sorcerer": "sorcerer",
+  Alvida: "alvida",
+  // A Vane-series enforcement unit, so it shares the Director's face rather
+  // than getting a portrait of its own.
+  "Enforcer Vane-02": "vane",
 };
+
+/**
+ * Speakers who are in the story but are not recruitable.
+ *
+ * `characterById` falls back to the last playable character, which would put
+ * the wrong name and colour on a story-only speaker's nameplate, so the story
+ * screen resolves its colours through `speakerProfile` instead.
+ */
+export const storyCast: Record<string, { name: string; title: string; color: string }> = {
+  alvida: { name: "Alvida", title: "Disciplinary Committee", color: "#c2703f" },
+};
+
+/** Display details for any speaker id, playable or story-only. */
+export function speakerProfile(id: string): { name: string; title: string; color: string } {
+  const playable = characters.find(c => c.id === id);
+  if (playable) return { name: playable.name, title: playable.title, color: playable.color };
+  return storyCast[id] ?? { name: id, title: "Gacha Debt", color: "#468cd4" };
+}
 
 /** Narrators, machines and monsters speak from off-screen. */
 export const offscreenSpeakers = new Set([
-  "Narrator", "System Voice", "P.A. Automated Voice", "Server Core", "Cursed Cat Mob",
+  "Narrator", "System", "System Voice", "P.A. Announcement", "Automated P.A. System",
+  "P.A. Automated Voice", "Server Core", "Cursed Cat Mob", "Spun Shroom",
 ]);
 
 /**
