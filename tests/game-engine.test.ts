@@ -94,10 +94,16 @@ test("The four designed units exist as SSR with distinct mechanics", () => {
   assert.equal(characterById("ruta").mechanic, "pierce");
   assert.equal(characterById("purp").mechanic, "drain");
   assert.equal(characterById("edgelord").mechanic, "riposte");
-  for (const id of ["penelope", "ruta"]) {
-    const stage = stages.find(s => s.id === (id === "penelope" ? "1-4" : "3-5"))!;
-    assert.ok(stage.pre.some(l => l.speaker === characterById(id).name), `${id} must appear in the story`);
-    assert.ok(stage.post.some(l => l.speaker === characterById(id).name), `${id} must speak after the battle`);
+  // Every member of the campaign cast has to actually appear in the script. The
+  // stage each one joins at is part of the story, so this counts rather than
+  // naming a stage - rewriting the script should not silently drop a character.
+  for (const id of ["penelope", "ruta", "purp", "edgelord", "ynna", "ninette"]) {
+    const name = characterById(id).name;
+    const speaksIn = stages.filter(stage => [...stage.pre, ...stage.post].some(entry =>
+      entry.kind === "line"
+        ? entry.speaker === name
+        : entry.options.some(option => option.reply.some(reply => reply.speaker === name))));
+    assert.ok(speaksIn.length >= 2, `${name} is in the roster but speaks in only ${speaksIn.length} stage(s)`);
   }
 });
 function squadWith(...ids: string[]) {
@@ -222,13 +228,20 @@ test("Chapter 1 is fought against slimes with simple attacks", () => {
   const slimeSprites = new Set(["slime-blue", "slime-red", "slime-gold", "slime-cactus", "kingslime"]);
   const chapterOne = stages.filter(s => s.chapter === 1).flatMap(s => s.enemies);
   assert.ok(chapterOne.length >= 10, "chapter 1 should field a full roster of mobs");
-  for (const enemy of chapterOne) assert.ok(slimeSprites.has(enemy.sprite), `${enemy.name} should be a slime, got ${enemy.sprite}`);
+  // Chapter 1 is slimes, with one exception: the chapter boss is the Student
+  // Council President himself, and the script names him.
+  for (const enemy of chapterOne) {
+    if (enemy.boss) continue;
+    assert.ok(slimeSprites.has(enemy.sprite), `${enemy.name} should be a slime, got ${enemy.sprite}`);
+  }
   assert.ok(chapterOne.some(e => e.boss), "chapter 1 needs its crowned boss");
+  assert.ok(chapterOne.some(e => e.boss && e.sprite === "escanooor"),
+    "chapter 1 ends on Escanooor, the Student Council President");
   const laterChapter = stages.filter(s => s.chapter === 2).flatMap(s => s.enemies);
   assert.ok(laterChapter.some(e => !slimeSprites.has(e.sprite)), "chapter 2 should move on from slimes");
 });
 test("Bosses have their own combat sprites instead of reusing mob art", () => {
-  const bossSprites = new Set(["kingslime", "prime", "terminal", "enforcer", "vane"]);
+  const bossSprites = new Set(["kingslime", "prime", "terminal", "enforcer", "vane", "escanooor"]);
   for (const stage of stages) for (const enemy of stage.enemies) {
     if (!enemy.boss) continue;
     const isNamedBoss = bossSprites.has(enemy.sprite) || ["purp", "solari"].includes(enemy.sprite);

@@ -25,6 +25,7 @@ export const bestiary: Record<string, string> = {
   "slime-blue": "Blue Slime", "slime-red": "Red Slime", "slime-gold": "Gold Slime", "slime-cactus": "Cactus Slime",
   kingslime: "Crowned Slime", prime: "Clockwork Sentry Prime", terminal: "GachaCorp Server Terminal",
   enforcer: "Corporate Enforcer", vane: "Director Vane",
+  shroom: "Spun Shroom", bluecap: "Blue Cap Shroom", reroom: "Reroom", fragment: "Corrupted Core Fragment",
 };
 export function Chibi({ id, className = "", label }: { id: string; className?: string; label?: string }) {
   const known = !!characters.some(c => c.id === id);
@@ -60,6 +61,14 @@ export function Chibi({ id, className = "", label }: { id: string; className?: s
     <path d="M42 58q12-12 26-14l-8 14q-10 2-18 0Z" fill="#e5848a" opacity=".8"/>
     <path d="M128 72v30l-8 3V74q4-4 8-2Z" fill="#e5848a" opacity=".5"/>
     <rect x="44" y="140" width="72" height="10" rx="5" fill="#8c2d34" opacity=".8"/>
+  </svg>;
+  if (id === "fragment") return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}>
+    <ellipse cx="80" cy="186" rx="38" ry="8" fill="#0c1a2c" opacity=".2"/>
+    <path d="M80 8 46 74l14 78 40 0 14-78Z" fill="#3a2c62" stroke="#1c1436" strokeWidth="3"/>
+    <path d="M80 8 60 74l20 78 20-78Z" fill="#5b46a0" opacity=".85"/>
+    <path d="M66 74h28l-6 44H72Z" fill="#8d76e6" opacity=".6"/>
+    <path d="M52 92l-16 22 12 30 12-24m48-28 16 22-12 30-12-24" fill="none" stroke="#6f57c4" strokeWidth="7" strokeLinecap="round"/>
+    <circle cx="80" cy="52" r="7" fill="#c9b6ff"/><circle cx="80" cy="52" r="3" fill="#fff"/>
   </svg>;
   if (id === "kingslime") return <svg viewBox="0 0 160 200" className={`chibi ${className}`} aria-label={c.name}>
     <ellipse cx="80" cy="186" rx="56" ry="10" fill="#0c1a2c" opacity=".26"/>
