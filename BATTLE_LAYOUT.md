@@ -8,3 +8,7 @@
 - Four-member squads and three-hostile encounters are checked on laptop, desktop, portrait-phone and landscape-phone sizes. Model vitals stay inside the arena.
 
 Validation: 188 unit/asset tests, TypeScript, targeted lint, and 17 scoped browser checks passed. The four layout/exit checks were also rerun with a full level-40 squad in stage 5-4. Existing database-dependent end-to-end and repository-wide lint limitations remain unchanged.
+
+## Foot-anchor correction
+
+Ally vitals and enemy labels are now positioned inside each model art container, absolutely anchored within six logical pixels of its bottom. They reserve no row in the team layout and have no card background, border or padding. Four viewport checks explicitly assert this parent relationship, transparent styling, foot proximity, arena coverage, and confirmed exit behavior. The screenshot showing account chrome and separate enemy/ally cards is the older layout; those elements are not part of the current combat view. The GitHub workflow reports the previous production deployment succeeded, but the live page itself could not be inspected from this environment. An already-open tab may still be running the older client until refreshed.
