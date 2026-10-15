@@ -693,7 +693,7 @@ export function companionLines(id: string): string[] {
   return critterQuotes[id] ?? companionQuotes[id] ?? companionQuotes.ynna;
 }
 
-export const STARTER_GEMS = 9600;
+export const STARTER_GEMS = 12800;
 export const STARTER_CREDITS = 25000;
 /** One free choice from the currently obtainable UR roster, never retired units. */
 export function starterUrPool() { return pullPool("UR"); }
