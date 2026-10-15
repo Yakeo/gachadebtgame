@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X, Diamond, Coins, LoaderCircle, Sparkles } from "lucide-react";
 import { characters, characterById } from "@/lib/game-data";
 export function Gem({ size = 17 }: { size?: number }) { return <Diamond size={size} className="gem-icon" fill="currentColor" strokeWidth={1.3} />; }
@@ -35,6 +36,14 @@ export const enemyArt: Record<string, string> = {
   "slime-gold": "/images/enemies/slime-gold.png",
   "slime-cactus": "/images/enemies/slime-cactus.png",
   kingslime: "/images/enemies/kingslime.png",
+  "shroom": "/images/enemies/critter-shroom.png",
+  "bluecap": "/images/enemies/critter-bluecap.png",
+  "reroom": "/images/enemies/critter-reroom.png",
+  "cat": "/images/enemies/critter-cat.png",
+  "sentry": "/images/enemies/critter-sentry.png",
+  "prime": "/images/enemies/critter-prime.png",
+  "enforcer": "/images/enemies/critter-enforcer.png",
+  "fragment": "/images/enemies/critter-fragment.png",
 };
 
 export const bestiary: Record<string, string> = {
@@ -50,7 +59,7 @@ export function Chibi({ id, className = "", label }: { id: string; className?: s
   // shows a character (battle rig, story speaker, roster card, pull result,
   // avatar) goes through this component, so one branch covers them all.
   // Characters without art keep the inline SVG below.
-  const art = known ? c.splash : enemyArt[id];
+  const art = known ? (c.splash ?? enemyArt[id]) : enemyArt[id];
   // Rendered as the sized element itself (class "chibi"), so every existing
   // width/height rule applies exactly as it did to the SVG; object-fit keeps
   // the figure from ever being stretched or cropped.
@@ -213,6 +222,10 @@ export function Modal({ title, eyebrow, onClose, children, className = "" }: { t
     document.addEventListener("keydown", handle);
     return () => { document.removeEventListener("keydown", handle); previous?.focus(); };
   }, [onClose]);
-  return <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}><div ref={ref} tabIndex={-1} className={`modal ${className}`} role="dialog" aria-modal="true" aria-labelledby={titleId}><div className="modal-top"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h2 id={titleId}>{title}</h2></div><button className="icon-button" onClick={onClose} aria-label="Close dialog"><X size={23} /></button></div>{children}</div></div>;
+  const content = <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}><div ref={ref} tabIndex={-1} className={`modal ${className}`} role="dialog" aria-modal="true" aria-labelledby={titleId}><div className="modal-top"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h2 id={titleId}>{title}</h2></div><button className="icon-button" onClick={onClose} aria-label="Close dialog"><X size={23} /></button></div>{children}</div></div>;
+  // Scene isolation/overflow must never put a dialog underneath the header.
+  // Keep the portal inside the scaled frame, rather than document.body.
+  const host = typeof document !== "undefined" ? document.querySelector(".game-shell") : null;
+  return host ? createPortal(content, host) : content;
 }
 export function EmptyState({ children }: { children: ReactNode }) { return <div className="empty-state"><Sparkles size={35} /><p>{children}</p></div>; }

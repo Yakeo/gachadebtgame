@@ -312,12 +312,15 @@ test("all sprites share one canvas aspect, so they scale alike", () => {
     `(spread ${spread.toFixed(3)}): ${aspects.map(a => `${a.file.split("/").pop()} ${a.aspect.toFixed(2)}`).join(", ")}`);
 });
 
-test("sprites render at a consistent height in the arena box", () => {
+test("humanoid sprites render at a consistent height in the arena box", () => {
+  const critters = JSON.parse(readFileSync(join(root, "art-source/roster/critters.json"), "utf8"));
+  const mascotModels = new Set(critters.filter(c => c.illustration).map(c => c.model.split("/").pop()));
   // The end-to-end check: simulate object-fit: contain in the 143x166 box the
   // arena uses and confirm the figures come out the same height. Before this
   // was fixed the spread was large enough to read as two different art styles.
   const heights = [];
   for (const file of walk("public/images", [".png"])) {
+    if (mascotModels.has(file.split("/").pop())) continue; // intentional wide/short creature silhouettes
     if (file.includes("/enemies/")) continue;   // see the aspect test above
     if (file.includes("/faces/")) continue;
     const image = decodePng(file);

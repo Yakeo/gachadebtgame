@@ -1133,3 +1133,126 @@
   .game-shell.is-combat .combat-units{row-gap:85px;padding-bottom:80px}
 }
 @media(max-height:500px){.game-shell.is-combat .combat-units{padding-bottom:70px}}
+
+/* Critter motions: each whole-body sprite keeps a distinct hop, slide or flutter. */
+.combat-unit.is-dashing .sprite-stage[data-character="kidjester"]{animation:kidjester-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes kidjester-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-19.0px) rotate(-18deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 38px)) rotate(18deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(9.0deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 19.0px)) rotate(-9.0deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="kidjester"].pose-skill .sprite-rig{animation:kidjester-cast .95s ease-in-out both}
+@keyframes kidjester-cast{0%,100%{transform:none}45%{transform:translateY(-4px) rotate(9.0deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="kidjester"],.reduce-motion .sprite-stage[data-character="kidjester"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="mrblack"]{animation:mrblack-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes mrblack-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-3.0px) rotate(9deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 6px)) rotate(-9deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-4.5deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 3.0px)) rotate(4.5deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="mrblack"].pose-skill .sprite-rig{animation:mrblack-cast .95s ease-in-out both}
+@keyframes mrblack-cast{0%,100%{transform:none}45%{transform:translateY(-5px) rotate(-4.5deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="mrblack"],.reduce-motion .sprite-stage[data-character="mrblack"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="mreats"]{animation:mreats-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes mreats-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-1.0px) rotate(-2deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 2px)) rotate(2deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(1.0deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 1.0px)) rotate(-1.0deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="mreats"].pose-skill .sprite-rig{animation:mreats-cast .95s ease-in-out both}
+@keyframes mreats-cast{0%,100%{transform:none}45%{transform:translateY(-6px) rotate(1.0deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="mreats"],.reduce-motion .sprite-stage[data-character="mreats"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="mrhide"]{animation:mrhide-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes mrhide-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-4.5px) rotate(6deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 9px)) rotate(-6deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-3.0deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 4.5px)) rotate(3.0deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="mrhide"].pose-skill .sprite-rig{animation:mrhide-cast .95s ease-in-out both}
+@keyframes mrhide-cast{0%,100%{transform:none}45%{transform:translateY(-7px) rotate(-3.0deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="mrhide"],.reduce-motion .sprite-stage[data-character="mrhide"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="takobuddy"]{animation:takobuddy-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes takobuddy-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-9.0px) rotate(-8deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 18px)) rotate(8deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(4.0deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 9.0px)) rotate(-4.0deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="takobuddy"].pose-skill .sprite-rig{animation:takobuddy-cast .95s ease-in-out both}
+@keyframes takobuddy-cast{0%,100%{transform:none}45%{transform:translateY(-8px) rotate(4.0deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="takobuddy"],.reduce-motion .sprite-stage[data-character="takobuddy"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="teacup"]{animation:teacup-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes teacup-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-6.0px) rotate(12deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 12px)) rotate(-12deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-6.0deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 6.0px)) rotate(6.0deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="teacup"].pose-skill .sprite-rig{animation:teacup-cast .95s ease-in-out both}
+@keyframes teacup-cast{0%,100%{transform:none}45%{transform:translateY(-9px) rotate(-6.0deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="teacup"],.reduce-motion .sprite-stage[data-character="teacup"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="moth"]{animation:moth-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes moth-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-16.5px) rotate(-5deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 33px)) rotate(5deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(2.5deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 16.5px)) rotate(-2.5deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="moth"].pose-skill .sprite-rig{animation:moth-cast .95s ease-in-out both}
+@keyframes moth-cast{0%,100%{transform:none}45%{transform:translateY(-10px) rotate(2.5deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="moth"],.reduce-motion .sprite-stage[data-character="moth"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="stapler"]{animation:stapler-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes stapler-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-2.0px) rotate(-11deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 4px)) rotate(11deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(5.5deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 2.0px)) rotate(-5.5deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="stapler"].pose-skill .sprite-rig{animation:stapler-cast .95s ease-in-out both}
+@keyframes stapler-cast{0%,100%{transform:none}45%{transform:translateY(-11px) rotate(5.5deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="stapler"],.reduce-motion .sprite-stage[data-character="stapler"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="bell"]{animation:bell-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes bell-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-10.0px) rotate(-16deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 20px)) rotate(16deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(8.0deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 10.0px)) rotate(-8.0deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="bell"].pose-skill .sprite-rig{animation:bell-cast .95s ease-in-out both}
+@keyframes bell-cast{0%,100%{transform:none}45%{transform:translateY(-12px) rotate(8.0deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="bell"],.reduce-motion .sprite-stage[data-character="bell"] .sprite-rig{animation:none!important}
+.combat-unit.is-dashing .sprite-stage[data-character="turnip"]{animation:turnip-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes turnip-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.05),-8.0px) rotate(15deg) scale(.96)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 16px)) rotate(-15deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-7.5deg) scale(1.08,.94)}
+  65%{transform:translate(calc(var(--dash-x,0px) * .65),calc(var(--dash-y,0px) * .65 - 8.0px)) rotate(7.5deg)}
+  100%{transform:translate(0,0)}
+}
+.sprite-stage[data-character="turnip"].pose-skill .sprite-rig{animation:turnip-cast .95s ease-in-out both}
+@keyframes turnip-cast{0%,100%{transform:none}45%{transform:translateY(-13px) rotate(-7.5deg) scale(1.08)}}
+.reduce-motion .sprite-stage[data-character="turnip"],.reduce-motion .sprite-stage[data-character="turnip"] .sprite-rig{animation:none!important}
+@media(prefers-reduced-motion:reduce){.sprite-stage[data-character="kidjester"],.sprite-stage[data-character="kidjester"] .sprite-rig,.sprite-stage[data-character="mrblack"],.sprite-stage[data-character="mrblack"] .sprite-rig,.sprite-stage[data-character="mreats"],.sprite-stage[data-character="mreats"] .sprite-rig,.sprite-stage[data-character="mrhide"],.sprite-stage[data-character="mrhide"] .sprite-rig,.sprite-stage[data-character="takobuddy"],.sprite-stage[data-character="takobuddy"] .sprite-rig,.sprite-stage[data-character="teacup"],.sprite-stage[data-character="teacup"] .sprite-rig,.sprite-stage[data-character="moth"],.sprite-stage[data-character="moth"] .sprite-rig,.sprite-stage[data-character="stapler"],.sprite-stage[data-character="stapler"] .sprite-rig,.sprite-stage[data-character="bell"],.sprite-stage[data-character="bell"] .sprite-rig,.sprite-stage[data-character="turnip"],.sprite-stage[data-character="turnip"] .sprite-rig{animation:none!important}}

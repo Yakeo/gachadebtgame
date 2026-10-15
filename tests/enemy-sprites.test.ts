@@ -96,7 +96,7 @@ test("every slime id is served as a sprite, and nothing draws it twice", () => {
   assert.doesNotMatch(ui, /if \(id === "slime-cactus"\)/, "the old cactus SVG is still present");
   assert.doesNotMatch(ui, /if \(id === "kingslime"\)/, "the old kingslime SVG is still present");
   // The artwork path is chosen before the SVG fallbacks render.
-  assert.match(ui, /const art = known \? c\.splash : enemyArt\[id\];/, "Chibi must consult enemyArt");
+  assert.match(ui, /const art = known \? \(c\.splash \?\? enemyArt\[id\]\) : enemyArt\[id\];/, "Chibi must consult enemyArt");
 });
 
 /* ------------------------------------------------------------------ motion */
