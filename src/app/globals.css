@@ -137,8 +137,26 @@ img.chibi{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;
    positioning is not. */
 .recruit-view>img.recruit-keyart-backdrop{transform:scale(1.15);
   filter:blur(34px) saturate(1.2) brightness(.9)}
+/*
+ * The illustration is a painted JPG with its own kitchen background running to
+ * every edge of its canvas. Drawn as-is it reads as a photo pasted on the side
+ * of the banner: a hard vertical seam where its left edge meets the wash, and
+ * the scene guillotined by the window on the right.
+ *
+ * A mask dissolves both vertical edges instead. The left fades over 16% of its
+ * width into the blurred wash behind it, which is the same picture, so the
+ * sharp art melts into its own blur rather than cutting against the navy. The
+ * last 8% on the right fades to the banner too, so the kitchen shelves run off
+ * the page as a soft bleed instead of a crop. Penelope and the pan sit between
+ * those two zones - around 20-87% of the width - and stay fully opaque.
+ *
+ * The mask is a look property and lives here, not in recruit-art.ts: a bad fade
+ * is survivable, a bad layout is not.
+ */
 .recruit-view>img.recruit-keyart{image-rendering:auto;
-  filter:drop-shadow(0 14px 22px #0d24422e)}
+  filter:drop-shadow(0 14px 22px #0d24422e);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 16%,#000 92%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 16%,#000 92%,transparent 100%)}
 @media (max-width:900px){
   .recruit-view>img.recruit-keyart{max-width:88%;opacity:.92}
 }
