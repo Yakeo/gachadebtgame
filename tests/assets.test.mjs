@@ -483,3 +483,12 @@ test("the home companion shows the illustration, with the model as fallback", ()
   assert.match(css, /\.companion-splash\{[^}]*mask-image/,
     "the illustration should be masked into the scene, not pasted as a rectangle");
 });
+
+ test("home illustration fills the companion stage at desktop and mobile sizes", () => {
+  const css = read("src/app/globals.css");
+  const stage = css.slice(css.indexOf("/* Full-bleed companion stage."));
+  assert.match(stage, /\.home-scene \.companion-figure\{[^}]*width:60%;height:100%/);
+  assert.match(stage, /\.companion-splash\{[^}]*object-fit:cover/);
+  assert.match(stage, /@media\(max-width:650px\)[\s\S]*width:100%;height:430px/);
+  assert.match(stage, /\.home-scene \.companion-tools,[\s\S]*z-index:2/);
+});

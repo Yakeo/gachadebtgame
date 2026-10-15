@@ -263,3 +263,42 @@ img.chibi{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;
 .story-choices>button.picked>.choice-arrow{opacity:0}
 .story-choices>button:disabled:not(.picked){opacity:.42}
 
+
+/* Full-bleed companion stage. Keep this after compact viewport overrides:
+   key art is scenery, not a small sprite above the dialogue box. */
+.home-scene .companion-figure{
+  inset:0 auto 0 0;
+  width:60%;height:100%;
+  z-index:0;filter:none;animation:scene-arrive .6s ease-out both;
+}
+.home-scene .companion-figure>.companion-splash{
+  display:block;width:100%;height:100%;object-fit:cover;
+  object-position:50% 24%;
+  mask-image:linear-gradient(90deg,#000 0%,#000 78%,transparent 100%);
+}
+.home-scene .companion-figure>.chibi{
+  width:100%;height:92%;position:absolute;bottom:0;object-fit:contain;
+}
+.home-scene .companion-figure-glow{display:none}
+.home-scene .companion-tools,
+.home-scene .companion-dialogue,
+.home-scene .featured-wrap,
+.home-scene .home-menu,
+.home-scene .scene-location,
+.home-scene .scene-welcome{z-index:2}
+.home-scene .scene-location,.home-scene .scene-welcome{
+  color:#f2f8ff;text-shadow:0 2px 5px #071c35,0 0 14px #071c35;
+}
+@media(max-width:900px) and (min-width:651px){
+  .home-scene .companion-figure{width:59%}
+}
+@media(max-width:650px){
+  .home-scene .companion-figure{inset:0 0 auto;width:100%;height:430px}
+  .home-scene .companion-figure>.companion-splash{
+    object-position:50% 22%;
+    mask-image:linear-gradient(180deg,#000 0%,#000 78%,transparent 100%);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .home-scene .companion-figure{animation:none}
+}
