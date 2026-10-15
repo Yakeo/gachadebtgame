@@ -187,7 +187,7 @@ test("a command that does not end the round still holds for its own animation", 
   // commands have no round to hang the beat on. Without a hold there, the
   // buttons returned while the attack was still swinging.
   assert.match(stage,
-    /setBeat\(true\);\s*if \(!roundEnded\) \{[\s\S]{0,900}?setTimeout\(resolve, POSE_HOLD_MS\)[\s\S]{0,300}?setBeat\(false\);/,
+    /setBeat\(true\);\s*if \(!enemyMoves\.length\) \{[\s\S]{0,900}?setTimeout\(resolve, POSE_HOLD_MS\)[\s\S]{0,300}?setBeat\(false\);/,
     "an ordinary command hands input back mid-animation");
   // auto-battle ticks between actions, not on top of their animations
   const tick = stage.match(/void command\([\s\S]{0,400}?\}, (\d+)\);/);
@@ -236,8 +236,8 @@ test("a blow and its answer are two separate beats", () => {
   // what made the animations easy to miss.
   assert.ok(IMPACT_BEAT_MS >= 300 && IMPACT_BEAT_MS <= 900, `IMPACT_BEAT_MS looks wrong: ${IMPACT_BEAT_MS}`);
   assert.match(stage, /setTimeout\(resolve, IMPACT_BEAT_MS\)/, "the beat is not being waited out");
-  assert.match(stage, /const roundEnded = nextBattle\.turn > battle\.turn && nextBattle\.status === "active"/,
-    "the retaliation must be triggered by the round ending, not by every command");
+  assert.match(stage, /nextBattle\.enemyActions/, "enemy animations must use resolved initiative slots");
+  assert.match(stage, /for \(const move of enemyMoves\)/, "enemy slots must animate in order");
   assert.match(stage, /setBeat\(true\)/, "input should be locked while the enemies answer");
   for (const label of ["command", "enemy", "retreat"]) {
     assert.ok(stage.includes(`${label}`), `${label} should still exist`);

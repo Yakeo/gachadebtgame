@@ -43,7 +43,7 @@ export function LevelUpgrade({ id, onUpgraded }: { id: string; onUpgraded: () =>
       <button className="level-max" disabled={disabled} onClick={() => setSelection(maxCount)}>MAX</button>
     </div>
     <p className="level-budget">{!owned ? "Recruit this character to level them up." : atCap ? "Maximum level reached." : maxCount === 0 ? `Need ${(level * 200).toLocaleString()} credits for the next level.` : `Up to ${maxCount} levels affordable. Drag the slider or use the arrow keys.`}</p>
-    {count > 0 && currentStats && nextStats && <div className="level-stat-preview" aria-label="Stat gains"><span>HP <b>+{nextStats.hp - currentStats.hp}</b></span><span>ATK <b>+{nextStats.attack - currentStats.attack}</b></span><span>DEF <b>+{nextStats.defense - currentStats.defense}</b></span></div>}
+    {count > 0 && currentStats && nextStats && <div className="level-stat-preview" aria-label="Stat gains"><span>HP <b>+{nextStats.hp - currentStats.hp}</b></span><span>ATK <b>+{nextStats.attack - currentStats.attack}</b></span><span>DEF <b>+{nextStats.defense - currentStats.defense}</b></span><span>SPD <b>+{nextStats.speed - currentStats.speed}</b></span></div>}
     <div className="level-cost"><span><Credit size={13} />{state.credits.toLocaleString()} available</span><strong><Credit size={14} />{cost.toLocaleString()} total</strong></div>
     <button className="small-primary full-width" disabled={disabled} onClick={confirm}>{atCap ? "MAX LEVEL" : `Level up${count ? ` ×${count}` : ""}`}<ArrowRight size={16} /></button>
   </section>;

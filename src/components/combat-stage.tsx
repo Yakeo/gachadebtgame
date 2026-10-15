@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BookOpen, ChevronRight, Crown, FastForward, Flag
 import { characterById, characters, type Battle } from "@/lib/game-data";
 import { campaignCredits } from "@/lib/campaign-balance";
 import { battlefieldFor, stages, type Stage } from "@/lib/campaign";
+import { InitiativeStrip } from "./initiative-strip";
 import { BattleCommandPanel } from "./battle-command-panel";
 import { useGame } from "./game-context";
 import { Avatar, Battlefield, Chibi, Credit, Gem, Modal, ProgressBar, Spinner } from "./ui";
@@ -90,6 +91,10 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     const opening: Record<string, Pose> = {};
     battle.allies.forEach(ally => { opening[ally.id] = ally.hp > 0 ? "enter" : "down"; });
     battle.enemies.forEach(enemy => { opening[enemy.id] = enemy.hp > 0 ? "enter" : "down"; });
+    battle.enemyActions?.forEach(move => {
+      if (!move.skipped) opening[move.actor] = "counter";
+      if (move.target && battle.allies.find(a => a.id === move.target)?.hp) opening[move.target] = "hit";
+    });
     setPoses(opening);
     const timer = setTimeout(() => { if (!acting.current) setPoses(current => Object.fromEntries(Object.entries(current).map(([id, pose]) => [id, pose === "enter" ? "idle" : pose])) as Record<string, Pose>); }, 1000);
     return () => clearTimeout(timer);
@@ -136,18 +141,10 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     setPoses(next);
     setImpact(true);
 
-    // Beat two: anybody still standing answers. The engine retaliates once per
-    // round rather than once per turn, so the turn number is what says whether
-    // anyone is coming - not the command that was just issued.
-    const roundEnded = nextBattle.turn > battle.turn && nextBattle.status === "active";
+    // Enemy slots can occur between any two allies, not only at a round boundary.
+    const enemyMoves = (nextBattle.enemyActions ?? []).filter(move => !move.skipped);
     setBeat(true);
-    if (!roundEnded) {
-      // Only the last ally in a round triggers the enemies' answer - the engine
-      // only advances the turn then. For every other command there is no beat
-      // to hang the hold on, and the buttons used to come back the instant the
-      // server replied: a quick click stamped on the swing that was still
-      // playing, which is the other half of "the animations don't show up".
-      // Hold for the pose window, so input returns as the animation ends.
+    if (!enemyMoves.length) {
       await new Promise(resolve => setTimeout(resolve, POSE_HOLD_MS));
       setImpact(false);
       setBeat(false);
@@ -155,17 +152,17 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
     }
     await new Promise(resolve => setTimeout(resolve, IMPACT_BEAT_MS));
     setImpact(false);
-    setPoses(current => {
-      const answering: Record<string, Pose> = { ...current };
-      nextBattle.enemies.forEach(enemy => { if (enemy.hp > 0) answering[enemy.id] = "counter"; });
-      return answering;
-    });
-    // Keep input locked until that leap has landed. Releasing the buttons the
-    // instant the pose is set let a fast click - or auto-battle's next tick -
-    // overwrite it mid-air, which is another way the animations went unseen.
-    await new Promise(resolve => setTimeout(resolve, COUNTER_HOLD_MS));
+    for (const move of enemyMoves) {
+      setPoses(current => {
+        const answering: Record<string, Pose> = Object.fromEntries(Object.entries(current).map(([id, pose]) => [id, pose === "down" ? "down" : "idle"]));
+        answering[move.actor] = "counter";
+        if (move.target) answering[move.target] = nextBattle.allies.find(a => a.id === move.target)!.hp > 0 ? "hit" : "down";
+        return answering;
+      });
+      await new Promise(resolve => setTimeout(resolve, COUNTER_HOLD_MS));
+    }
     setBeat(false);
-  }, [action, active.id, battle.allies, battle.status, battle.turn, beat, busy, target]);
+  }, [action, active.id, battle.allies, battle.status, battle.turn, beat, busy, target, c.color]);
 
   useEffect(() => {
     if (!auto || busy || beat || battle.status !== "active" || retreat || log) return;
@@ -182,7 +179,8 @@ export function BattleScreen({ battle, stage, onStory, onRetreat }: { battle: Ba
 
   const firstClear = !state.cleared.includes(stage.id);
   return <section className={`battle-screen ${impact ? "has-impact" : ""}`} style={{ "--impact-color": impactColor } as CSSProperties}>
-    <div className="battle-header"><div><span className="battle-operation">OPERATION {stage.id}</span><h1>{stage.title}</h1></div><div className="battle-turn"><span>TURN</span><strong>{String(battle.turn).padStart(2, "0")}</strong></div><div className="battle-header-actions"><button className={auto ? "active" : ""} onClick={() => setAuto(!auto)} disabled={battle.status !== "active"}>{auto ? <Pause size={15} /> : <FastForward size={15} />} AUTO {auto ? "ON" : "OFF"}</button><button onClick={() => setLog(true)}><History size={16} />LOG</button><button onClick={() => setRetreat(true)} disabled={busy}><Flag size={16} />RETREAT</button></div></div>
+    <div className="battle-header"><div><span className="battle-operation">OPERATION {stage.id}</span><h1>{stage.title}</h1></div><div className="battle-turn"><span>ROUND</span><strong>{String(battle.turn).padStart(2, "0")}</strong></div><div className="battle-header-actions"><button className={auto ? "active" : ""} onClick={() => setAuto(!auto)} disabled={battle.status !== "active"}>{auto ? <Pause size={15} /> : <FastForward size={15} />} AUTO {auto ? "ON" : "OFF"}</button><button onClick={() => setLog(true)}><History size={16} />LOG</button><button onClick={() => setRetreat(true)} disabled={busy}><Flag size={16} />RETREAT</button></div></div>
+    <InitiativeStrip battle={battle} />
     <div className={`battle-arena chapter-${stage.chapter}`}><Battlefield key={stage.chapter} src={battlefieldFor(stage.chapter)} alt={`The battlefield at ${stage.location.toLowerCase()}`} /><div className="arena-shade" /><div className="arena-grid" /><div className="arena-topline"><span><Radio size={12} /> TACTICAL LINK ESTABLISHED</span><span>{battle.enemies.filter(enemy => enemy.hp > 0).length} HOSTILES REMAINING</span></div><div className="battle-versus" aria-hidden="true">VS<span>COUNCIL / CORPORATE</span></div>
       <div className="combat-teams">
         <div className="combat-units enemy-team">{battle.enemies.map((enemy, index) => <button key={enemy.id} data-hit={impact && battle.lastHit?.target === enemy.id ? "on" : undefined} className={`combat-unit enemy-unit ${target === index ? "targeted" : ""} ${enemy.hp <= 0 ? "defeated" : ""}`} disabled={enemy.hp <= 0 || busy || beat || battle.status !== "active"} onClick={() => setTarget(index)} aria-label={`Target ${enemy.name}, ${enemy.hp.toLocaleString()} HP`}><div className="combat-unit-label">{enemy.boss && <Crown size={12} />}<span>{enemy.name}{enemy.level ? <b className="enemy-level">LV {enemy.level}</b> : null}</span><ProgressBar value={enemy.hp} max={enemy.maxHp} className="enemy-health" /><small>{enemy.hp.toLocaleString()} / {enemy.maxHp.toLocaleString()}</small></div><div className={`combat-unit-art ${enemy.boss ? "is-boss" : ""}`}><div className="unit-ground" /><CombatSprite id={enemy.sprite ?? stage.enemies[index].sprite} label={enemy.name} pose={poseFor(enemy.id, enemy.hp)} side="enemy" />{target === index && enemy.hp > 0 && <span className="target-reticle"><Target size={26} /></span>}{impact && battle.lastHit?.target === enemy.id && <span className={`floating-damage ${battle.lastHit.critical ? "critical" : ""}`}>{battle.lastHit.critical && <small>CRITICAL!</small>}{battle.lastHit.amount.toLocaleString()}</span>}</div>{target === index && enemy.hp > 0 && <span className="target-label">TARGET</span>}</button>)}</div>

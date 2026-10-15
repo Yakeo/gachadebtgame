@@ -685,3 +685,20 @@
   .command-activation{display:grid;grid-template-columns:1fr 1.3fr;align-items:center;gap:8px}
   .command-activation>small{grid-column:1/-1}
 }
+
+/* Persisted mixed-side initiative, with acted/dead slots kept visible. */
+.initiative-strip{display:flex;align-items:center;gap:15px;padding:9px 3.5%;background:#11283d;color:#d9e9f5;flex-shrink:0;border-bottom:1px solid #44617b;min-width:0}
+.initiative-caption{flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.initiative-caption strong{font-size:11px;letter-spacing:1px;color:#98d8ff}
+.initiative-caption span{font-size:9px;color:#a0b5c8}
+.initiative-strip ol{position:relative;list-style:none;display:flex;gap:6px;overflow-x:auto;min-width:0;padding:1px 0 3px;scrollbar-width:thin}
+.initiative-strip li{display:flex;align-items:center;gap:7px;flex-shrink:0;padding:7px 9px;border:1px solid #538cb877;background:#24425c;min-width:100px}
+.initiative-strip li.enemy{background:#532f3e;border-color:#bf6d775c}
+.initiative-strip li.current{border-color:#99d6ff;box-shadow:inset 0 -2px #6bc8ff;background:#2c5d7c}
+.initiative-strip li.spent{opacity:.42}
+.initiative-strip li>b{font-size:15px;font-family:var(--display);color:#aac9e1}
+.initiative-strip li strong{display:block;font-size:10px}
+.initiative-strip li span{display:block;font-size:7px;letter-spacing:.3px;margin-top:3px}
+.operator-statblock{display:flex;gap:8px;flex-wrap:wrap;font-size:8px;color:#9bb6cc;margin-top:10px}
+.operator-statblock b{color:#eaf5ff}
+@media(max-width:650px){.initiative-strip{padding:8px 12px;gap:9px}.initiative-caption strong{font-size:9px}.initiative-caption span{font-size:7px}.initiative-strip li{padding:6px;min-width:92px}}

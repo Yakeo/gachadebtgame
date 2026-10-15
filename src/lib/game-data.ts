@@ -1,3 +1,4 @@
+import { baseStatBlock, type CombatClass } from "./character-stats";
 export type Rarity = "R" | "SR" | "SSR" | "UR";
 export type Mechanic =
   | "standard" | "chaos" | "pierce" | "drain" | "riposte"
@@ -22,11 +23,11 @@ export type Character = {
   // models while the character pages get real splash art.
   keyart?: string;
   mechanic?: Mechanic;
-  hp: number; attack: number; defense: number;
+  hp: number; attack: number; defense: number; speed: number; combatClass: CombatClass;
   skill: string; ultimate: string; skillNote: string; ultimateNote: string;
   weapon: string; description: string;
 };
-export const characters: Character[] = [
+const characterDefinitions: Omit<Character, "speed" | "combatClass">[] = [
   {
     id: "penelope", name: "Penelope", title: "Certified Kitchen Disaster", rarity: "SSR", element: "Flame", role: "Chaos",
     color: "#ef6ec0", hair: "#e9eef2", splash: "/images/splash-penelope.png", keyart: "/images/keyart-penelope.webp", mechanic: "chaos", weapon: "Cast-Iron Frying Pan",
@@ -493,6 +494,8 @@ export type PullRarity = keyof typeof PULL_RATES;
 /** Share of SSR hits that go to the featured character rather than the pool. */
 export const SSR_FEATURED_SHARE = .5;
 
+export const characters: Character[] = characterDefinitions.map(c => ({ ...c, ...baseStatBlock(c) }));
+
 /** The characters available at a rarity, with the featured SSR out of the pool. */
 export function pullPool(rarity: string) {
   return characters.filter(c => c.rarity === rarity && (rarity !== "SSR" || c.id !== ssrFeaturedId));
@@ -515,8 +518,10 @@ export function pullOdds(): { id: string; rarity: Rarity; chance: number; featur
 }
 export function characterById(id: string) { return characters.find(c => c.id === id) ?? characters[characters.length - 1]; }
 export type OwnedCharacter = { id: string; level: number; potential: number; duplicates: number };
-export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean; shield?: number; audited?: boolean; stunned?: boolean };
-export type Battle = { balanceVersion?: number; stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
+export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; speed?: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean; shield?: number; audited?: boolean; stunned?: boolean };
+export type InitiativeEntry = { side: "ally" | "enemy"; id: string; score: number };
+export type EnemyAction = { actor: string; target?: string; damage?: number; skipped?: boolean };
+export type Battle = { initiative?: InitiativeEntry[]; initiativeIndex?: number; enemyActions?: EnemyAction[]; balanceVersion?: number; stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
 export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[]; choices: Record<string, string>; companion: string };
 export type Player = { id: string; name: string; email: string | null; guest: boolean };
 export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guaranteed: boolean };
@@ -645,7 +650,7 @@ export function initialState(): GameState {
 export function stats(owned: OwnedCharacter) {
   const c = characterById(owned.id);
   const scale = (1 + (owned.level - 1) * .065) * (1 + owned.potential * .05);
-  return { hp: Math.round(c.hp * scale), attack: Math.round(c.attack * scale), defense: Math.round(c.defense * scale) };
+  return { hp: Math.round(c.hp * scale), attack: Math.round(c.attack * scale), defense: Math.round(c.defense * scale), speed: c.speed + Math.floor((owned.level - 1) / 10) + owned.potential };
 }
 export const missions = [
   { id: "first-stage", title: "The first step", description: "Clear your first campaign stage.", goal: 1, kind: "stages", gems: 200, credits: 1000 },
