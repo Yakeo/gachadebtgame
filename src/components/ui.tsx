@@ -15,7 +15,7 @@ export function Battlefield({ src, alt, className = "" }: { src: string; alt: st
     const image = event.currentTarget;
     if (image.dataset.fallenBack) return;
     image.dataset.fallenBack = "1";
-    image.src = "/images/academy.jpg";
+    image.src = "/images/academy-anime.jpg";
   }} />;
 }
 export function ProgressBar({ value, max = 100, className = "" }: { value: number; max?: number; className?: string }) { return <div className={`progress-track ${className}`}><span style={{ width: `${Math.max(0, Math.min(100, value / max * 100))}%` }} /></div>; }

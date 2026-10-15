@@ -70,7 +70,7 @@ test("First battle can be won and its first-clear reward collected only once", (
   const finished = applyGameAction(state, { action: "finishStage" }, ordinary).state;
   assert.deepEqual(finished.cleared, ["1-1"]);
   assert.equal(finished.gems, 5000);
-  assert.equal(finished.credits, 26500);
+  assert.equal(finished.credits, 27900);
   assert.throws(() => applyGameAction(finished, { action: "finishStage" }, ordinary), /Win the battle/);
   const claimed = applyGameAction(finished, { action: "claim", id: "first-stage" }, ordinary).state;
   assert.equal(claimed.gems, 5200);

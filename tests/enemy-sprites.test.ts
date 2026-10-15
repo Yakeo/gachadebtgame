@@ -242,12 +242,12 @@ test("a blow and its answer are two separate beats", () => {
   for (const label of ["command", "enemy", "retreat"]) {
     assert.ok(stage.includes(`${label}`), `${label} should still exist`);
   }
-  // Every command button has to respect the beat, or a player can stack actions.
-  const commandButtons = [...stage.matchAll(/className="command [a-z]+" disabled=\{([^}]*)\}/g)].map(m => m[1]);
-  assert.equal(commandButtons.length, 4, `expected four command buttons, found ${commandButtons.length}`);
-  for (const condition of commandButtons) {
-    assert.match(condition, /beat/, `a command button ignores the beat: ${condition}`);
-  }
+  // Inspection is now separate from activation; both controls inherit the beat lock.
+  assert.match(stage, /<BattleCommandPanel[^\n]*locked=\{busy \|\| beat/);
+  const panel = read("src/components/battle-command-panel.tsx");
+  assert.match(panel, /disabled=\{locked\}/, "inspection ignores the animation lock");
+  assert.match(panel, /disabled=\{locked \|\| insufficient\}/, "activation ignores the animation lock");
+  assert.match(panel, /if \(!locked && !insufficient\) onActivate/, "keyboard activation ignores the lock");
 });
 
 test("only the enemy that was struck reacts to a blow", () => {

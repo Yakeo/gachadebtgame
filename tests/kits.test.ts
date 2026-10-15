@@ -261,6 +261,9 @@ test("Penelope's clumsiness tax never kills her", () => {
   const state = withEnergy(battleWith("penelope"));
   state.battle!.enemies.forEach(e => { e.hp = 40000; e.maxHp = 40000; });
   state.battle!.allies[0].hp = 1;                 // one clumsy follow-through from defeat
+  // Isolate recoil from enemy retaliation. The old giant-HP damage multiplier
+  // accidentally ended this fight before enemies could act.
+  state.battle!.allies.push({ ...state.battle!.allies[0], id: "ynna", name: "Ynna", hp: 1000 });
   const out = act(state, "attack", () => 0.01, 0).state;
   const me = out.battle!.allies.find(a => a.id === "penelope")!;
   assert.ok(me.hp >= 1, "she should be embarrassed, not defeated");

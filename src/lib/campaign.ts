@@ -42,15 +42,15 @@ export type Stage = {
 // chapter's own arena art. The story screen, the campaign map and the home
 // tile follow the same picture, which keeps the whole journey legible.
 export const chapters = [
-  { id: 1, title: "The Stuco Treasury & The Gacha Debt", short: "The Gacha Debt", subtitle: "One banner. An entire semester's budget. What could possibly go wrong?", color: "#238afa", location: "ACADEMY DISTRICT", battlefield: "/images/academy.jpg" },
-  { id: 2, title: "Spores, Servers & The Fungal Underground", short: "The Fungal Underground", subtitle: "The tournament prelims are underground, and the arena is alive.", color: "#a084eb", location: "THE OLD WEST WING", battlefield: "/images/west-wing.jpg" },
-  { id: 3, title: "The Supreme Audit & The Sacred Pan", short: "The Supreme Audit", subtitle: "GachaCorp didn't just take the money. They planned to take everything.", color: "#d9b765", location: "SAINT ATHANASIUS CHAPEL", battlefield: "/images/chapel.jpg" },
-  { id: 4, title: "Corporate Desolation", short: "Corporate Desolation", subtitle: "No more plastic swords. We end this today.", color: "#f08383", location: "GACHACORP HEADQUARTERS", battlefield: "/images/hq.jpg" },
-  { id: 5, title: "The Price of Redemption", short: "The Price of Redemption", subtitle: "The most important things were never behind a rate-up banner.", color: "#7ecbdb", location: "THE ZERO-POINT CORE", battlefield: "/images/core.jpg" },
+  { id: 1, title: "The Stuco Treasury & The Gacha Debt", short: "The Gacha Debt", subtitle: "One banner. An entire semester's budget. What could possibly go wrong?", color: "#238afa", location: "ACADEMY DISTRICT", battlefield: "/images/academy-anime.jpg" },
+  { id: 2, title: "Spores, Servers & The Fungal Underground", short: "The Fungal Underground", subtitle: "The tournament prelims are underground, and the arena is alive.", color: "#a084eb", location: "THE OLD WEST WING", battlefield: "/images/west-wing-anime.jpg" },
+  { id: 3, title: "The Supreme Audit & The Sacred Pan", short: "The Supreme Audit", subtitle: "GachaCorp didn't just take the money. They planned to take everything.", color: "#d9b765", location: "SAINT ATHANASIUS CHAPEL", battlefield: "/images/chapel-anime.jpg" },
+  { id: 4, title: "Corporate Desolation", short: "Corporate Desolation", subtitle: "No more plastic swords. We end this today.", color: "#f08383", location: "GACHACORP HEADQUARTERS", battlefield: "/images/hq-anime.jpg" },
+  { id: 5, title: "The Price of Redemption", short: "The Price of Redemption", subtitle: "The most important things were never behind a rate-up banner.", color: "#7ecbdb", location: "THE ZERO-POINT CORE", battlefield: "/images/core-anime.jpg" },
 ];
 /** The arena art for a chapter, with the academy courtyard as the fallback. */
 export function battlefieldFor(chapter: number | undefined) {
-  return chapters.find(c => c.id === chapter)?.battlefield ?? "/images/academy.jpg";
+  return chapters.find(c => c.id === chapter)?.battlefield ?? "/images/academy-anime.jpg";
 }
 
 const CHOICE = /^CHOICE\s+([a-z0-9-]+)\|(.+)$/i;
@@ -386,7 +386,7 @@ Edgelord69|(Eyes glowing) FINALLY. SOMEONE WHO UNDERSTANDS MY ROTATION.
 
   stage(2, 5, "The Overclocked Core", "Tournament Server Core", `
 Narrator|(In the middle of the arena sits a massive, glowing server tower covered in vines, spores, spinning gears, and a giant glowing red eye.)
-System|HP: 1,500,000 / 1,500,000 — [BOSS] TOURNAMENT SERVER CORE
+System|[BOSS] TOURNAMENT SERVER CORE — adaptive defenses online. See the live combat display for integrity.
 Ninette|THERE IT IS! THE MAIN TERMINAL CONTROLLING THE PRIZE POOL!
 Purp|(Taps on floating tome) The server has gone hyper-overclocked! It's using the fungal spores and cursed energy to build a physical defense barrier!
 Ynna|If we destroy that firewall core... Purp can execute the transaction to claim our $30,000 tournament check!

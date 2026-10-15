@@ -516,7 +516,7 @@ export function pullOdds(): { id: string; rarity: Rarity; chance: number; featur
 export function characterById(id: string) { return characters.find(c => c.id === id) ?? characters[characters.length - 1]; }
 export type OwnedCharacter = { id: string; level: number; potential: number; duplicates: number };
 export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean; shield?: number; audited?: boolean; stunned?: boolean };
-export type Battle = { stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
+export type Battle = { balanceVersion?: number; stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
 export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[]; choices: Record<string, string>; companion: string };
 export type Player = { id: string; name: string; email: string | null; guest: boolean };
 export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guaranteed: boolean };
