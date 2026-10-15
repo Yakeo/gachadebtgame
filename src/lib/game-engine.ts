@@ -1,3 +1,4 @@
+import { MAX_CHARACTER_LEVEL, upgradeCost } from "./leveling";
 import { characterById, characters, initialState, missionProgress, missions, pullPool, PULL_RATES, SSR_FEATURED_SHARE, ssrFeaturedId, stats, type Battle, type Combatant, type GameState, type PullResult } from "./game-data";
 import { choicePointById, stageById, stages } from "./campaign";
 
@@ -101,11 +102,13 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
     case "upgrade": {
       const owned = state.roster.find(c => c.id === id);
       if (!owned) throw new Error("Recruit this character first.");
-      if (owned.level >= 50) throw new Error("Maximum level reached.");
-      const cost = owned.level * 200;
+      if (owned.level >= MAX_CHARACTER_LEVEL) throw new Error("Maximum level reached.");
+      const levels = input.levels === undefined ? 1 : input.levels;
+      if (typeof levels !== "number") throw new Error("Choose a valid number of levels.");
+      const cost = upgradeCost(owned.level, levels);
       if (state.credits < cost) throw new Error("Not enough credits for this upgrade.");
       state.credits -= cost;
-      owned.level++;
+      owned.level += levels;
       message = `${characterById(id).name} reached level ${owned.level}!`;
       break;
     }

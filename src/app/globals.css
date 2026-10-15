@@ -302,3 +302,22 @@ img.chibi{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;
 @media(prefers-reduced-motion:reduce){
   .home-scene .companion-figure{animation:none}
 }
+
+/* Affordable multi-level training: same cumulative prices as single upgrades. */
+.level-upgrade{padding:16px 0;border-bottom:1px solid #dce7f0}
+.level-upgrade .level-section{padding:0 0 10px;border:0}
+.level-target{display:flex;align-items:center;gap:8px;color:#187cdf;font-size:16px;font-weight:700}
+.level-slider-heading{display:flex;justify-content:space-between;align-items:center;margin-top:18px;color:#5d7894;font-size:9px;letter-spacing:1px;font-weight:700}
+.level-slider-heading output{font-size:21px;color:#2087e9;letter-spacing:0}
+.level-slider-controls{display:flex;align-items:center;gap:8px;margin-top:8px}
+.level-slider-controls input{min-width:0;flex:1;accent-color:#2087e9;height:28px;cursor:pointer}
+.level-slider-controls>button{display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;border:1px solid #cfdfed;background:#edf5fd;color:#287ec6;border-radius:3px}
+.level-slider-controls>button.level-max{width:44px;font-size:9px;font-weight:700}
+.level-slider-controls input:disabled{cursor:not-allowed;opacity:.5}
+.level-slider-controls input:focus-visible,.level-slider-controls>button:focus-visible{outline:2px solid #187cdf;outline-offset:3px}
+.level-budget{font-size:10px;line-height:1.6;color:#7590a8;margin-top:8px}
+.level-stat-preview{display:flex;gap:14px;flex-wrap:wrap;padding:12px 0;font-size:10px;color:#6686a2}
+.level-stat-preview b{color:#2b9a86;margin-left:3px}
+.level-cost{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0;font-size:10px;color:#7190aa;flex-wrap:wrap}
+.level-cost>span,.level-cost>strong{display:flex;align-items:center;gap:5px}
+.level-cost>strong{color:#365c7c;font-size:12px}

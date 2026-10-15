@@ -490,3 +490,142 @@
 .pose-hit[data-enemy="slime"] .sprite-fx i:nth-child(4){left:-14%;right:-14%;bottom:-4%;height:14px;border-radius:50%;border:2px solid #fff;animation:fx-ground 0.59s ease-out both}
 .pose-skill[data-enemy="slime"] .sprite-fx i:nth-child(4){left:-26%;right:-26%;bottom:-6%;height:20px;border-radius:50%;border:2px solid #cfe6ffcc;animation:fx-ground 0.78s 0.59s ease-out both}
 .sprite-stage[data-enemy="slime"].pose-idle .sprite-fx i:nth-child(1){left:50%;top:44%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#ffffff88;animation:fx-pop 4.76s 0.56s ease-out infinite}
+
+/* Expansion recruits: role-aware motions with per-character timings and reach. */
+.sprite-stage[data-character="aster"].pose-attack .sprite-rig{animation:aster-attack 0.8s ease-in-out both}
+@keyframes aster-attack{0%,100%{transform:none}23%{transform:rotate(-3deg) translateY(-5px)}52%{transform:translateX(calc(var(--facing) * 23px)) rotate(3deg)}}
+.sprite-stage[data-character="aster"].pose-skill .sprite-rig{animation:aster-skill 0.9s ease-in-out both}
+@keyframes aster-skill{0%,100%{transform:none}23%{transform:rotate(-5deg) translateY(-10px)}52%{transform:translateX(calc(var(--facing) * 35px)) rotate(5deg)}}
+.sprite-stage[data-character="aster"].pose-ultimate .sprite-rig{animation:aster-ultimate 1.0s ease-in-out both}
+@keyframes aster-ultimate{0%,100%{transform:none}23%{transform:rotate(-7deg) translateY(-15px)}52%{transform:translateX(calc(var(--facing) * 47px)) rotate(7deg)}}
+.sprite-stage[data-character="aster"]{ --recruit-color:#39b9aa; }
+.sprite-stage[data-character="aster"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="vesper"].pose-attack .sprite-rig{animation:vesper-attack 0.8s ease-in-out both}
+@keyframes vesper-attack{0%,100%{transform:none}23%{transform:rotate(-4deg) translateY(-6px)}52%{transform:translateX(calc(var(--facing) * 25px)) rotate(4deg)}}
+.sprite-stage[data-character="vesper"].pose-skill .sprite-rig{animation:vesper-skill 0.9s ease-in-out both}
+@keyframes vesper-skill{0%,100%{transform:none}23%{transform:rotate(-6deg) translateY(-11px)}52%{transform:translateX(calc(var(--facing) * 37px)) rotate(6deg)}}
+.sprite-stage[data-character="vesper"].pose-ultimate .sprite-rig{animation:vesper-ultimate 1.0s ease-in-out both}
+@keyframes vesper-ultimate{0%,100%{transform:none}23%{transform:rotate(-8deg) translateY(-16px)}52%{transform:translateX(calc(var(--facing) * 49px)) rotate(8deg)}}
+.sprite-stage[data-character="vesper"]{ --recruit-color:#eeb33f; }
+.sprite-stage[data-character="vesper"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="maribel"].pose-attack .sprite-rig{animation:maribel-attack 0.8s ease-in-out both}
+@keyframes maribel-attack{0%,100%{transform:none}23%{transform:rotate(-5deg) translateY(-7px)}52%{transform:translateX(calc(var(--facing) * 27px)) rotate(5deg)}}
+.sprite-stage[data-character="maribel"].pose-skill .sprite-rig{animation:maribel-skill 0.9s ease-in-out both}
+@keyframes maribel-skill{0%,100%{transform:none}35%{transform:translateY(-12px) rotate(-7deg)}65%{transform:translateY(-15px) rotate(3.5deg) scale(1.074)}}
+.sprite-stage[data-character="maribel"].pose-ultimate .sprite-rig{animation:maribel-ultimate 1.0s ease-in-out both}
+@keyframes maribel-ultimate{0%,100%{transform:none}35%{transform:translateY(-17px) rotate(-9deg)}65%{transform:translateY(-20px) rotate(4.5deg) scale(1.104)}}
+.sprite-stage[data-character="maribel"]{ --recruit-color:#ec83a9; }
+.sprite-stage[data-character="maribel"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="cobalt"].pose-attack .sprite-rig{animation:cobalt-attack 0.8s ease-in-out both}
+@keyframes cobalt-attack{0%,100%{transform:none}23%{transform:rotate(-6deg) translateY(-8px)}52%{transform:translateX(calc(var(--facing) * 29px)) rotate(6deg)}}
+.sprite-stage[data-character="cobalt"].pose-skill .sprite-rig{animation:cobalt-skill 0.9s ease-in-out both}
+@keyframes cobalt-skill{0%,100%{transform:none}35%{transform:translateY(-13px) rotate(-8deg)}65%{transform:translateY(-16px) rotate(4.0deg) scale(1.076)}}
+.sprite-stage[data-character="cobalt"].pose-ultimate .sprite-rig{animation:cobalt-ultimate 1.0s ease-in-out both}
+@keyframes cobalt-ultimate{0%,100%{transform:none}35%{transform:translateY(-18px) rotate(-10deg)}65%{transform:translateY(-21px) rotate(5.0deg) scale(1.106)}}
+.sprite-stage[data-character="cobalt"]{ --recruit-color:#3897db; }
+.sprite-stage[data-character="cobalt"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="octavia"].pose-attack .sprite-rig{animation:octavia-attack 0.8s ease-in-out both}
+@keyframes octavia-attack{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -14px)) rotate(-7deg)}55%{transform:translateX(calc(var(--facing) * 31px)) scale(1.03)}}
+.sprite-stage[data-character="octavia"].pose-skill .sprite-rig{animation:octavia-skill 0.9s ease-in-out both}
+@keyframes octavia-skill{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -14px)) rotate(-9deg)}55%{transform:translateX(calc(var(--facing) * 43px)) scale(1.07)}}
+.sprite-stage[data-character="octavia"].pose-ultimate .sprite-rig{animation:octavia-ultimate 1.0s ease-in-out both}
+@keyframes octavia-ultimate{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -14px)) rotate(-11deg)}55%{transform:translateX(calc(var(--facing) * 55px)) scale(1.11)}}
+.sprite-stage[data-character="octavia"]{ --recruit-color:#a17edd; }
+.sprite-stage[data-character="octavia"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="flint"].pose-attack .sprite-rig{animation:flint-attack 0.8s ease-in-out both}
+@keyframes flint-attack{0%,100%{transform:none}23%{transform:rotate(-8deg) translateY(-6px)}52%{transform:translateX(calc(var(--facing) * 33px)) rotate(8deg)}}
+.sprite-stage[data-character="flint"].pose-skill .sprite-rig{animation:flint-skill 0.9s ease-in-out both}
+@keyframes flint-skill{0%,100%{transform:none}23%{transform:rotate(-10deg) translateY(-11px)}52%{transform:translateX(calc(var(--facing) * 45px)) rotate(10deg)}}
+.sprite-stage[data-character="flint"].pose-ultimate .sprite-rig{animation:flint-ultimate 1.0s ease-in-out both}
+@keyframes flint-ultimate{0%,100%{transform:none}23%{transform:rotate(-12deg) translateY(-16px)}52%{transform:translateX(calc(var(--facing) * 57px)) rotate(12deg)}}
+.sprite-stage[data-character="flint"]{ --recruit-color:#ed7345; }
+.sprite-stage[data-character="flint"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="seraphine"].pose-attack .sprite-rig{animation:seraphine-attack 0.8s ease-in-out both}
+@keyframes seraphine-attack{0%,100%{transform:none}23%{transform:rotate(-3deg) translateY(-7px)}52%{transform:translateX(calc(var(--facing) * 35px)) rotate(3deg)}}
+.sprite-stage[data-character="seraphine"].pose-skill .sprite-rig{animation:seraphine-skill 0.9s ease-in-out both}
+@keyframes seraphine-skill{0%,100%{transform:none}35%{transform:translateY(-12px) rotate(-5deg)}65%{transform:translateY(-15px) rotate(2.5deg) scale(1.082)}}
+.sprite-stage[data-character="seraphine"].pose-ultimate .sprite-rig{animation:seraphine-ultimate 1.0s ease-in-out both}
+@keyframes seraphine-ultimate{0%,100%{transform:none}35%{transform:translateY(-17px) rotate(-7deg)}65%{transform:translateY(-20px) rotate(3.5deg) scale(1.112)}}
+.sprite-stage[data-character="seraphine"]{ --recruit-color:#e3bd52; }
+.sprite-stage[data-character="seraphine"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="rook"].pose-attack .sprite-rig{animation:rook-attack 0.8s ease-in-out both}
+@keyframes rook-attack{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -17px)) rotate(-4deg)}55%{transform:translateX(calc(var(--facing) * 37px)) scale(1.03)}}
+.sprite-stage[data-character="rook"].pose-skill .sprite-rig{animation:rook-skill 0.9s ease-in-out both}
+@keyframes rook-skill{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -17px)) rotate(-6deg)}55%{transform:translateX(calc(var(--facing) * 49px)) scale(1.07)}}
+.sprite-stage[data-character="rook"].pose-ultimate .sprite-rig{animation:rook-ultimate 1.0s ease-in-out both}
+@keyframes rook-ultimate{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -17px)) rotate(-8deg)}55%{transform:translateX(calc(var(--facing) * 61px)) scale(1.11)}}
+.sprite-stage[data-character="rook"]{ --recruit-color:#e85c65; }
+.sprite-stage[data-character="rook"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="morrow"].pose-attack .sprite-rig{animation:morrow-attack 0.8s ease-in-out both}
+@keyframes morrow-attack{0%,100%{transform:none}23%{transform:rotate(-5deg) translateY(-5px)}52%{transform:translateX(calc(var(--facing) * 39px)) rotate(5deg)}}
+.sprite-stage[data-character="morrow"].pose-skill .sprite-rig{animation:morrow-skill 0.9s ease-in-out both}
+@keyframes morrow-skill{0%,100%{transform:none}35%{transform:translateY(-10px) rotate(-7deg)}65%{transform:translateY(-13px) rotate(3.5deg) scale(1.086)}}
+.sprite-stage[data-character="morrow"].pose-ultimate .sprite-rig{animation:morrow-ultimate 1.0s ease-in-out both}
+@keyframes morrow-ultimate{0%,100%{transform:none}35%{transform:translateY(-15px) rotate(-9deg)}65%{transform:translateY(-18px) rotate(4.5deg) scale(1.116)}}
+.sprite-stage[data-character="morrow"]{ --recruit-color:#866de0; }
+.sprite-stage[data-character="morrow"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="tala"].pose-attack .sprite-rig{animation:tala-attack 0.8s ease-in-out both}
+@keyframes tala-attack{0%,100%{transform:none}23%{transform:rotate(-6deg) translateY(-6px)}52%{transform:translateX(calc(var(--facing) * 41px)) rotate(6deg)}}
+.sprite-stage[data-character="tala"].pose-skill .sprite-rig{animation:tala-skill 0.9s ease-in-out both}
+@keyframes tala-skill{0%,100%{transform:none}23%{transform:rotate(-8deg) translateY(-11px)}52%{transform:translateX(calc(var(--facing) * 53px)) rotate(8deg)}}
+.sprite-stage[data-character="tala"].pose-ultimate .sprite-rig{animation:tala-ultimate 1.0s ease-in-out both}
+@keyframes tala-ultimate{0%,100%{transform:none}23%{transform:rotate(-10deg) translateY(-16px)}52%{transform:translateX(calc(var(--facing) * 65px)) rotate(10deg)}}
+.sprite-stage[data-character="tala"]{ --recruit-color:#e877bc; }
+.sprite-stage[data-character="tala"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="pip"].pose-attack .sprite-rig{animation:pip-attack 0.8s ease-in-out both}
+@keyframes pip-attack{0%,100%{transform:none}23%{transform:rotate(-7deg) translateY(-7px)}52%{transform:translateX(calc(var(--facing) * 43px)) rotate(7deg)}}
+.sprite-stage[data-character="pip"].pose-skill .sprite-rig{animation:pip-skill 0.9s ease-in-out both}
+@keyframes pip-skill{0%,100%{transform:none}23%{transform:rotate(-9deg) translateY(-12px)}52%{transform:translateX(calc(var(--facing) * 55px)) rotate(9deg)}}
+.sprite-stage[data-character="pip"].pose-ultimate .sprite-rig{animation:pip-ultimate 1.0s ease-in-out both}
+@keyframes pip-ultimate{0%,100%{transform:none}23%{transform:rotate(-11deg) translateY(-17px)}52%{transform:translateX(calc(var(--facing) * 67px)) rotate(11deg)}}
+.sprite-stage[data-character="pip"]{ --recruit-color:#65bde8; }
+.sprite-stage[data-character="pip"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="mira"].pose-attack .sprite-rig{animation:mira-attack 0.8s ease-in-out both}
+@keyframes mira-attack{0%,100%{transform:none}23%{transform:rotate(-8deg) translateY(-8px)}52%{transform:translateX(calc(var(--facing) * 45px)) rotate(8deg)}}
+.sprite-stage[data-character="mira"].pose-skill .sprite-rig{animation:mira-skill 0.9s ease-in-out both}
+@keyframes mira-skill{0%,100%{transform:none}35%{transform:translateY(-13px) rotate(-10deg)}65%{transform:translateY(-16px) rotate(5.0deg) scale(1.092)}}
+.sprite-stage[data-character="mira"].pose-ultimate .sprite-rig{animation:mira-ultimate 1.0s ease-in-out both}
+@keyframes mira-ultimate{0%,100%{transform:none}35%{transform:translateY(-18px) rotate(-12deg)}65%{transform:translateY(-21px) rotate(6.0deg) scale(1.122)}}
+.sprite-stage[data-character="mira"]{ --recruit-color:#ee9876; }
+.sprite-stage[data-character="mira"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="quill"].pose-attack .sprite-rig{animation:quill-attack 0.8s ease-in-out both}
+@keyframes quill-attack{0%,100%{transform:none}23%{transform:rotate(-3deg) translateY(-5px)}52%{transform:translateX(calc(var(--facing) * 47px)) rotate(3deg)}}
+.sprite-stage[data-character="quill"].pose-skill .sprite-rig{animation:quill-skill 0.9s ease-in-out both}
+@keyframes quill-skill{0%,100%{transform:none}35%{transform:translateY(-10px) rotate(-5deg)}65%{transform:translateY(-13px) rotate(2.5deg) scale(1.094)}}
+.sprite-stage[data-character="quill"].pose-ultimate .sprite-rig{animation:quill-ultimate 1.0s ease-in-out both}
+@keyframes quill-ultimate{0%,100%{transform:none}35%{transform:translateY(-15px) rotate(-7deg)}65%{transform:translateY(-18px) rotate(3.5deg) scale(1.124)}}
+.sprite-stage[data-character="quill"]{ --recruit-color:#7393ca; }
+.sprite-stage[data-character="quill"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="brass"].pose-attack .sprite-rig{animation:brass-attack 0.8s ease-in-out both}
+@keyframes brass-attack{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -23px)) rotate(-4deg)}55%{transform:translateX(calc(var(--facing) * 49px)) scale(1.03)}}
+.sprite-stage[data-character="brass"].pose-skill .sprite-rig{animation:brass-skill 0.9s ease-in-out both}
+@keyframes brass-skill{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -23px)) rotate(-6deg)}55%{transform:translateX(calc(var(--facing) * 61px)) scale(1.07)}}
+.sprite-stage[data-character="brass"].pose-ultimate .sprite-rig{animation:brass-ultimate 1.0s ease-in-out both}
+@keyframes brass-ultimate{0%,100%{transform:none}25%{transform:translateX(calc(var(--facing) * -23px)) rotate(-8deg)}55%{transform:translateX(calc(var(--facing) * 73px)) scale(1.11)}}
+.sprite-stage[data-character="brass"]{ --recruit-color:#d6a66a; }
+.sprite-stage[data-character="brass"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="lumi"].pose-attack .sprite-rig{animation:lumi-attack 0.8s ease-in-out both}
+@keyframes lumi-attack{0%,100%{transform:none}23%{transform:rotate(-5deg) translateY(-7px)}52%{transform:translateX(calc(var(--facing) * 51px)) rotate(5deg)}}
+.sprite-stage[data-character="lumi"].pose-skill .sprite-rig{animation:lumi-skill 0.9s ease-in-out both}
+@keyframes lumi-skill{0%,100%{transform:none}35%{transform:translateY(-12px) rotate(-7deg)}65%{transform:translateY(-15px) rotate(3.5deg) scale(1.098)}}
+.sprite-stage[data-character="lumi"].pose-ultimate .sprite-rig{animation:lumi-ultimate 1.0s ease-in-out both}
+@keyframes lumi-ultimate{0%,100%{transform:none}35%{transform:translateY(-17px) rotate(-9deg)}65%{transform:translateY(-20px) rotate(4.5deg) scale(1.128)}}
+.sprite-stage[data-character="lumi"]{ --recruit-color:#62c9c1; }
+.sprite-stage[data-character="lumi"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="altria"].pose-attack .sprite-rig{animation:altria-attack 0.8s ease-in-out both}
+@keyframes altria-attack{0%,100%{transform:none}23%{transform:rotate(-6deg) translateY(-8px)}52%{transform:translateX(calc(var(--facing) * 53px)) rotate(6deg)}}
+.sprite-stage[data-character="altria"].pose-skill .sprite-rig{animation:altria-skill 0.9s ease-in-out both}
+@keyframes altria-skill{0%,100%{transform:none}23%{transform:rotate(-8deg) translateY(-13px)}52%{transform:translateX(calc(var(--facing) * 65px)) rotate(8deg)}}
+.sprite-stage[data-character="altria"].pose-ultimate .sprite-rig{animation:altria-ultimate 1.0s ease-in-out both}
+@keyframes altria-ultimate{0%,100%{transform:none}23%{transform:rotate(-10deg) translateY(-18px)}52%{transform:translateX(calc(var(--facing) * 77px)) rotate(10deg)}}
+.sprite-stage[data-character="altria"]{ --recruit-color:#3c79df; }
+.sprite-stage[data-character="altria"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+.sprite-stage[data-character="alice"].pose-attack .sprite-rig{animation:alice-attack 0.8s ease-in-out both}
+@keyframes alice-attack{0%,100%{transform:none}23%{transform:rotate(-7deg) translateY(-5px)}52%{transform:translateX(calc(var(--facing) * 55px)) rotate(7deg)}}
+.sprite-stage[data-character="alice"].pose-skill .sprite-rig{animation:alice-skill 0.9s ease-in-out both}
+@keyframes alice-skill{0%,100%{transform:none}35%{transform:translateY(-10px) rotate(-9deg)}65%{transform:translateY(-13px) rotate(4.5deg) scale(1.102)}}
+.sprite-stage[data-character="alice"].pose-ultimate .sprite-rig{animation:alice-ultimate 1.0s ease-in-out both}
+@keyframes alice-ultimate{0%,100%{transform:none}35%{transform:translateY(-15px) rotate(-11deg)}65%{transform:translateY(-18px) rotate(5.5deg) scale(1.132)}}
+.sprite-stage[data-character="alice"]{ --recruit-color:#b95a9b; }
+.sprite-stage[data-character="alice"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
+@media(prefers-reduced-motion:reduce){.sprite-stage[data-character="aster"] .sprite-rig,.sprite-stage[data-character="vesper"] .sprite-rig,.sprite-stage[data-character="maribel"] .sprite-rig,.sprite-stage[data-character="cobalt"] .sprite-rig,.sprite-stage[data-character="octavia"] .sprite-rig,.sprite-stage[data-character="flint"] .sprite-rig,.sprite-stage[data-character="seraphine"] .sprite-rig,.sprite-stage[data-character="rook"] .sprite-rig,.sprite-stage[data-character="morrow"] .sprite-rig,.sprite-stage[data-character="tala"] .sprite-rig,.sprite-stage[data-character="pip"] .sprite-rig,.sprite-stage[data-character="mira"] .sprite-rig,.sprite-stage[data-character="quill"] .sprite-rig,.sprite-stage[data-character="brass"] .sprite-rig,.sprite-stage[data-character="lumi"] .sprite-rig,.sprite-stage[data-character="altria"] .sprite-rig,.sprite-stage[data-character="alice"] .sprite-rig{animation:none!important}}
