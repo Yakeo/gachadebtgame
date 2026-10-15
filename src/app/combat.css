@@ -1256,3 +1256,65 @@
 @keyframes turnip-cast{0%,100%{transform:none}45%{transform:translateY(-13px) rotate(-7.5deg) scale(1.08)}}
 .reduce-motion .sprite-stage[data-character="turnip"],.reduce-motion .sprite-stage[data-character="turnip"] .sprite-rig{animation:none!important}
 @media(prefers-reduced-motion:reduce){.sprite-stage[data-character="kidjester"],.sprite-stage[data-character="kidjester"] .sprite-rig,.sprite-stage[data-character="mrblack"],.sprite-stage[data-character="mrblack"] .sprite-rig,.sprite-stage[data-character="mreats"],.sprite-stage[data-character="mreats"] .sprite-rig,.sprite-stage[data-character="mrhide"],.sprite-stage[data-character="mrhide"] .sprite-rig,.sprite-stage[data-character="takobuddy"],.sprite-stage[data-character="takobuddy"] .sprite-rig,.sprite-stage[data-character="teacup"],.sprite-stage[data-character="teacup"] .sprite-rig,.sprite-stage[data-character="moth"],.sprite-stage[data-character="moth"] .sprite-rig,.sprite-stage[data-character="stapler"],.sprite-stage[data-character="stapler"] .sprite-rig,.sprite-stage[data-character="bell"],.sprite-stage[data-character="bell"] .sprite-rig,.sprite-stage[data-character="turnip"],.sprite-stage[data-character="turnip"] .sprite-rig{animation:none!important}}
+
+/* Stage-independent combat contrast. Light the sprite layer, not the rig:
+   hit/ultimate filters and travel transforms must still animate normally. */
+.battle-screen .combat-unit:not(.defeated) .sprite-art{
+  filter:brightness(1.22) drop-shadow(0 0 2px #fff9) drop-shadow(0 3px 3px #081523);
+}
+/* Target buttons are locked during resolution, not visually knocked out.
+   The generic button:disabled opacity otherwise dims every living enemy. */
+.battle-screen .enemy-unit:disabled:not(.defeated){opacity:1}
+.battle-screen .ally-unit.current:not(.defeated) .sprite-art,
+.battle-screen .enemy-unit.targeted:not(.defeated) .sprite-art{
+  filter:brightness(1.3) drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) drop-shadow(0 0 6px #fff9);
+}
+.battle-screen .ally-unit.current:not(.defeated) .unit-ground,
+.battle-screen .enemy-unit.targeted:not(.defeated) .unit-ground{
+  background:#ffffff38;border:2px solid #fff;box-shadow:0 0 14px #fffa;
+}
+/* A static down-arrow replaces the old circular reticle. It stays anchored
+   above the model, never travelling with the attacker or covering vitals. */
+.battle-screen .target-pointer,.battle-screen .turn-pointer{
+  position:absolute;top:-38px;left:50%;transform:translateX(-50%);z-index:6;
+  display:flex;align-items:center;justify-content:center;width:34px;height:34px;
+  color:#fff;filter:drop-shadow(0 2px 1px #081523) drop-shadow(0 0 4px #fff9);pointer-events:none;
+}
+.game-shell.is-combat .ally-unit.current:not(.defeated) .ally-ready-label{
+  color:#10283d;background:#fff;border:1px solid #fff;opacity:1;
+  font-weight:800;font-size:12px;letter-spacing:.8px;padding:4px 8px;
+}
+.game-shell.is-combat .enemy-unit .target-label{
+  color:#10283d;background:#fff;border:1px solid #fff;font-weight:800;font-size:11px;
+}
+/* Energy gets its own light backing; no dependence on chapter painting.
+   Keep the foot-anchored HP/name block transparent and in the same position. */
+.game-shell.is-combat .model-vitals>div:last-child{
+  color:#10283d;background:#f4faff;border:1px solid #fff;border-radius:3px;
+  padding:3px 4px;font-size:12px;font-weight:800;text-shadow:none;gap:5px;
+}
+.game-shell.is-combat .model-vitals>div:last-child>svg{color:#075cca;flex-shrink:0}
+.game-shell.is-combat .model-vitals>div:last-child>span{white-space:nowrap}
+.game-shell.is-combat .model-vitals>div:last-child>.progress-track{
+  height:7px;background:#15324f;border:1px solid #15324f;box-shadow:none;
+}
+.game-shell.is-combat .model-vitals>div:last-child>.progress-track>span{
+  background:linear-gradient(90deg,#57bfff,#b3f4ff);box-shadow:0 0 5px #8cdeff;
+}
+.game-shell.is-combat .model-vitals .ally-name,
+.game-shell.is-combat .model-vitals>span,
+.game-shell.is-combat .enemy-unit .combat-unit-label{
+  color:#fff;text-shadow:0 1px 2px #000,1px 0 2px #000,-1px 0 2px #000,0 0 5px #000;
+}
+.combat-initiative-overlay .initiative-strip li.current{
+  background:#fff;color:#10283d;border:2px solid #fff;box-shadow:0 0 8px #fff8;
+}
+.combat-initiative-overlay .initiative-strip li.current span{color:#264961}
+@media(max-width:650px){
+  .battle-screen .target-pointer,.battle-screen .turn-pointer{top:-30px;width:28px;height:28px}
+  .battle-screen .target-pointer>svg,.battle-screen .turn-pointer>svg{width:26px;height:26px}
+  .game-shell.is-combat .model-vitals>div:last-child{font-size:10px;padding:2px;gap:3px}
+  .game-shell.is-combat .ally-unit.current:not(.defeated) .ally-ready-label{font-size:9px;padding:3px 4px}
+  .game-shell.is-combat .enemy-unit .target-label{font-size:9px}
+}
+.combat-initiative-overlay .initiative-strip li.current>b{color:#10283d}
