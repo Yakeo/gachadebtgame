@@ -23,16 +23,22 @@ test("fungal encounters, servers and the rainy chapel use their proper settings"
   assert.notEqual(at("2-2").src, at("2-4").src);
   assert.equal(at("2-4").surface, "metal");
   assert.notEqual(at("3-1").src, at("3-4").src);
+  assert.equal(at("3-3").weather, "clear");
+  assert.notEqual(at("3-3").src, at("3-4").src);
   assert.equal(at("3-4").weather, "rain");
   assert.equal(at("3-5").weather, "rain");
   assert.equal(at("4-1").weather, "rain");
   assert.notEqual(at("5-4").src, at("5-5").src);
 });
-test("legacy HQ/core art explicitly requests a continuous floor extension", () => {
-  for (const stage of stages.filter(s => s.chapter >= 4)) {
-    assert.equal(sceneForStage(stage).extendedFloor, true);
+test("HQ and core stages now have dedicated floor-composed paintings", () => {
+  const later = stages.filter(s => s.chapter >= 4).map(sceneForStage);
+  assert.equal(new Set(later.map(s => s.src)).size, 9);
+  for (const scene of later) {
+    assert.notEqual(scene.extendedFloor, true);
+    assert.ok(scene.src.startsWith("/images/battlefields/"));
   }
-  assert.equal(Object.values(battleScenes).filter(s => !s.extendedFloor).length, 10);
+  assert.equal(Object.values(battleScenes).length, 20);
+  assert.equal(new Set(Object.values(battleScenes).map(s => s.src)).size, 20);
   assert.equal(sceneForStage({ id: "unknown", chapter: 99 }).id, "fountain-courtyard");
 });
 test("story and battle resolve the same location; map art remains chapter-based", () => {

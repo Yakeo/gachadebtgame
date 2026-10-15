@@ -1269,7 +1269,7 @@
    Grow the art, not the dock or vitals; keep animation transforms independent. */
 .game-shell.is-combat .combat-unit{max-width:none}
 .game-shell.is-combat .combat-unit-art{
-  width:140%;max-width:min(340px,36vh);height:auto;aspect-ratio:861/1000;
+  width:157%;max-width:min(380px,40.3vh);height:auto;aspect-ratio:861/1000;
   flex-shrink:0;margin-left:0;margin-right:0;
 }
 /* All recruit/new enemy canvases put their feet at 90%; original slimes at 84%.
@@ -1280,10 +1280,10 @@
 @media(max-width:650px){
   /* Two rows still need room for the foot bars and the initiative strip. */
   .game-shell.is-combat .combat-teams{padding-left:5%;padding-right:5%}
-  .game-shell.is-combat .combat-unit-art{width:145%;max-width:min(145px,calc((82dvh - 330px) * .4305))}
+  .game-shell.is-combat .combat-unit-art{width:162%;max-width:min(162px,calc((82dvh - 330px) * .4822))}
 }
 @media(max-height:500px){
-  .game-shell.is-combat .combat-unit-art{width:135%;max-width:min(135px,26vh)}
+  .game-shell.is-combat .combat-unit-art{width:151%;max-width:min(151px,29.1vh)}
 }
 /* Stage-independent combat contrast. Light the sprite layer, not the rig:
    hit/ultimate filters and travel transforms must still animate normally. */
@@ -1367,7 +1367,7 @@
 .game-shell.is-combat .combat-unit:nth-child(2){--depth-offset:-12px}
 .game-shell.is-combat .combat-unit:nth-child(3){--depth-offset:8px}
 .game-shell.is-combat .combat-unit:nth-child(4){--depth-offset:-5px}
-.game-shell.is-combat .combat-unit-art{height:clamp(155px,29vh,255px)}
+.game-shell.is-combat .combat-unit-art{height:clamp(174px,32.5vh,286px)}
 .game-shell.is-combat .combat-unit.defeated{transform:translateY(var(--depth-offset,0px))}
 .sprite-footing{width:100%;height:100%;transform:translateY(var(--feet-offset,0px))}
 .sprite-footing>.sprite-art{object-fit:contain;object-position:center bottom}
@@ -1400,16 +1400,16 @@
 .battle-arena[data-surface=metal] .arena-floor::after{background:repeating-linear-gradient(90deg,transparent 0 210px,#7ae9f51a 211px,transparent 214px),repeating-linear-gradient(0deg,transparent 0 98px,#030d1855 99px,transparent 101px)}
 @media(max-width:650px){
   .game-shell.is-combat .combat-units{width:43%;bottom:27%;gap:4px;flex-wrap:wrap;row-gap:100px}
-  .game-shell.is-combat .enemy-team{left:3%}
-  .game-shell.is-combat .ally-team{right:3%}
+  .game-shell.is-combat .enemy-team{left:6%}
+  .game-shell.is-combat .ally-team{right:6%}
   .game-shell.is-combat .combat-unit{flex:0 1 46%;width:46%}
-  .game-shell.is-combat .combat-unit-art{height:105px}
+  .game-shell.is-combat .combat-unit-art{height:118px}
   .game-shell.is-combat .combat-unit:nth-child(n){--depth-offset:0px}
   .game-shell.is-combat .combat-unit .unit-ground{height:10px;bottom:-4px}
 }
 @media(max-height:500px){
   .game-shell.is-combat .combat-units{bottom:29%;row-gap:50px}
-  .game-shell.is-combat .combat-unit-art{height:80px}
+  .game-shell.is-combat .combat-unit-art{height:90px}
 }
 /* Leave a gap between the active-unit arrow and the YOUR TURN badge. */
 .battle-screen .turn-pointer{top:-70px}

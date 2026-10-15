@@ -1,7 +1,7 @@
 import { enemySpeed, rollInitiative } from "./initiative";
 import { campaignCredits, chapterMinimumLevel, recommendedLevel, squadAverageLevel } from "./campaign-balance";
 import { MAX_CHARACTER_LEVEL, upgradeCost } from "./leveling";
-import { characterById, characters, initialState, missionProgress, missions, pullPool, PULL_RATES, SSR_FEATURED_SHARE, ssrFeaturedId, stats, type Battle, type Combatant, type GameState, type PullResult } from "./game-data";
+import { characterById, characters, initialState, missionProgress, missions, pullPool, PULL_RATES, SSR_FEATURED_SHARE, ssrFeaturedId, stats, starterUrPool, type Battle, type Combatant, type GameState, type PullResult } from "./game-data";
 import { choicePointById, stageById, stages } from "./campaign";
 
 // Enemy pressure is driven by how far into the campaign the stage sits, not by
@@ -143,6 +143,20 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
   const id = typeof input.id === "string" ? input.id : "";
   switch (input.action) {
     case "init": break;
+    case "starterUr": {
+      if (state.starterUrClaimed) throw new Error("Your free UR selector has already been claimed.");
+      if (state.battle) throw new Error("Finish or retreat from your battle before claiming your UR.");
+      const pick = starterUrPool().find(character => character.id === id);
+      if (!pick) throw new Error("Choose an available UR character from the selector.");
+      const owned = state.roster.find(character => character.id === pick.id);
+      if (owned) { owned.duplicates++; state.credits += 100; }
+      else state.roster.push({ id: pick.id, level: 1, potential: 0, duplicates: 0 });
+      // Persisted in the same row-locked transaction as the roster grant. No
+      // gems, pity, pull count or pull history are consumed by a welcome gift.
+      state.starterUrClaimed = pick.id;
+      message = owned ? `${pick.name}: free UR claimed! +1 duplicate token and 100 credits.` : `${pick.name} joins your council! Free UR claimed.`;
+      break;
+    }
     case "choose": {
       // A story decision. Recording it is what lets a later scene look back.
       const point = choicePointById(id);

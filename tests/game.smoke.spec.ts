@@ -1,3 +1,4 @@
+import { STARTER_GEMS } from "../src/lib/game-data";
 import { test, expect } from "@playwright/test";
 const base = process.env.TEST_BASE_URL || "http://localhost:3000";
 test.setTimeout(90000);
@@ -34,7 +35,7 @@ test("main menu, recruitment, upgrades, account binding, and session restoration
   await expect(page.locator(".pull-result")).toHaveCount(10, { timeout: 20000 });
   await page.getByRole("button", { name: "Back to banner" }).click();
   let data = await page.evaluate(async () => (await fetch("/api/game")).json());
-  expect(data.state.gems).toBe(3200);
+  expect(data.state.gems).toBe(STARTER_GEMS - 1600);
   expect(data.state.totalPulls).toBe(10);
   await goHome(page);
   await page.locator(".characters-tile").click();
@@ -101,7 +102,7 @@ test("story, turn-based battle, post-story, rewards, and archive loop", async ({
   await expect(page.locator(".stage-details")).toContainText("An Unwelcome Visitor");
   const data = await page.evaluate(async () => (await fetch("/api/game")).json());
   expect(data.state.cleared).toEqual(["1-1"]);
-  expect(data.state.gems).toBe(5000);
+  expect(data.state.gems).toBe(STARTER_GEMS + 200);
   expect(data.state.battle).toBeNull();
   await goHome(page);
   await page.locator(".quick-tile").filter({ hasText: "Missions" }).click();

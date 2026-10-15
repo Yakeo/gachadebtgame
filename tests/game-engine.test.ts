@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as gameEngine from "../src/lib/game-engine";
 import { applyGameAction, regenerateEnergy } from "../src/lib/game-engine";
-import { characterById, companionLines, characters, initialState, stats } from "../src/lib/game-data";
+import { characterById, companionLines, characters, initialState, STARTER_GEMS, stats } from "../src/lib/game-data";
 import { stages } from "../src/lib/campaign";
 const ordinary = () => .8;
 test("The campaign has five chapters with five complete stages each", () => {
@@ -26,7 +26,7 @@ test("Pity resolves per character inside a ten-pull", () => {
   assert.equal(result.pulls?.length, 10);
   assert.equal(result.pulls?.[4].guaranteed, true);
   assert.equal(result.state.pity, 5);
-  assert.equal(result.state.gems, 3200);
+  assert.equal(result.state.gems, STARTER_GEMS - 1600);
 });
 test("Natural SSR and UR pulls reset pity", () => {
   const state = initialState(); state.pity = 30;
@@ -69,16 +69,16 @@ test("First battle can be won and its first-clear reward collected only once", (
   assert.equal(state.battle?.status, "victory");
   const finished = applyGameAction(state, { action: "finishStage" }, ordinary).state;
   assert.deepEqual(finished.cleared, ["1-1"]);
-  assert.equal(finished.gems, 5000);
+  assert.equal(finished.gems, STARTER_GEMS + 200);
   assert.equal(finished.credits, 27900);
   assert.throws(() => applyGameAction(finished, { action: "finishStage" }, ordinary), /Win the battle/);
   const claimed = applyGameAction(finished, { action: "claim", id: "first-stage" }, ordinary).state;
-  assert.equal(claimed.gems, 5200);
+  assert.equal(claimed.gems, STARTER_GEMS + 400);
   assert.throws(() => applyGameAction(claimed, { action: "claim", id: "first-stage" }, ordinary), /already been claimed/);
 });
 test("Daily rewards are idempotent and energy has a hard cap", () => {
   const state = applyGameAction(initialState(), { action: "daily" }, ordinary).state;
-  assert.equal(state.gems, 4960); assert.equal(state.energy, 120);
+  assert.equal(state.gems, STARTER_GEMS + 160); assert.equal(state.energy, 120);
   assert.throws(() => applyGameAction(state, { action: "daily" }, ordinary), /gift has been claimed/);
   state.energy = 115; state.energyAt = Date.now() - 240000 * 30;
   assert.equal(regenerateEnergy(state).energy, 120);
