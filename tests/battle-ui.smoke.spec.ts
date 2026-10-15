@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { initialState, characterById } from "../src/lib/game-data";
 import { applyGameAction } from "../src/lib/game-engine";
-import { stages, battlefieldFor } from "../src/lib/campaign";
+import { stages } from "../src/lib/campaign";
+import { sceneForStage } from "../src/lib/battle-scenes";
 const base = process.env.TEST_BASE_URL || "http://localhost:3000";
 
 for (const width of [1440, 390]) {
@@ -55,7 +56,7 @@ test("every campaign chapter actually renders its own anime environment", async 
     await page.addInitScript(() => localStorage.setItem("gd-motion", "true"));
     await page.goto(`${base}/?signedIn=1`);
     const image = page.locator(".battle-arena > img");
-    await expect(image).toHaveAttribute("src", battlefieldFor(chapter));
+    await expect(image).toHaveAttribute("src", sceneForStage(stages.find(s => s.id === `${chapter}-1`)!).src);
     await expect.poll(() => image.evaluate((e: HTMLImageElement) => e.naturalWidth)).toBeGreaterThan(1000);
     await expect(image).toHaveCSS("image-rendering", "auto");
   }
