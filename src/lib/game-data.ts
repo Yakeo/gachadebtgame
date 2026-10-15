@@ -1,3 +1,4 @@
+import { critterDefinitions, critterQuotes } from "./critter-data";
 import { baseStatBlock, type CombatClass } from "./character-stats";
 export type Rarity = "R" | "SR" | "SSR" | "UR";
 export type Mechanic =
@@ -22,6 +23,7 @@ export type Character = {
   // reveal). Keeping the two separate is what lets the roster keep its pixel
   // models while the character pages get real splash art.
   keyart?: string;
+  retired?: boolean; // Legacy owned units/story cast remain usable, but do not pull.
   mechanic?: Mechanic;
   hp: number; attack: number; defense: number; speed: number; combatClass: CombatClass;
   skill: string; ultimate: string; skillNote: string; ultimateNote: string;
@@ -494,11 +496,11 @@ export type PullRarity = keyof typeof PULL_RATES;
 /** Share of SSR hits that go to the featured character rather than the pool. */
 export const SSR_FEATURED_SHARE = .5;
 
-export const characters: Character[] = characterDefinitions.map(c => ({ ...c, ...baseStatBlock(c) }));
+export const characters: Character[] = [...characterDefinitions.map(c => ({ ...c, retired: c.rarity === "SR", ...baseStatBlock(c) })), ...critterDefinitions.map(c => ({ ...c, ...baseStatBlock(c) }))];
 
 /** The characters available at a rarity, with the featured SSR out of the pool. */
 export function pullPool(rarity: string) {
-  return characters.filter(c => c.rarity === rarity && (rarity !== "SSR" || c.id !== ssrFeaturedId));
+  return characters.filter(c => !c.retired && c.rarity === rarity && (rarity !== "SSR" || c.id !== ssrFeaturedId));
 }
 
 /**
@@ -510,7 +512,7 @@ export function pullOdds(): { id: string; rarity: Rarity; chance: number; featur
   return characters.map(c => {
     const featured = c.rarity === "SSR" && c.id === ssrFeaturedId;
     const pool = pullPool(c.rarity);
-    const share = featured ? SSR_FEATURED_SHARE
+    const share = c.retired ? 0 : featured ? SSR_FEATURED_SHARE
       : c.rarity === "SSR" ? (1 - SSR_FEATURED_SHARE) / pool.length
       : 1 / pool.length;
     return { id: c.id, rarity: c.rarity, chance: PULL_RATES[c.rarity as PullRarity] * share, featured };
@@ -641,7 +643,7 @@ export const companionQuotes: Record<string, string[]> = {
 
 /** The companion's lines, falling back to Ynna's if a character has none. */
 export function companionLines(id: string): string[] {
-  return companionQuotes[id] ?? companionQuotes.ynna;
+  return critterQuotes[id] ?? companionQuotes[id] ?? companionQuotes.ynna;
 }
 
 export function initialState(): GameState {

@@ -20,6 +20,16 @@ export const CHARACTER_PROFILES: Record<string, [CombatClass, number]> = {
   rook: ["Vanguard", 3], morrow: ["Arcanist", -4], tala: ["Warrior", 7], pip: ["Ranger", 3],
   mira: ["Support", 2], quill: ["Arcanist", 3], brass: ["Vanguard", 1], lumi: ["Support", 5],
   altria: ["Warrior", 6], alice: ["Arcanist", 6],
+  kidjester: ["Ranger", 6],
+  mrblack: ["Warrior", 5],
+  mreats: ["Support", -2],
+  mrhide: ["Vanguard", -3],
+  takobuddy: ["Arcanist", 3],
+  teacup: ["Support", 1],
+  moth: ["Arcanist", 7],
+  stapler: ["Warrior", -1],
+  bell: ["Support", 5],
+  turnip: ["Warrior", 2],
 };
 export function baseStatBlock(c: Pick<Character, "id" | "hp" | "attack" | "defense" | "rarity">) {
   const [combatClass, speedOffset] = CHARACTER_PROFILES[c.id] ?? ["Warrior", 0];

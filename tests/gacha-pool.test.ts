@@ -19,11 +19,12 @@ test("the four hand-made designs are all obtainable", () => {
   }
 });
 
-test("every character in the roster is reachable from the gacha", () => {
+test("every active character has odds and legacy retirees have zero odds", () => {
   const odds = pullOdds();
   assert.equal(odds.length, characters.length, "every character should have a stated chance");
   for (const entry of odds) {
-    assert.ok(entry.chance > 0, `${entry.id} has a chance of ${entry.chance}`);
+    if (characters.find(c => c.id === entry.id)!.retired) assert.equal(entry.chance, 0);
+    else assert.ok(entry.chance > 0, `${entry.id} has a chance of ${entry.chance}`);
   }
   // the pool split for a rarity must account for the whole band
   for (const rarity of ["UR", "SSR", "SR", "R"] as const) {

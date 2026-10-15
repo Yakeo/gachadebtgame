@@ -16,7 +16,7 @@ test("expansion adds exactly ten SSRs, five SRs and two URs with unique IDs", ()
     const c = characterById(recruit.id);
     assert.equal(c.id, recruit.id);
     assert.equal(c.rarity, recruit.rarity);
-    assert.ok(pullOdds().find(o => o.id === c.id)!.chance > 0);
+    assert.equal(pullOdds().find(o => o.id === c.id)!.chance > 0, !c.retired);
     assert.ok(c.hp > 0 && c.attack > 0 && c.defense > 0);
     assert.ok(c.description && c.weapon && c.skillNote && c.ultimateNote);
     assert.equal(companionLines(c.id).length, 3);

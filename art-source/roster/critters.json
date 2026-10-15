@@ -1,0 +1,290 @@
+[
+  {
+    "id": "kidjester",
+    "source": "Kid Jester.png",
+    "model": "/images/splash-kidjester.png",
+    "illustration": "/images/keyart-kidjester.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 503538,
+    "bounds": [
+      52,
+      120,
+      808,
+      900
+    ],
+    "sha256": "e2cd4ac37616444620c48699a2f8f982206df99aa03238bf2f7fcb4c70196ae9"
+  },
+  {
+    "id": "mrblack",
+    "source": "Mr. Black.png",
+    "model": "/images/splash-mrblack.png",
+    "illustration": "/images/keyart-mrblack.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 575529,
+    "bounds": [
+      31,
+      315,
+      829,
+      900
+    ],
+    "sha256": "133e2ff3a8b7a9d3bcfece6497891a42d3d4a1008f9b0d4c44bf4bf35aaae117"
+  },
+  {
+    "id": "mreats",
+    "source": "Mr. Eats.png",
+    "model": "/images/splash-mreats.png",
+    "illustration": "/images/keyart-mreats.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 693339,
+    "bounds": [
+      31,
+      546,
+      829,
+      900
+    ],
+    "sha256": "bd924b1f9afc44d0c52651e18d3b55d074f27c7e7043b6da6e7293b66f82aeda"
+  },
+  {
+    "id": "mrhide",
+    "source": "Mr. Hide.png",
+    "model": "/images/splash-mrhide.png",
+    "illustration": "/images/keyart-mrhide.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 608802,
+    "bounds": [
+      165,
+      120,
+      696,
+      900
+    ],
+    "sha256": "2cb9af672d5d777aa76e9ea1b73affcbc1fd8eaedd8eec088dfda4f8662382ab"
+  },
+  {
+    "id": "takobuddy",
+    "source": "Tako Buddy.png",
+    "model": "/images/splash-takobuddy.png",
+    "illustration": "/images/keyart-takobuddy.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 577032,
+    "bounds": [
+      31,
+      312,
+      829,
+      900
+    ],
+    "sha256": "ef5534b7b6d9810dd4fb7b7d6ff926b7712f6569d5069e0447d9720c58ba307c"
+  },
+  {
+    "id": "teacup",
+    "source": "art-src/critters/teacup.png",
+    "model": "/images/splash-teacup.png",
+    "illustration": "/images/keyart-teacup.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 519405,
+    "bounds": [
+      31,
+      246,
+      829,
+      900
+    ],
+    "sha256": "852dc89a01e7032eb2ec1f22e61a9c48b35815a8b1bd04894133105a0507442d"
+  },
+  {
+    "id": "moth",
+    "source": "art-src/critters/moth.png",
+    "model": "/images/splash-moth.png",
+    "illustration": "/images/keyart-moth.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 608811,
+    "bounds": [
+      159,
+      120,
+      702,
+      900
+    ],
+    "sha256": "323a5f44f85dddfe94575fbef0d8385c08a7260a6473720fbaaf4f859cc25b95"
+  },
+  {
+    "id": "stapler",
+    "source": "art-src/critters/stapler.png",
+    "model": "/images/splash-stapler.png",
+    "illustration": "/images/keyart-stapler.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 540384,
+    "bounds": [
+      31,
+      150,
+      829,
+      900
+    ],
+    "sha256": "eefbb2c2b068e280c75dd9f6fbd1290d34d4d12320c2ba453495aebd97f75423"
+  },
+  {
+    "id": "bell",
+    "source": "art-src/critters/bell.png",
+    "model": "/images/splash-bell.png",
+    "illustration": "/images/keyart-bell.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 591810,
+    "bounds": [
+      118,
+      120,
+      742,
+      900
+    ],
+    "sha256": "6f85b673a939dc5d51c28d12707b3077cab3ba1b925bb4334d80ce08bbd602dd"
+  },
+  {
+    "id": "turnip",
+    "source": "art-src/critters/turnip.png",
+    "model": "/images/splash-turnip.png",
+    "illustration": "/images/keyart-turnip.webp",
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 547629,
+    "bounds": [
+      43,
+      120,
+      817,
+      900
+    ],
+    "sha256": "da1ffc3c38f2a98da74c14befb96a79e871614c11da4afa52e5d0391a0e98518"
+  },
+  {
+    "id": "foe-shroom",
+    "source": "art-src/critters/foe-shroom.png",
+    "model": "/images/enemies/critter-shroom.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 480264,
+    "bounds": [
+      67,
+      120,
+      793,
+      900
+    ],
+    "sha256": "da87cdaf074cace9dda64f1a46bce0b415d2d7ff55fc7535f64e4197f126c65d"
+  },
+  {
+    "id": "foe-cat",
+    "source": "art-src/critters/foe-cat.png",
+    "model": "/images/enemies/critter-cat.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 475242,
+    "bounds": [
+      60,
+      120,
+      801,
+      900
+    ],
+    "sha256": "ec6f3b73cf8d6fd0e301551ef787dae7a08ef4048e3402c2d357ab6a62315376"
+  },
+  {
+    "id": "foe-prime",
+    "source": "art-src/critters/foe-prime.png",
+    "model": "/images/enemies/critter-prime.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 482253,
+    "bounds": [
+      39,
+      120,
+      822,
+      900
+    ],
+    "sha256": "1f610d51ecc0cd2806f087ee1465fb1ec37b928d49b4075c7199a90d16a3b368"
+  },
+  {
+    "id": "foe-enforcer",
+    "source": "art-src/critters/foe-enforcer.png",
+    "model": "/images/enemies/critter-enforcer.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 458907,
+    "bounds": [
+      31,
+      120,
+      829,
+      900
+    ],
+    "sha256": "78edf9c4f6177734a28f8a29926fc9cedf889530da97336a7298daa3913c8c78"
+  },
+  {
+    "id": "foe-fragment",
+    "source": "art-src/critters/foe-fragment.png",
+    "model": "/images/enemies/critter-fragment.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 549978,
+    "bounds": [
+      31,
+      156,
+      829,
+      900
+    ],
+    "sha256": "cb8441e65c579fa934d0ea3f6cb0b7a8420fb4eccaf052492fc1740e0d947452"
+  },
+  {
+    "id": "foe-bluecap",
+    "source": "palette variant of foe-shroom",
+    "model": "/images/enemies/critter-bluecap.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 480264,
+    "bounds": [
+      67,
+      120,
+      793,
+      900
+    ],
+    "sha256": "be2f2c3063741a59111e7885c36f6d1dfd6b112408abe7aabf17998a2b3eb77e"
+  },
+  {
+    "id": "foe-reroom",
+    "source": "palette variant of foe-shroom",
+    "model": "/images/enemies/critter-reroom.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 480264,
+    "bounds": [
+      67,
+      120,
+      793,
+      900
+    ],
+    "sha256": "a3ffb267b9a0d4a05ee5ee4d2523ade331a3cf9807020576c8e28992c89de18d"
+  },
+  {
+    "id": "foe-sentry",
+    "source": "palette variant of foe-prime",
+    "model": "/images/enemies/critter-sentry.png",
+    "illustration": null,
+    "width": 861,
+    "height": 1000,
+    "transparentPixels": 482253,
+    "bounds": [
+      39,
+      120,
+      822,
+      900
+    ],
+    "sha256": "e974fbd12498b2e804b78eddcd674c6e52ee6380c4e4b3bcf1603aa13e7d7f5a"
+  }
+]
