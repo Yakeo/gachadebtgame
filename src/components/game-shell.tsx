@@ -52,7 +52,7 @@ function GameShell({ onSignedOut }: { onSignedOut: () => void }) {
     setHistory([]);
     setView("home");
   }
-  return <div className={`game-shell ${view === "home" ? "is-home" : ""}`}>
+  return <div className={`game-shell ${view === "home" ? "is-home" : ""} ${state.battle && view === "campaign" ? "is-combat" : ""}`}>
     <header className="topbar">
       {view !== "home" && !navLocked && <button className="back-button" onClick={goBack} aria-label="Back to the previous screen"><ArrowLeft size={16} /><span>BACK</span></button>}
       <button className="brand-button" onClick={goHome} aria-label="Gacha Debt home"><Logo /></button>
@@ -64,7 +64,7 @@ function GameShell({ onSignedOut }: { onSignedOut: () => void }) {
     <main className={`game-main view-${view}`}>
       {error && <div className="connection-banner">We couldn’t reach your save. <button disabled={busy} onClick={() => action("init", {}, true)}>Reconnect <RefreshCw size={14} /></button></div>}
       {view === "home" && <HomeView navigate={navigate} openDialog={setDialog} dailyReady={dailyReady} />}
-      {view === "campaign" && <CampaignView onImmersive={setImmersive} />}
+      {view === "campaign" && <CampaignView onImmersive={setImmersive} onMainMenu={() => { setImmersive(false); setHistory([]); setView("home"); }} />}
       {view === "characters" && <CharactersView />}
       {view === "recruit" && <RecruitView />}
       {view === "missions" && <MissionsView />}
