@@ -1,11 +1,12 @@
 // Guards the slime enemies: their art, and the way they move.
 //
 // These five used to be inline SVG - a body, a pair of eyes and a crown as
-// separate shapes, which could only jiggle together. They are pixel-art PNGs
-// now, drawn by scripts/gen-slime-sprites.mjs and animated as one piece, so
-// there are two things that can silently rot: the committed art drifting from
-// the script that draws it, and the animation rules losing to the generic ones
-// they sit on top of.
+// separate shapes, which could only jiggle together. They are the supplied
+// pixel-art PNGs now (art-source/enemies/, the "loom" designs), normalised
+// onto the rig's canvas by scripts/gen-slime-sprites.mjs and animated as one
+// piece, so there are two things that can silently rot: the committed art
+// drifting from the pipeline that builds it, and the animation rules losing
+// to the generic ones they sit on top of.
 //
 // Run with: npm test
 import test from "node:test";
