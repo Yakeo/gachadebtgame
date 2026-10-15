@@ -1,17 +1,16 @@
+import { campaignCredits, chapterMinimumLevel, recommendedLevel, squadAverageLevel } from "./campaign-balance";
 import { MAX_CHARACTER_LEVEL, upgradeCost } from "./leveling";
 import { characterById, characters, initialState, missionProgress, missions, pullPool, PULL_RATES, SSR_FEATURED_SHARE, ssrFeaturedId, stats, type Battle, type Combatant, type GameState, type PullResult } from "./game-data";
 import { choicePointById, stageById, stages } from "./campaign";
 
 // Enemy pressure is driven by how far into the campaign the stage sits, not by
 // chapter number alone, so difficulty climbs monotonically across all 25 stages.
-export function enemyLevel(wave: number) { return Math.max(1, Math.round(1 + (wave - 1) * 2.1)); }
-export function enemyHp(wave: number, boss: boolean, stageId?: string) {
-  if (boss && stageId === "2-5") return 1500000;
-  if (boss && stageId === "5-5") return 5000000;
+export function enemyLevel(wave: number) { return recommendedLevel(wave); }
+export function enemyHp(wave: number, boss: boolean, _stageId?: string) {
   const growth = 240 + wave * 118 + Math.pow(wave, 1.55) * 26;
   return Math.round(growth * (boss ? 2.4 : 1));
 }
-export function enemyAttack(wave: number) { return Math.round(58 + wave * 13.5 + Math.pow(wave, 1.3) * 2.6); }
+export function enemyAttack(wave: number) { return Math.round(56 + wave * 15 + Math.pow(wave, 1.45) * 3.5); }
 export function enemyDefense(wave: number) { return Math.round(10 + wave * 4.6); }
 
 const enemyMoves: Record<string, string[]> = {
@@ -47,6 +46,23 @@ export function regenerateEnergy(state: GameState) {
 }
 export function applyGameAction(original: GameState, input: Record<string, unknown>, random: () => number) {
   const state = regenerateEnergy(structuredClone(original));
+  // Existing active saves may contain the former million-HP bosses. Rebase
+  // only once, preserving HP ratios and all status effects instead of forcing
+  // a retreat or leaving the player trapped after the damage-cliff removal.
+  if (state.battle?.status === "active" && state.battle.balanceVersion !== 2) {
+    const wave = stages.findIndex(s => s.id === state.battle!.stageId) + 1;
+    if (wave > 0) {
+      for (const enemy of state.battle.enemies) {
+        const fraction = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 0;
+        enemy.maxHp = enemyHp(wave, !!enemy.boss);
+        enemy.hp = fraction <= 0 ? 0 : Math.max(1, Math.round(enemy.maxHp * Math.min(1, fraction)));
+        enemy.attack = enemyAttack(wave);
+        enemy.defense = enemyDefense(wave);
+        enemy.level = enemyLevel(wave);
+      }
+    }
+    state.battle.balanceVersion = 2;
+  }
   // Saves written before the campaign had choices simply do not have the field.
   if (!state.choices) state.choices = {};
   // Same for the home-screen companion, which arrived after launch saves.
@@ -187,6 +203,12 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
         if (state.battle.stageId === id) return { state, message: "Battle resumed.", pulls };
         throw new Error("Finish or retreat from your current battle first.");
       }
+      // Cleared operations stay farmable, including for older saves. Validate
+      // before charging energy; resuming an existing battle is never gated.
+      const minimum = chapterMinimumLevel(stage.chapter);
+      if (!state.cleared.includes(id) && squadAverageLevel(state) < minimum) {
+        throw new Error(`Chapter ${stage.chapter} requires an average squad level of ${minimum}. Train your squad or replay cleared operations for credits.`);
+      }
       const cost = stage.boss ? 12 : 8;
       if (state.energy < cost) throw new Error("Not enough energy. Energy regenerates every four minutes, or visit the exchange.");
       state.energy -= cost;
@@ -203,7 +225,7 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
           level: enemyLevel(wave), attack: enemyAttack(wave), defense: enemyDefense(wave), boss: e.boss,
         };
       });
-      state.battle = { stageId: id, allies, enemies, active: 0, turn: 1, status: "active", log: [`${stage.title} — the council is ready. Select an enemy and issue a command.`] };
+      state.battle = { balanceVersion: 2, stageId: id, allies, enemies, active: 0, turn: 1, status: "active", log: [`${stage.title} — the council is ready. Select an enemy and issue a command.`] };
       message = "Operation started.";
       break;
     }
@@ -228,13 +250,12 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       else actor.energy = Math.min(100, actor.energy + 35);
       const living = () => b.enemies.filter(e => e.hp > 0);
       const strike = (enemy: Combatant, mult: number, options: { ignoreDefense?: boolean; critical?: boolean } = {}) => {
-        const scale = enemy.maxHp > 10000 ? (b.stageId === "5-5" ? 2500 : 1000) : 1;
         // Ninette's audit: an open line item on a target pays the whole squad
         // 20% more until somebody collects it.
         const audited = enemy.audited ? 1.2 : 1;
         const raw = actor.attack * mult * audited * (options.critical ? 1.5 : 1) * (owned.potential >= 3 ? 1.1 : 1);
         const defense = options.ignoreDefense ? 0 : enemy.defense;
-        const damage = Math.max(1, Math.round((raw - defense) * scale));
+        const damage = Math.max(1, Math.round(raw - defense));
         enemy.hp = Math.max(0, enemy.hp - damage);
         b.lastHit = { target: enemy.id, amount: damage, critical: !!options.critical };
         return damage;
@@ -591,15 +612,16 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       const b = state.battle;
       if (!b || b.status !== "victory") throw new Error("Win the battle before collecting rewards.");
       const first = !state.cleared.includes(b.stageId);
+      const credits = campaignCredits(stages.findIndex(s => s.id === b.stageId) + 1, first);
+      state.credits += credits;
       if (first) {
         state.cleared.push(b.stageId);
         state.gems += 200;
-        state.credits += 1500;
         const recruit = b.stageId === "1-4" ? "penelope" : b.stageId === "2-2" ? "purp" : b.stageId === "3-2" ? "solari" : b.stageId === "3-5" ? "ruta" : null;
         if (recruit && !state.roster.some(o => o.id === recruit)) state.roster.push({ id: recruit, level: 5, potential: 0, duplicates: 0 });
-      } else state.credits += 300;
+      }
       state.battle = null;
-      message = first ? "First clear! +200 gems and +1,500 credits. Next stage unlocked." : "Stage cleared! +300 credits.";
+      message = first ? `First clear! +200 gems and +${credits.toLocaleString()} credits. Next stage unlocked.` : `Stage cleared! +${credits.toLocaleString()} credits.`;
       break;
     }
     case "retreat": state.battle = null; message = "Returned to the campaign. Spent energy is not refunded."; break;

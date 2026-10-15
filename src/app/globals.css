@@ -1,15 +1,15 @@
 @import "tailwindcss";
-@font-face{font-family:Barlow;src:url('/fonts/barlow-400-normal.ttf') format('truetype');font-weight:400;font-display:swap}
-@font-face{font-family:Barlow;src:url('/fonts/barlow-500-normal.ttf') format('truetype');font-weight:500;font-display:swap}
-@font-face{font-family:Barlow;src:url('/fonts/barlow-600-normal.ttf') format('truetype');font-weight:600;font-display:swap}
-@font-face{font-family:Barlow;src:url('/fonts/barlow-700-normal.ttf') format('truetype');font-weight:700;font-display:swap}
-@font-face{font-family:Barlow;src:url('/fonts/barlow-800-normal.ttf') format('truetype');font-weight:800;font-display:swap}
-@font-face{font-family:Barlow;src:url('/fonts/barlow-700-italic.ttf') format('truetype');font-weight:700;font-style:italic;font-display:swap}
-@font-face{font-family:Barlow;src:url('/fonts/barlow-800-italic.ttf') format('truetype');font-weight:800;font-style:italic;font-display:swap}
-@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-600-normal.ttf') format('truetype');font-weight:600;font-display:swap}
-@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-700-normal.ttf') format('truetype');font-weight:700;font-display:swap}
-@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-800-normal.ttf') format('truetype');font-weight:800;font-display:swap}
-@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-900-normal.ttf') format('truetype');font-weight:900;font-display:swap}
+@font-face{font-family:Barlow;src:url('/fonts/barlow-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:Barlow;src:url('/fonts/barlow-500-normal.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:Barlow;src:url('/fonts/barlow-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:Barlow;src:url('/fonts/barlow-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:Barlow;src:url('/fonts/barlow-800-normal.woff2') format('woff2');font-weight:800;font-display:swap}
+@font-face{font-family:Barlow;src:url('/fonts/barlow-700-italic.woff2') format('woff2');font-weight:700;font-style:italic;font-display:swap}
+@font-face{font-family:Barlow;src:url('/fonts/barlow-800-italic.woff2') format('woff2');font-weight:800;font-style:italic;font-display:swap}
+@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-800-normal.woff2') format('woff2');font-weight:800;font-display:swap}
+@font-face{font-family:'Barlow Condensed';src:url('/fonts/barlow-condensed-900-normal.woff2') format('woff2');font-weight:900;font-display:swap}
 :root{--blue:#2188ed;--blue-dark:#0767d7;--ink:#153250;--muted:#73859b;--line:#dce7f1;--pale:#f0f6fc;--display:'Barlow Condensed',Arial,sans-serif;--body:Barlow,Arial,sans-serif}
 *{box-sizing:border-box}html,body{margin:0;padding:0;background:#eaf3fc;color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button,a,input,select{-webkit-tap-highlight-color:transparent}button{cursor:pointer;border:0;background:none;color:inherit}button,a{touch-action:manipulation}button{transition:background .2s,transform .2s,box-shadow .2s,opacity .2s}button:disabled{cursor:not-allowed;opacity:.45}button:focus-visible,a:focus-visible{outline:3px solid #67baff;outline-offset:4px}input:focus,select:focus{outline:none;border-color:var(--blue)!important;box-shadow:0 0 0 3px #2188ed14}a{color:inherit;text-decoration:none}h1,h2,h3,p{margin:0}svg{flex-shrink:0}img{display:block;max-width:100%}::selection{background:#a2d6ff;color:#123451}::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#aec7df;border-radius:8px}::-webkit-scrollbar-track{background:transparent}.game-shell{height:100svh;min-height:760px;display:flex;flex-direction:column;overflow:hidden}.topbar{height:86px;min-height:86px;background:#f8fbff;display:flex;align-items:center;padding:0 2.9%;gap:25px;position:relative;z-index:50;border-bottom:1px solid #d9e5f2;box-shadow:0 3px 18px #163c6310}.brand-button{padding:0;text-align:left;flex-shrink:0}.brand{display:flex;align-items:center;gap:10px;width:188px}.brand>svg{width:47px;height:52px}.brand strong{font-family:var(--display);font-size:35px;line-height:.77;letter-spacing:1px;font-weight:800;font-style:italic;display:block;transform:skew(-3deg)}.brand strong span{color:var(--blue);display:inline-block;margin-left:4px;font-size:35px}.brand small{font-size:6.9px;font-weight:700;letter-spacing:1.05px;display:block;margin-top:11px;white-space:nowrap}.header-divider{width:1px;height:34px;background:var(--line);flex-shrink:0}.profile-button{display:flex;align-items:center;gap:11px;text-align:left;flex-shrink:0;padding:0}.profile-avatar{width:43px;height:47px;position:relative}.profile-avatar>.avatar{width:43px;height:43px;border:2px solid #d8eafd;border-radius:50%;background:#e5eefb;overflow:hidden}.profile-avatar>span{position:absolute;bottom:-2px;right:-4px;background:var(--blue);color:white;border:2px solid #fff;border-radius:3px;font-size:10px;font-weight:700;padding:1px 5px}.profile-copy strong{font-size:16px;font-weight:700;display:flex;gap:12px;align-items:center}.profile-copy small{font-size:8px;font-weight:600;letter-spacing:1.1px;display:block;margin-top:5px;color:var(--muted)}.resource-bar{margin-left:auto;display:flex;gap:12px;align-items:center}.resource{display:flex;align-items:center;gap:9px;background:#ecf3fa;border:1px solid #e1eaf4;border-radius:5px;padding:8px 9px 8px 11px;min-width:127px;height:36px}.resource:hover{background:#deedfc;transform:translateY(-1px)}.resource>span{font-weight:700;font-size:16px;white-space:nowrap;flex:1;text-align:left}.resource>span small{font-size:11px;color:#8392a6;font-weight:500}.gem-icon{color:#538fea}.credit-icon{color:#d8af52}.energy-resource>svg:first-child{color:#2f9ce8}.resource-plus{background:#fff;border-radius:3px;padding:1px;box-sizing:content-box;color:#8497ab}.header-actions{display:flex;align-items:center;gap:16px;margin-left:1px}.icon-button{height:35px;width:32px;position:relative;display:flex;align-items:center;justify-content:center;color:#3c5673;border-radius:5px}.icon-button:hover{background:#e6f1fc;color:var(--blue)}.notification-dot{height:5px;width:5px;position:absolute;right:3px;top:5px;border-radius:50%;background:#f07986;border:1px solid white}.game-main{flex:1;min-height:0;overflow-y:auto;position:relative;display:flex;flex-direction:column;background:#eef5fc}.connection-banner{position:absolute;top:0;left:0;right:0;z-index:80;padding:9px 20px;background:#fff3d6;display:flex;gap:15px;align-items:center;justify-content:center;font-size:13px}.connection-banner button{display:flex;gap:5px;align-items:center;color:#7c5011;font-weight:700}.bottom-bar{position:relative;z-index:50;background:#f9fcff;flex-shrink:0;border-top:1px solid white;box-shadow:0 -4px 24px #0a34671c}.back-button{display:flex;align-items:center;gap:8px;flex-shrink:0;padding:10px 13px 10px 10px;border:1px solid #d9e5f2;border-radius:5px;background:#fff;color:#6b7f96;font-size:10px;font-weight:700;letter-spacing:1.4px}.back-button:hover{background:#e6f1fc;color:var(--blue);border-color:#bfe0fb;transform:translateY(-1px)}.status-bar{height:29px;display:flex;align-items:center;justify-content:space-between;padding:0 3%;font-size:8px;letter-spacing:1px;color:#7f93a9}.music-button{display:flex;align-items:center;gap:8px;font-size:8px;letter-spacing:1px;color:#6c879f;height:100%;padding:0}.music-button>svg{color:#528bc6}.music-button b{padding:0 4px;font-weight:400}.build-label{font-size:7px;letter-spacing:1.3px}.build-label b{padding:0 7px;font-weight:400}.online-status{display:flex;align-items:center;gap:6px;font-size:7px;letter-spacing:1px}.online-status>i{width:5px;height:5px;border-radius:50%;background:#60bdb0;box-shadow:0 0 0 3px #60bdb016}.online-status>i.offline{background:#ef9968}.equalizer{height:10px;display:flex;align-items:center;gap:2px}.equalizer i{height:3px;width:2px;background:#5b9ed7}.equalizer i:nth-child(2){height:8px}.equalizer i:nth-child(3){height:5px}.equalizer.playing i{animation:equalize 1s ease-in-out infinite alternate}.equalizer.playing i:nth-child(2){animation-delay:-.3s}.equalizer.playing i:nth-child(3){animation-delay:-.7s}
 /* THE COUNCIL ROOM */
@@ -321,3 +321,56 @@ img.chibi{object-fit:contain;object-position:50% 100%;image-rendering:pixelated;
 .level-cost{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0;font-size:10px;color:#7190aa;flex-wrap:wrap}
 .level-cost>span,.level-cost>strong{display:flex;align-items:center;gap:5px}
 .level-cost>strong{color:#365c7c;font-size:12px}
+
+/* Viewport-owned app frame: no minimum-height overflow onto the document. */
+html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+.game-viewport{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;overflow:hidden;background:#eaf3fc}
+.game-frame{position:relative;width:100%;height:100%;transform:scale(1);transform-origin:top left;isolation:isolate}
+.game-frame .game-shell{height:100%;min-height:0;width:100%}
+.game-frame .game-main{min-height:0;min-width:0;overscroll-behavior:contain}
+.game-frame .topbar,.game-frame .bottom-bar{flex-shrink:0}
+.game-frame .boot-screen{position:absolute}
+.game-frame .modal{max-height:calc(var(--game-frame-height,100dvh) - 48px)}
+.stage-level-advice{margin:13px 0;padding:11px;background:#eaf3fb;border-left:2px solid #428ed5;display:flex;flex-direction:column;gap:5px}
+.stage-level-advice strong{font-size:11px;color:#3675ab;letter-spacing:.6px}
+.stage-level-advice span,.stage-level-advice small{font-size:10px;line-height:1.5;color:#68849d}
+.stage-level-advice.needs-training{background:#fff1dc;border-color:#dca24f}
+.stage-level-advice.needs-training strong{color:#996221}
+@media(min-width:901px){
+  .game-frame .home-scene{min-height:0;height:100%;flex:1}
+  .game-frame .view-home{overflow:hidden}
+}
+@media(max-width:900px){
+  .game-frame .topbar{max-width:100%}
+  .game-frame .game-main{overflow-x:hidden}
+}
+@media(max-width:650px){
+  .game-frame .resource-bar{gap:4px}
+  .game-frame .stage-level-advice{padding:9px}
+}
+@media(min-width:901px){
+  /* Keep the last menu row inside the 810px logical composition at all scales. */
+  .game-frame .home-menu{top:20px}
+}
+@media(max-width:650px) and (min-height:780px){
+  .game-frame .home-scene{--menu-top:clamp(280px,calc(280px + (var(--game-frame-height,844px) - 780px)*.3125),310px);min-height:0;height:100%}
+  .game-frame .home-menu{top:var(--menu-top);gap:8px}
+  .game-frame .companion-figure{height:calc(var(--menu-top) + 20px)}
+  .game-frame .companion-dialogue{top:calc(var(--menu-top) - 110px)}
+  .game-frame .companion-name{height:30px}
+  .game-frame .companion-quote{min-height:62px;padding:12px 20px}
+  .game-frame .companion-quote>span:first-child{font-size:14px;line-height:1.5}
+  .game-frame .companion-caption{margin-top:4px}
+  .game-frame .campaign-tile{height:128px;padding-top:10px}
+  .game-frame .campaign-tile h1{font-size:30px;line-height:1.1;margin-top:4px}
+  .game-frame .campaign-tile>p{font-size:9px;margin-top:2px}
+  .game-frame .campaign-tile-bottom{height:25px;margin-top:6px}
+  .game-frame .characters-tile,.game-frame .recruit-tile{height:102px;padding-top:9px}
+  .game-frame .characters-tile h2,.game-frame .recruit-tile h2{font-size:25px;margin-top:4px}
+  .game-frame .tile-symbol{margin-top:5px;width:18px;height:18px}
+  .game-frame .tile-foot{margin-top:5px;padding-top:5px}
+  .game-frame .quick-tile{height:66px;padding-top:7px}
+  .game-frame .quick-tile>svg{width:18px;height:18px;margin-bottom:2px}
+  .game-frame .quick-tile>span:nth-child(2){font-size:17px}
+  .game-frame .daily-strip{min-height:49px;padding-top:7px;padding-bottom:7px}
+}
