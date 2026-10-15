@@ -486,6 +486,48 @@ const characterDefinitions: Omit<Character, "speed" | "combatClass">[] = [
     splash: "/images/splash-alice.png",
     keyart: "/images/keyart-alice.webp"
   },
+  {
+    id: "grimm",
+    name: "Grimm",
+    title: "The Lost Knight",
+    rarity: "UR",
+    element: "Dark",
+    role: "Striker",
+    color: "#819587",
+    hair: "#454746",
+    weapon: "Weathered Longsword",
+    hp: 1600,
+    attack: 236,
+    defense: 88,
+    skill: "Ashen Blade",
+    ultimate: "A Fairy Tale Without Dawn",
+    skillNote: "Deal 165% attack damage to one enemy.",
+    ultimateNote: "Deal 340% attack damage to all enemies.",
+    description: "A silent knight from Black Souls, stranded between a broken fairy tale and a debt that refuses to die. Beneath the slitted visor, the academy finds no face it can remember.",
+    splash: "/images/splash-grimm.png",
+    keyart: "/images/keyart-grimm.webp"
+  },
+  {
+    id: "redhood",
+    name: "Red Hood",
+    title: "The Hunter in Crimson",
+    rarity: "UR",
+    element: "Fire",
+    role: "Striker",
+    color: "#a82e39",
+    hair: "#d9be76",
+    weapon: "Huntsman’s Axe",
+    hp: 1220,
+    attack: 250,
+    defense: 48,
+    skill: "Through the Wolfwood",
+    ultimate: "No One Leaves the Forest",
+    skillNote: "Deal 165% attack damage to one enemy.",
+    ultimateNote: "Deal 340% attack damage to all enemies.",
+    description: "A crimson-cloaked visitor from Black Souls. She walks the academy’s paths as though they were forest trails, listening for something behind the walls. Her axe never leaves her hand.",
+    splash: "/images/splash-redhood.png",
+    keyart: "/images/keyart-redhood.webp"
+  },
 ];
 export const ssrFeaturedId = "penelope";
 /**
@@ -538,6 +580,9 @@ export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guara
  * is a bad idea. Voices follow `campaign_script.md`.
  */
 export const companionQuotes: Record<string, string[]> = {
+    grimm: ["The ledger has an ending. That already makes it kinder than my story.", "Keep the lantern lit. Not everything outside is looking for a door.", "I have forgotten many names. I will try not to forget yours."],
+    redhood: ["You call this a campus. I keep finding paths that lead back to the woods.", "A red cloak does not make someone easy to find. Remember that.", "If you hear someone calling from behind the trees, finish your tea first."],
+
   aster: ["The short route is under the campus. Bring a torch, not a permission slip.", "I drew a map. Facilities called it a security concern.", "Welcome back. Ready to find a way around the gates?"],
   vesper: ["Last shuttle is leaving. Council members ride free.", "They tried to install a fare meter. I installed a second exit.", "Welcome aboard. No one gets left behind tonight."],
   maribel: ["Sit down. The greenhouse has room for one more patient.", "Those planters were confiscated. The flowers disagree.", "Please stop testing my medicine by jumping off things."],
