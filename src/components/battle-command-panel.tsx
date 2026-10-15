@@ -38,7 +38,7 @@ export function BattleCommandPanel({ character, actor, targetName, locked, onIns
   }, [activate, inspect, locked]);
 
   return <section className="battle-command-panel" style={{ "--operator-color": character.color } as CSSProperties} aria-label="Command inspection">
-    <div className="operator-brief"><div className="operator-model"><Chibi id={actor.id} /></div><div><span className="eyebrow">ACTIVE OPERATOR</span><strong>{actor.name}</strong><small>{character.element} / {character.role}</small><span className="operator-energy"><Zap size={12} />{actor.energy} / 100 ENERGY</span></div></div>
+    <div className="operator-brief"><div className="operator-model"><Chibi id={actor.id} /></div><div><span className="eyebrow">ACTIVE OPERATOR</span><strong>{actor.name}</strong><small>{character.element} / {character.combatClass}</small><span className="operator-energy"><Zap size={12} />{actor.energy} / 100 ENERGY</span><div className="operator-statblock"><span>ATK <b>{actor.attack}</b></span><span>DEF <b>{actor.defense}</b></span><span>SPD <b>{actor.speed ?? character.speed}</b></span></div></div></div>
     <div className="command-inspection">
       <div className="command-selector" role="group" aria-label="Inspect a command before activating">
         {BATTLE_COMMANDS.map((command, index) => {

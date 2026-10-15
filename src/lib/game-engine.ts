@@ -1,3 +1,4 @@
+import { enemySpeed, rollInitiative } from "./initiative";
 import { campaignCredits, chapterMinimumLevel, recommendedLevel, squadAverageLevel } from "./campaign-balance";
 import { MAX_CHARACTER_LEVEL, upgradeCost } from "./leveling";
 import { characterById, characters, initialState, missionProgress, missions, pullPool, PULL_RATES, SSR_FEATURED_SHARE, ssrFeaturedId, stats, type Battle, type Combatant, type GameState, type PullResult } from "./game-data";
@@ -37,6 +38,53 @@ function moveFor(sprite: string, random: () => number) {
   return list[Math.floor(random() * list.length)];
 }
 
+/** Resolve enemy slots until the next player decision; dead slots are skipped.
+ * Every survivor gets one slot per round, regardless of speed. */
+function advanceInitiative(b: Battle, random: () => number) {
+  while (b.status === "active") {
+    if (!b.allies.some(a => a.hp > 0)) {
+      b.status = "defeat";
+      b.active = -1;
+      b.log.unshift("The council retreats. Upgrade your squad and try again.");
+      return;
+    }
+    if (!b.initiative || (b.initiativeIndex ?? 0) >= b.initiative.length) {
+      b.turn++;
+      b.initiative = rollInitiative(b, random);
+      b.initiativeIndex = 0;
+      b.log.unshift(`Round ${b.turn}: initiative rerolled (Speed + 0–24).`);
+    }
+    const entry = b.initiative[b.initiativeIndex ?? 0];
+    const units = entry.side === "ally" ? b.allies : b.enemies;
+    const index = units.findIndex(u => u.id === entry.id);
+    const unit = units[index];
+    if (unit && unit.hp > 0) {
+      if (entry.side === "ally") { b.active = index; return; }
+      if (unit.stunned) {
+        unit.stunned = false;
+        b.enemyActions!.push({ actor: unit.id, skipped: true });
+        b.log.unshift(`${unit.name} is still in detention and loses its turn.`);
+      } else {
+        const living = b.allies.filter(a => a.hp > 0);
+        const victim = living[Math.floor(random() * living.length)];
+        let damage = Math.max(1, Math.round((unit.attack - victim.defense * .35) * (victim.guard ? .35 : 1)));
+        let absorbed = 0;
+        if (victim.shield) {
+          absorbed = Math.min(victim.shield, damage);
+          victim.shield -= absorbed;
+          damage -= absorbed;
+          if (victim.shield <= 0) victim.shield = undefined;
+        }
+        victim.hp = Math.max(0, victim.hp - damage);
+        victim.energy = Math.min(100, victim.energy + 12);
+        b.enemyActions!.push({ actor: unit.id, target: victim.id, damage });
+        b.log.unshift(`${unit.name}: ${moveFor(unit.sprite ?? "", random)} → ${victim.name} −${damage.toLocaleString()} HP${absorbed ? ` (${absorbed.toLocaleString()} absorbed by a shield)` : victim.guard ? " (guarded)" : ""}.`);
+      }
+    }
+    b.initiativeIndex = (b.initiativeIndex ?? 0) + 1;
+  }
+}
+
 export function regenerateEnergy(state: GameState) {
   const now = Date.now();
   const ticks = Math.floor((now - state.energyAt) / 240000);
@@ -62,6 +110,29 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       }
     }
     state.battle.balanceVersion = 2;
+  }
+  // Resume legacy battles without granting an extra turn or replaying enemies.
+  // Preserve the current round's remaining squad order; new rounds use rolls.
+  if (state.battle?.status === "active" && !state.battle.initiative) {
+    const b = state.battle;
+    const wave = stages.findIndex(s => s.id === b.stageId) + 1;
+    b.allies.forEach(a => {
+      const owned = state.roster.find(o => o.id === a.id);
+      if (!owned) return;
+      const values = stats(owned);
+      const fraction = a.maxHp > 0 ? a.hp / a.maxHp : 0;
+      a.hp = fraction <= 0 ? 0 : Math.max(1, Math.round(values.hp * Math.min(1, fraction)));
+      a.maxHp = values.hp; a.attack = values.attack; a.defense = values.defense; a.speed = values.speed;
+    });
+    b.enemies.forEach((e, index) => {
+      e.sprite ??= stageById(b.stageId)?.enemies[index]?.sprite;
+      e.speed = enemySpeed(wave, e.sprite ?? "", !!e.boss);
+    });
+    b.initiative = [
+      ...b.allies.slice(b.active).filter(a => a.hp > 0).map(a => ({ side: "ally" as const, id: a.id, score: a.speed ?? 100 })),
+      ...b.enemies.filter(e => e.hp > 0).map(e => ({ side: "enemy" as const, id: e.id, score: e.speed ?? 100 })),
+    ];
+    b.initiativeIndex = 0; b.enemyActions = [];
   }
   // Saves written before the campaign had choices simply do not have the field.
   if (!state.choices) state.choices = {};
@@ -216,16 +287,21 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       const allies: Combatant[] = state.squad.map(cid => {
         const owned = state.roster.find(c => c.id === cid)!;
         const c = characterById(cid); const s = stats(owned);
-        return { id: cid, name: c.name, hp: s.hp, maxHp: s.hp, energy: 35, attack: s.attack, defense: s.defense };
+        return { id: cid, name: c.name, hp: s.hp, maxHp: s.hp, energy: 35, attack: s.attack, defense: s.defense, speed: s.speed };
       });
       const enemies: Combatant[] = stage.enemies.map((e, index) => {
         const hp = enemyHp(wave, !!e.boss, id);
         return {
           id: `${e.sprite}-${index}`, name: e.name, hp, maxHp: hp, energy: 0,
-          level: enemyLevel(wave), attack: enemyAttack(wave), defense: enemyDefense(wave), boss: e.boss,
+          sprite: e.sprite, speed: enemySpeed(wave, e.sprite, !!e.boss), level: enemyLevel(wave), attack: enemyAttack(wave), defense: enemyDefense(wave), boss: e.boss,
         };
       });
       state.battle = { balanceVersion: 2, stageId: id, allies, enemies, active: 0, turn: 1, status: "active", log: [`${stage.title} — the council is ready. Select an enemy and issue a command.`] };
+      state.battle.initiative = rollInitiative(state.battle, random);
+      state.battle.initiativeIndex = 0;
+      state.battle.enemyActions = [];
+      state.battle.log.unshift("Initiative: Speed + a 0–24 roll. Enemies can act first.");
+      advanceInitiative(state.battle, random);
       message = "Operation started.";
       break;
     }
@@ -239,6 +315,9 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       const targetIndex = typeof input.target === "number" ? input.target : 0;
       const target = b.enemies[targetIndex];
       if (!target || (target.hp <= 0 && command !== "guard")) throw new Error("Select a living enemy.");
+      const slot = b.initiative?.[b.initiativeIndex ?? 0];
+      if (!slot || slot.side !== "ally" || slot.id !== actor.id) throw new Error("Wait for this character's initiative slot.");
+      b.enemyActions = [];
       actor.guard = false;
       b.lastHit = undefined;
       const c = characterById(actor.id);
@@ -575,34 +654,8 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       }
       if (b.enemies.every(e => e.hp === 0)) { b.status = "victory"; b.log.unshift("OPERATION COMPLETE! The council stands together."); }
       else {
-        const next = b.allies.findIndex((a, i) => i > b.active && a.hp > 0);
-        if (next >= 0) b.active = next;
-        else {
-          for (const enemy of b.enemies.filter(e => e.hp > 0)) {
-            if (enemy.stunned) {
-              enemy.stunned = false;
-              b.log.unshift(`${enemy.name} is still in detention and loses its turn.`);
-              continue;
-            }
-            const living = b.allies.filter(a => a.hp > 0);
-            if (!living.length) break;
-            const victim = living[Math.floor(random() * living.length)];
-            let damage = Math.max(1, Math.round((enemy.attack - victim.defense * .35) * (victim.guard ? .35 : 1)));
-            let absorbed = 0;
-            if (victim.shield) {                       // Sanctify shields eat damage first
-              absorbed = Math.min(victim.shield, damage);
-              victim.shield -= absorbed;
-              damage -= absorbed;
-              if (victim.shield <= 0) victim.shield = undefined;
-            }
-            victim.hp = Math.max(0, victim.hp - damage);
-            victim.energy = Math.min(100, victim.energy + 12);
-            b.log.unshift(`${enemy.name}: ${moveFor(enemy.sprite ?? "", random)} → ${victim.name} −${damage.toLocaleString()} HP${absorbed ? ` (${absorbed.toLocaleString()} absorbed by a shield)` : victim.guard ? " (guarded)" : ""}.`);
-          }
-          b.turn++;
-          b.active = b.allies.findIndex(a => a.hp > 0);
-          if (b.active < 0) { b.status = "defeat"; b.log.unshift("The council retreats. Upgrade your squad and try again."); }
-        }
+        b.initiativeIndex = (b.initiativeIndex ?? 0) + 1;
+        advanceInitiative(b, random);
       }
       b.log = b.log.slice(0, 25);
       message = b.status === "victory" ? "Operation complete!" : "Command executed.";

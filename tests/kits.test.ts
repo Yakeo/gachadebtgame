@@ -56,6 +56,7 @@ test("every character's declared mechanic is implemented in the engine", () => {
 
 test("Ynna builds rate-up while she misses, and resets when it lands", () => {
   let state = withEnergy(battleWith("ynna"));
+  state.battle!.enemies.forEach(e => { e.hp = 40000; e.maxHp = 40000; }); // keep the rate-up test independent of base damage
   state = act(state, "attack", never).state;
   assert.equal(state.battle?.streak, 1, "a non-crit should build the rate-up streak");
   assert.match(state.battle!.log.join(" "), /rate-up and climbing/);
@@ -261,9 +262,9 @@ test("Penelope's clumsiness tax never kills her", () => {
   const state = withEnergy(battleWith("penelope"));
   state.battle!.enemies.forEach(e => { e.hp = 40000; e.maxHp = 40000; });
   state.battle!.allies[0].hp = 1;                 // one clumsy follow-through from defeat
-  // Isolate recoil from enemy retaliation. The old giant-HP damage multiplier
-  // accidentally ended this fight before enemies could act.
-  state.battle!.allies.push({ ...state.battle!.allies[0], id: "ynna", name: "Ynna", hp: 1000 });
+  // Isolate recoil from initiative-driven enemy attacks. This test exercises
+  // the clumsiness floor, not survival against a subsequent enemy slot.
+  state.battle!.enemies.forEach(e => { e.stunned = true; });
   const out = act(state, "attack", () => 0.01, 0).state;
   const me = out.battle!.allies.find(a => a.id === "penelope")!;
   assert.ok(me.hp >= 1, "she should be embarrassed, not defeated");
