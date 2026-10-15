@@ -28,13 +28,13 @@ test("living enemies do not dim when controls are locked; defeated ones stay dis
   assert.ok(css.includes(".battle-screen .enemy-unit:disabled:not(.defeated){opacity:1}"));
   assert.match(css, /\.combat-unit:not\(.defeated\) \.sprite-art\{\s*filter:brightness\(1.22\)/);
   // Illumination is on the art, leaving rig hit flashes and dash transforms alone.
-  const contrast = css.slice(css.indexOf("/* Stage-independent combat contrast."));
+  const contrast = css.slice(css.indexOf("/* Stage-independent combat contrast."), css.indexOf("/* A place to stand,"));
   assert.doesNotMatch(contrast, /\.sprite-rig\{/);
   assert.doesNotMatch(contrast, /animation:|@keyframes/);
 });
 
 test("energy is readable independently of the battlefield painting", () => {
-  const contrast = css.slice(css.indexOf("/* Stage-independent combat contrast."));
+  const contrast = css.slice(css.indexOf("/* Stage-independent combat contrast."), css.indexOf("/* A place to stand,"));
   assert.match(contrast, /\.model-vitals>div:last-child\{\s*color:#10283d;background:#f4faff/);
   assert.match(contrast, /height:7px;background:#15324f/);
   assert.match(contrast, /background:linear-gradient\(90deg,#57bfff,#b3f4ff\)/);
