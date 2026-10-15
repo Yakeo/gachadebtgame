@@ -1,0 +1,114 @@
+[
+  {
+    "id": "alice",
+    "path": "/images/keyart-alice.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 131581,
+    "fraction": 0.1228
+  },
+  {
+    "id": "cobalt",
+    "path": "/images/keyart-cobalt.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 282134,
+    "fraction": 0.2632
+  },
+  {
+    "id": "edgelord",
+    "path": "/images/keyart-edgelord.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 313000,
+    "fraction": 0.292
+  },
+  {
+    "id": "escanooor",
+    "path": "/images/keyart-escanooor.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 273707,
+    "fraction": 0.2554
+  },
+  {
+    "id": "maribel",
+    "path": "/images/keyart-maribel.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 70417,
+    "fraction": 0.0657
+  },
+  {
+    "id": "mira",
+    "path": "/images/keyart-mira.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 193266,
+    "fraction": 0.1803
+  },
+  {
+    "id": "octavia",
+    "path": "/images/keyart-octavia.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 310598,
+    "fraction": 0.2898
+  },
+  {
+    "id": "penelope",
+    "path": "/images/keyart-penelope.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 357853,
+    "fraction": 0.3339
+  },
+  {
+    "id": "purp",
+    "path": "/images/keyart-purp.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 321447,
+    "fraction": 0.2999
+  },
+  {
+    "id": "quill",
+    "path": "/images/keyart-quill.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 216147,
+    "fraction": 0.2017
+  },
+  {
+    "id": "ruta",
+    "path": "/images/keyart-ruta.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 469184,
+    "fraction": 0.4377
+  },
+  {
+    "id": "solari",
+    "path": "/images/keyart-solari.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 367559,
+    "fraction": 0.3429
+  },
+  {
+    "id": "vesper",
+    "path": "/images/keyart-vesper.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 310571,
+    "fraction": 0.2897
+  },
+  {
+    "id": "ynna",
+    "path": "/images/keyart-ynna.webp",
+    "width": 848,
+    "height": 1264,
+    "transparentPixels": 384966,
+    "fraction": 0.3592
+  }
+]

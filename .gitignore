@@ -15,3 +15,7 @@ tsconfig.tsbuildinfo
 
 # Generated art working files (green-screen originals). Shipped art lives in public/images.
 art-src/
+
+# Local image tooling and reference cache
+.venv/
+.cache/
