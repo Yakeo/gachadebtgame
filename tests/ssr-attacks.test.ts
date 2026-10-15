@@ -86,7 +86,8 @@ test("the roster has the SSR characters this suite checks", () => {
     assert.ok(ssrIds.includes(expected), `${expected} should be an SSR`);
   }
   assert.ok(ssrIds.length >= 9, `expected at least 9 SSR characters, found ${ssrIds.length}`);
-  // Ninette is SR (and Angelina UR) - deliberately out of scope for now.
+  // Ninette is SR (and Angelina UR) - the trio's own body language lives in
+  // tests/attack-travel.test.ts alongside the travel system.
   assert.ok(!ssrIds.includes("ninette"), "Ninette is SR and should not be in the SSR set");
 });
 
