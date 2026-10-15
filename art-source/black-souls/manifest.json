@@ -1,0 +1,54 @@
+[
+  {
+    "id": "grimm",
+    "kind": "art",
+    "path": "/images/keyart-grimm.webp",
+    "sha256": "e39f3a1895fe9e082bb8de45089bee4eebc28acd4398e1a2ffd4ba2af055eedd",
+    "bounds": [
+      0,
+      0,
+      731,
+      1122
+    ],
+    "transparentPixels": 419678
+  },
+  {
+    "id": "grimm",
+    "kind": "model",
+    "path": "/images/splash-grimm.png",
+    "sha256": "dee306a2b248f005011f8e7ea5e38a3637cb68182e29ab1e1032a7496b7e6539",
+    "bounds": [
+      133,
+      78,
+      727,
+      900
+    ],
+    "transparentPixels": 604131
+  },
+  {
+    "id": "redhood",
+    "kind": "art",
+    "path": "/images/keyart-redhood.webp",
+    "sha256": "274914d3550a85c3f3ebaa79ed88bfd12507084aa3f6907a24c74937594784d4",
+    "bounds": [
+      0,
+      0,
+      746,
+      752
+    ],
+    "transparentPixels": 346511
+  },
+  {
+    "id": "redhood",
+    "kind": "model",
+    "path": "/images/splash-redhood.png",
+    "sha256": "1c24212fead06fd37dc5cc11d5e22c381583c0b50fa3f4afc29c1504d5bf7f9d",
+    "bounds": [
+      24,
+      78,
+      837,
+      900
+    ],
+    "transparentPixels": 605031
+  }
+]
