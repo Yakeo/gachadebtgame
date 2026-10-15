@@ -2,7 +2,7 @@
 
 ## Character identity
 
-Each of the 34 recruits has an explicit class and speed offset in `src/lib/character-stats.ts`. Existing kit roles remain separate so a class assignment cannot accidentally convert a custom skill into a generic heal or spell.
+Each of the 44 recruits has an explicit class and speed offset in `src/lib/character-stats.ts`. Existing kit roles remain separate so a class assignment cannot accidentally convert a custom skill into a generic heal or spell.
 
 | Class | Purpose | Base HP | Base ATK | Base DEF | Base SPD |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -18,7 +18,7 @@ HP/ATK/DEF keep the existing level/potential scaling. Speed increases by one eve
 
 ## Initiative rules
 
-- Each living ally and enemy rolls **SPD + a uniform integer from 0 to 24** each round. Ties use a separate random tie-break roll.
+- Each living ally and enemy rolls **SPD + a D20 (uniform integer from 1 to 20)** each round. Ties use a separate random tie-break roll.
 - One persisted mixed-side queue, descending score. Everyone gets one slot, not bonus actions for speed.
 - Enemies can open the encounter or act between allies. The server automatically resolves enemy slots until the next player decision.
 - Enemy speeds depend on enemy identity plus gentle campaign progression, not giant level multipliers.
@@ -27,12 +27,18 @@ HP/ATK/DEF keep the existing level/potential scaling. Speed increases by one eve
 - Victory/defeat stops resolution immediately. Loading/resuming never rerolls or re-applies opening damage.
 - Legacy active battles retain their remaining old-round order once; new rounds roll initiative. Ally HP fractions and effects survive the stat-block migration.
 
-The battle strip shows current/acted/dead slots, sides, SPD and initiative score. It scrolls horizontally to keep the current slot visible on phones. Enemy animations use the actual resolved slots, not the former assumption that all enemies retaliate only at a round boundary.
+The battle strip shows turn positions, current/acted/dead slots, sides, SPD, each persisted D20 result and total initiative score. Waiting units show how many slots remain before their turn. New encounters play one 650ms animated D20 flourish before commands unlock (100ms, no dice motion, with Reduced Motion). Later rounds reroll without another opening delay. These are server rolls, never client-generated cosmetic results. Older saved entries without a die field are labeled LEGACY until their next normal reroll.
+
+The strip scrolls horizontally to keep the current slot visible on phones. Enemy animations use the actual resolved slots, not the former assumption that all enemies retaliate only at a round boundary.
 
 ## Validation
 
-- `npm test`: **176 passing**, including 300 seeded recommended-level campaign clears and initiative-specific tests for ordering, random reversals, opening attacks, once-per-round slots, deaths, stun, guard, shields, revive, defeat and legacy resume.
+- `npm test`: **200 passing**, including 300 seeded recommended-level campaign clears and initiative-specific tests for ordering, random reversals, opening attacks, once-per-round slots, deaths, stun, guard, shields, revive, defeat and legacy resume.
 - `npx tsc --noEmit`: passes.
 - Targeted ESLint for new helpers, component and tests: passes. Existing repository-wide hook lint issues remain outside this change.
-- **13 scoped browser checks pass**: 3 battle inspection/background tests, 3 initiative/stat-block tests, 7 viewport tests. Persistence is mocked; the actual UI, renderer and engine are used.
+- **9 scoped browser checks pass**: 2 loading-background/D20 timing checks, 3 initiative/stat-block checks, and 4 battlefield layout/pause checks. Persistence is mocked; the actual UI, renderer and engine are used.
 - Legacy non-mocked `game.smoke.spec.ts` was not part of the passing scoped run; its existing login/boot expectations did not complete in this environment. Database-backed end-to-end behavior was not verified.
+
+## Loading art refresh
+
+`public/images/loading-campus.jpg` is an original generated anime campus environment: bright cyan skies, sunlit white academy architecture, pools and greenery, not pixel art. Loading-only styles retain its saturation and brightness, with localized translucent backing for legible text. Title/login and campaign art are unchanged.

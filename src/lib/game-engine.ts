@@ -52,7 +52,7 @@ function advanceInitiative(b: Battle, random: () => number) {
       b.turn++;
       b.initiative = rollInitiative(b, random);
       b.initiativeIndex = 0;
-      b.log.unshift(`Round ${b.turn}: initiative rerolled (Speed + 0–24).`);
+      b.log.unshift(`Round ${b.turn}: initiative rerolled (Speed + D20 (1–20)).`);
     }
     const entry = b.initiative[b.initiativeIndex ?? 0];
     const units = entry.side === "ally" ? b.allies : b.enemies;
@@ -300,7 +300,7 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       state.battle.initiative = rollInitiative(state.battle, random);
       state.battle.initiativeIndex = 0;
       state.battle.enemyActions = [];
-      state.battle.log.unshift("Initiative: Speed + a 0–24 roll. Enemies can act first.");
+      state.battle.log.unshift("Initiative: Speed + a D20 (1–20) roll. Enemies can act first.");
       advanceInitiative(state.battle, random);
       message = "Operation started.";
       break;

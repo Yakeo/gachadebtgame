@@ -163,3 +163,28 @@ test("shield absorption and enemy energy gain survive initiative resolution", ()
   assert.equal(state.battle!.allies[1].energy, energy + 12);
   assert.equal(state.battle!.enemyActions![0].damage, 0);
 });
+
+test("D20 initiative persists a genuine 1–20 result and Speed + die total for each living unit", () => {
+  const b = start().battle!;
+  for (const value of [0, .25, .5, .999999, 1]) {
+    const rolled = rollInitiative(b, () => value);
+    assert.equal(rolled.length, [...b.allies, ...b.enemies].filter(u => u.hp > 0).length);
+    for (const entry of rolled) {
+      assert.ok(Number.isInteger(entry.roll) && entry.roll! >= 1 && entry.roll! <= 20);
+      const unit = (entry.side === "ally" ? b.allies : b.enemies).find(u => u.id === entry.id)!;
+      assert.equal(entry.score, unit.speed! + entry.roll!);
+      assert.equal(entry.roll, Math.min(20, 1 + Math.floor(value * 20)));
+    }
+    assert.deepEqual(rolled.map(e => e.score), rolled.map(e => e.score).sort((a, b) => b - a));
+  }
+});
+
+test("D20 ties remain deterministic with injected randomness and never add extra turns", () => {
+  const b = start().battle!;
+  [...b.allies, ...b.enemies].forEach(u => { u.speed = 100; });
+  const first = rollInitiative(b, () => .5);
+  assert.deepEqual(rollInitiative(b, () => .5), first);
+  assert.equal(new Set(first.map(e => `${e.side}:${e.id}`)).size, first.length);
+  b.enemies[0].hp = 0;
+  assert.ok(!rollInitiative(b, () => .5).some(e => e.side === "enemy" && e.id === b.enemies[0].id));
+});

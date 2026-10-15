@@ -3,3 +3,12 @@
 @keyframes tap-pulse{0%{box-shadow:0 0 0 0 #ffffff88}70%{box-shadow:0 0 0 12px #ffffff00}100%{box-shadow:0 0 0 0 #ffffff00}}
 @media(max-width:760px){.boot-frame{inset:12px}.loading-brand{top:20px;left:18px;transform:scale(.82);transform-origin:left top}.loading-card{padding:0 22px}.loading-card h1{font-size:34px}.loading-card p{font-size:14px}.loading-footer{left:18px;right:18px;bottom:18px;flex-wrap:wrap;gap:8px}.title-copy{margin:12vh 22px auto;gap:14px}.title-copy .brand svg{width:52px;height:58px}.title-copy .brand strong,.title-copy .brand strong span{font-size:46px}.title-shade{background:linear-gradient(#07192a22,#07192ae8 62%)}.login-screen{justify-content:center;padding:16px 0 28px}.login-shade{background:#07111ed0}.login-panel{width:min(440px,calc(100% - 24px));margin:0 auto}.returning-account{align-items:stretch;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.loading-card,.title-start::after,.title-bg{animation:none}.loading-card{opacity:1}}
+
+/* Sunlit anime campus: keep the scenery vivid, shade only behind the copy. */
+.loading-screen .boot-bg{filter:saturate(1.08) brightness(1);object-position:center}
+.loading-screen .boot-shade{background:linear-gradient(180deg,#d5f5ff10 40%,#06466970 100%)}
+.loading-screen .loading-card{background:#103b59b3;backdrop-filter:blur(9px);border:1px solid #ffffff70;border-radius:8px;padding:28px 36px;box-shadow:0 12px 45px #08608325}
+.loading-screen .loading-brand .brand strong,.loading-screen .loading-brand .brand small{color:#144966}
+.loading-screen .loading-brand>span{color:#144966}
+.loading-screen .loading-footer{text-shadow:0 1px 5px #082c49}
+@media(max-width:760px){.loading-screen .loading-card{padding:22px;max-width:calc(100% - 32px)}}
