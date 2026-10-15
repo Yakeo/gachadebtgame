@@ -526,7 +526,7 @@ export type Combatant = { id: string; name: string; hp: number; maxHp: number; e
 export type InitiativeEntry = { side: "ally" | "enemy"; id: string; score: number; roll?: number };
 export type EnemyAction = { actor: string; target?: string; damage?: number; skipped?: boolean };
 export type Battle = { initiative?: InitiativeEntry[]; initiativeIndex?: number; enemyActions?: EnemyAction[]; balanceVersion?: number; stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
-export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[]; choices: Record<string, string>; companion: string };
+export type GameState = { starterUrClaimed?: string | null; gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[]; choices: Record<string, string>; companion: string };
 export type Player = { id: string; name: string; email: string | null; guest: boolean };
 export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guaranteed: boolean };
 /**
@@ -648,8 +648,13 @@ export function companionLines(id: string): string[] {
   return critterQuotes[id] ?? companionQuotes[id] ?? companionQuotes.ynna;
 }
 
+export const STARTER_GEMS = 9600;
+export const STARTER_CREDITS = 25000;
+/** One free choice from the currently obtainable UR roster, never retired units. */
+export function starterUrPool() { return pullPool("UR"); }
+
 export function initialState(): GameState {
-  return { gems: 4800, credits: 25000, energy: 120, energyAt: Date.now(), pity: 0, totalPulls: 0, roster: ["ynna", "ninette", "edgelord"].map(id => ({ id, level: 1, potential: 0, duplicates: 0 })), squad: ["ynna", "ninette", "edgelord"], cleared: [], claimed: [], lastDaily: null, battle: null, pullHistory: [], choices: {}, companion: "ynna" };
+  return { starterUrClaimed: null, gems: STARTER_GEMS, credits: STARTER_CREDITS, energy: 120, energyAt: Date.now(), pity: 0, totalPulls: 0, roster: ["ynna", "ninette", "edgelord"].map(id => ({ id, level: 1, potential: 0, duplicates: 0 })), squad: ["ynna", "ninette", "edgelord"], cleared: [], claimed: [], lastDaily: null, battle: null, pullHistory: [], choices: {}, companion: "ynna" };
 }
 export function stats(owned: OwnedCharacter) {
   const c = characterById(owned.id);

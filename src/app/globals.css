@@ -400,3 +400,47 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 .enemy-hud-target{position:absolute;top:7px;right:9px;font-size:9px;letter-spacing:1.1px;font-weight:700;color:#fff;background:#d1553d;padding:2px 7px;border-radius:2px}
 @media(max-height:830px){.enemy-hud{gap:8px;margin-bottom:8px}.enemy-hud-card{padding:6px 10px;gap:9px}.enemy-hud-art{width:38px;height:44px}.enemy-hud-target{top:5px;right:7px}}
 @media(max-width:900px){.enemy-hud{flex-wrap:wrap}.enemy-hud-card{flex:1 1 46%;padding:7px 9px;gap:7px}.enemy-hud-art{width:32px;height:38px}.enemy-hud-card strong{font-size:11px}}
+
+/* Welcome gift takes the existing news-banner slot, not another HUD row. */
+.starter-gift-button{width:100%;height:112px;position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:9px;padding:16px 20px;background:linear-gradient(120deg,#163a62,#564288);border:1px solid #e4d29c;border-left:4px solid #ffe199;color:#fff;text-align:left;box-shadow:0 6px 24px #17335726}
+.starter-gift-button>span{font-size:9px;color:#ffe6ab;letter-spacing:1.2px;font-weight:700}
+.starter-gift-button>strong{display:flex;align-items:center;gap:9px;font-size:22px;font-family:var(--display)}
+.starter-gift-button>small{font-size:11px;color:#e1ecfa;max-width:90%}
+.starter-gift-button>svg:last-child{position:absolute;right:15px;top:44px;color:#ffe6ab}
+.featured-wrap:has(.starter-gift-button)>.featured-banner,.featured-wrap:has(.starter-gift-button)>.banner-indicators{display:none}
+.starter-inbox-button{margin-top:16px}
+.starter-ur-modal{width:820px;max-width:100%}
+.starter-ur-options{border:0;margin:20px 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-width:0}
+.starter-ur-options>legend{font-size:13px;font-weight:700;margin-bottom:12px}
+.starter-ur-option{display:flex;flex-direction:column;position:relative;padding:10px;border:2px solid #d5dfed;background:#f2f6fc;border-radius:6px;cursor:pointer;min-width:0;gap:5px}
+.starter-ur-option.selected{background:#fff7e0;border-color:#a97822;box-shadow:0 0 0 2px #eacb6b55}
+.starter-ur-option:focus-within{outline:3px solid #2188ed;outline-offset:2px}
+.starter-ur-option>input{position:absolute;top:12px;left:12px;width:18px;height:18px;z-index:2;accent-color:#a97822}
+.starter-ur-art{display:flex;justify-content:center;align-items:flex-end;height:180px;overflow:hidden;border-radius:3px;background:radial-gradient(ellipse at bottom,#d3c5ef,transparent 75%)}
+.starter-ur-art>img,.starter-ur-art>.chibi{height:100%;width:100%;object-fit:contain}
+.starter-ur-rarity{position:absolute;right:15px;top:12px;color:#936116;background:#fff2c4;border:1px solid #c7a85c;border-radius:3px;font-size:12px;font-weight:800;padding:2px 6px}
+.starter-ur-option>strong{font-size:20px;font-family:var(--display)}
+.starter-ur-option>small{font-size:12px;color:#4e6b87}
+.starter-ur-title{font-size:11px;color:#637d96;line-height:1.4}
+.starter-ur-preview{border:1px solid #d6e4ef;background:#f3f8fc;padding:14px;border-radius:5px;margin:14px 0;color:#284963}
+.starter-ur-preview>strong{display:flex;align-items:center;gap:7px;font-size:16px}
+.starter-ur-preview>p{font-size:13px;line-height:1.6;margin-top:8px}
+.starter-ur-preview>.starter-ur-duplicate{font-weight:700;color:#835f21}
+.starter-ur-note{font-size:12px;color:#59758d;line-height:1.6;display:flex;align-items:center;gap:8px;margin:14px 0}
+.starter-ur-success{padding:15px 0;text-align:center}
+.starter-ur-success>svg{color:#369e85}
+.starter-ur-success>h3{font-size:28px;margin:12px 0}
+.starter-ur-success>p{font-size:15px;line-height:1.6;margin:12px 0 24px}
+@media(max-width:650px){
+  .starter-gift-button{height:98px;padding:12px;gap:7px}
+  .starter-gift-button>span{font-size:8px;letter-spacing:.6px}
+  .starter-gift-button>strong{font-size:21px}.starter-gift-button>small{font-size:10px}
+  .starter-ur-options{gap:8px;margin:14px 0}.starter-ur-option{padding:7px}
+  .starter-ur-art{height:115px}.starter-ur-option>strong{font-size:18px}
+  .starter-ur-option>small,.starter-ur-title{font-size:10px}
+  .starter-ur-rarity{right:5px;top:5px;font-size:10px;padding:2px 3px}
+  .starter-ur-option>input{left:5px;top:5px;width:16px;height:16px}
+}
+
+.home-menu>.starter-gift-mobile{display:none}
+@media(max-width:650px){.home-menu>.starter-gift-mobile{display:block}.home-scene:has(.starter-gift-button){min-height:1010px}}

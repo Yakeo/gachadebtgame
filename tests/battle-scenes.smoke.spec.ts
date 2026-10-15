@@ -18,7 +18,7 @@ for (const [width, height] of [[1366, 680], [390, 844], [844, 390]]) {
       player: { id: "scene-test", name: "President", guest: true, email: null },
       state: applyGameAction(seed, { action: "startBattle", id: stageId }, () => .8).state,
     } : { googleEnabled: false } }));
-    for (const id of ["1-1", "1-5", "2-2", "3-4", "5-5"]) {
+    for (const id of ["1-1", "1-5", "2-2", "3-3", "3-4", "4-1", "4-3", "4-5", "5-1", "5-3", "5-4", "5-5"]) {
       stageId = id;
       await page.goto(`${base}/?signedIn=1`);
       const scene = sceneForStage(stages.find(s => s.id === id)!);
