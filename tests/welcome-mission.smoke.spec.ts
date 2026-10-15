@@ -32,7 +32,7 @@ for (const width of [1440, 390]) {
     const gift = page.locator(".mission-card").filter({ hasText: WELCOME_MISSION.title });
     await expect(gift).toBeVisible();
     await expect(gift.locator(".mission-progress > span")).toHaveText("1 / 1");
-    await expect(gift.locator(".mission-rewards")).toHaveText("3200");
+    await expect(gift.locator(".mission-rewards")).toHaveText("3,200");
     await gift.getByRole("button", { name: "Claim rewards" }).click();
     await expect(gift).toHaveCount(0);
     expect(state.gems).toBe(3323);
