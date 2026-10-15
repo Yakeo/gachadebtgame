@@ -75,7 +75,7 @@ test("all critter models are genuine transparent PNGs with preserved floor basel
 });
 test("new enemy art is wired before placeholder fallbacks, including friendly R variants", () => {
   const ui = readFileSync("src/components/ui.tsx", "utf8");
-  for (const id of ["shroom", "bluecap", "reroom", "cat", "sentry", "prime", "enforcer", "fragment"]) assert.ok(ui.includes(`/images/enemies/critter-${id}.png`));
+  for (const id of ["shroom", "bluecap", "reroom", "cat", "sentry", "prime", "enforcer", "fragment"]) assert.ok(ui.includes(`/images/enemies/${["shroom", "bluecap", "reroom"].includes(id) ? "upload" : ["cat", "sentry"].includes(id) ? "completed" : "critter"}-${id}.png`));
   assert.match(ui, /c\.splash \?\? enemyArt\[id\]/);
   assert.equal(characters.filter(c => !c.retired && c.rarity === "SR").length, 10);
 });

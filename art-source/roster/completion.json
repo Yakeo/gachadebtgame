@@ -1,0 +1,194 @@
+[
+  {
+    "model": "/images/enemies/upload-shroom.png",
+    "source": "Spun Shroom.png",
+    "sha256": "d8b08e07a5484fc908b16342b9d5b9ca61fb6fbab69a05ae6d24c61bbe6c9a87",
+    "bounds": [
+      111,
+      120,
+      750,
+      900
+    ],
+    "transparentPixels": 490884
+  },
+  {
+    "model": "/images/splash-shroom.png",
+    "source": "Spun Shroom.png",
+    "sha256": "d8b08e07a5484fc908b16342b9d5b9ca61fb6fbab69a05ae6d24c61bbe6c9a87",
+    "bounds": [
+      111,
+      120,
+      750,
+      900
+    ],
+    "transparentPixels": 490884
+  },
+  {
+    "model": "/images/enemies/upload-reroom.png",
+    "source": "Reroom.png",
+    "sha256": "03ca6bab2b6c2d0b4b92af22c8df78ea31833f0029e13648e611d76fb2d9f237",
+    "bounds": [
+      31,
+      186,
+      829,
+      900
+    ],
+    "transparentPixels": 522771
+  },
+  {
+    "model": "/images/splash-reroom.png",
+    "source": "Reroom.png",
+    "sha256": "03ca6bab2b6c2d0b4b92af22c8df78ea31833f0029e13648e611d76fb2d9f237",
+    "bounds": [
+      31,
+      186,
+      829,
+      900
+    ],
+    "transparentPixels": 522771
+  },
+  {
+    "model": "/images/enemies/upload-bluecap.png",
+    "source": "Buroom.png",
+    "sha256": "0cd66e1f45f798d5f7ed734a4dec92a2600aa21b67c5eb1e6303170a8c70cab3",
+    "bounds": [
+      31,
+      186,
+      829,
+      900
+    ],
+    "transparentPixels": 522771
+  },
+  {
+    "model": "/images/splash-bluecap.png",
+    "source": "Buroom.png",
+    "sha256": "0cd66e1f45f798d5f7ed734a4dec92a2600aa21b67c5eb1e6303170a8c70cab3",
+    "bounds": [
+      31,
+      186,
+      829,
+      900
+    ],
+    "transparentPixels": 522771
+  },
+  {
+    "model": "/images/enemies/upload-yeroom.png",
+    "source": "Yeroom.png",
+    "sha256": "030c5f7534397d12322593758bc7dd50e3215cfe2e7b9f31a3fbebdab08421f2",
+    "bounds": [
+      31,
+      186,
+      829,
+      900
+    ],
+    "transparentPixels": 522771
+  },
+  {
+    "model": "/images/enemies/upload-boomshroom.png",
+    "source": "Boom Shroom.png",
+    "sha256": "9a10e3535a5c623931b84d592c234e89854c76123949cfe6ad076e58edc9a751",
+    "bounds": [
+      31,
+      183,
+      829,
+      900
+    ],
+    "transparentPixels": 394737
+  },
+  {
+    "model": "/images/enemies/upload-hitmonshroom.png",
+    "source": "HitMonShroom.png",
+    "sha256": "c3bbc8d96eefed2a91e52800d9f5b3dfe67d590c3a5167552bb19572ef3e5b1a",
+    "bounds": [
+      82,
+      120,
+      778,
+      900
+    ],
+    "transparentPixels": 565125
+  },
+  {
+    "model": "/images/splash-byte.png",
+    "source": "art-src/completion/byte-model.png",
+    "sha256": "c90a348730f784dd2ed7415c421b1e51becc4ce37e602917de5c4ff953a89281",
+    "bounds": [
+      172,
+      78,
+      688,
+      900
+    ],
+    "transparentPixels": 655584
+  },
+  {
+    "model": "/images/splash-angelina.png",
+    "source": "art-src/completion/angelina-model.png",
+    "sha256": "98484256ac9c4068cbfcf570d8230560dc7c74dabaf9dceca9c6702ae550819b",
+    "bounds": [
+      94,
+      78,
+      766,
+      900
+    ],
+    "transparentPixels": 615228
+  },
+  {
+    "model": "/images/splash-cat.png",
+    "source": "art-src/completion/cat-art.png",
+    "sha256": "4a8f0c95993e90ee8847811da1eff0acbdae873c5803e232feca76bcfaeba811",
+    "bounds": [
+      51,
+      120,
+      810,
+      900
+    ],
+    "transparentPixels": 467970
+  },
+  {
+    "model": "/images/enemies/completed-cat.png",
+    "source": "art-src/completion/cat-art.png",
+    "sha256": "4a8f0c95993e90ee8847811da1eff0acbdae873c5803e232feca76bcfaeba811",
+    "bounds": [
+      51,
+      120,
+      810,
+      900
+    ],
+    "transparentPixels": 467970
+  },
+  {
+    "model": "/images/splash-sentry.png",
+    "source": "art-src/completion/sentry-art.png",
+    "sha256": "520768dc2538e557ac4afa4d468bb1ecf572afcb03183a233e130b7ae1e19c00",
+    "bounds": [
+      94,
+      120,
+      766,
+      900
+    ],
+    "transparentPixels": 529071
+  },
+  {
+    "model": "/images/enemies/completed-sentry.png",
+    "source": "art-src/completion/sentry-art.png",
+    "sha256": "520768dc2538e557ac4afa4d468bb1ecf572afcb03183a233e130b7ae1e19c00",
+    "bounds": [
+      94,
+      120,
+      766,
+      900
+    ],
+    "transparentPixels": 529071
+  },
+  {
+    "model": "/images/enemies/terminal.png",
+    "source": "art-src/completion/terminal-model.png",
+    "sha256": "2ff8bbca2b83941f3af6f6b668b561e3bf2d92be8df66283c874f7133f49e1fe",
+    "bounds": [
+      102,
+      120,
+      759,
+      900
+    ],
+    "transparentPixels": 539646
+  }
+]

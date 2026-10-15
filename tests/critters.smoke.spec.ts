@@ -51,7 +51,7 @@ for (const width of [1440, 390]) {
     for (const image of await page.locator(".combat-unit .sprite-art").all()) {
       await expect.poll(() => image.evaluate((e: HTMLImageElement) => e.naturalWidth)).toBe(861);
     }
-    for (const image of await page.locator(".enemy-unit .sprite-art").all()) await expect(image).toHaveAttribute("src", /critter-/);
+    for (const image of await page.locator(".enemy-unit .sprite-art").all()) await expect(image).toHaveAttribute("src", /splash-(shroom|reroom)\.png/);
     await page.screenshot({ path: `.cache/critter-battle-${width}.png` });
     await page.getByRole("button", { name: /1 Attack/ }).click();
     await expect(page.locator(".command-detail")).toBeVisible();

@@ -1,0 +1,11 @@
+{
+  "character": "Angelina",
+  "game": "Arknights",
+  "variant": "Elite 2",
+  "source": "https://github.com/Aceship/Arknight-Images/blob/master/characters/char_291_aglina_2.png",
+  "original": "art-source/official/angelina-e2.png",
+  "originalSha256": "12d5d8b1cc3d58e465fe0182ed6ae7f822e2d2a2355ff8fa87c3c26052aa694e",
+  "keyart": "/images/keyart-angelina.webp",
+  "keyartSha256": "16bbc6e0049e859679c69e7307771925aae627b69057cdfb76678324d57f61cf",
+  "note": "Official artwork, not AI-generated. Copyright remains with the original Arknights rights holders. Attribution is not a license grant."
+}
