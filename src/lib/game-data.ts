@@ -708,12 +708,52 @@ export function stats(owned: OwnedCharacter) {
 }
 /** Available to every save, including guests created before starter-gem increases. */
 export const WELCOME_MISSION = { id: "welcome-gift", title: "Welcome to the game", description: "Start the game. Claim 3,200 free gems for 20 rolls—new and returning players are welcome!", goal: 1, kind: "welcome", gems: 3200, credits: 0 } as const;
+// Keep published IDs/rewards stable: older saves retain their claimed rewards.
+// New milestones use progress already stored in every save; no reset is needed.
 export const missions = [
   WELCOME_MISSION,
+  // Campaign: fund the next stretch of squad training, not just the last fight.
   { id: "first-stage", title: "The first step", description: "Clear your first campaign stage.", goal: 1, kind: "stages", gems: 200, credits: 1000 },
+  { id: "stages-3", title: "The council has a budget", description: "Clear 3 different campaign stages.", goal: 3, kind: "stages", gems: 320, credits: 10000 },
   { id: "chapter-one", title: "A very expensive mistake", description: "Clear all 5 stages of Chapter 01.", goal: 5, kind: "stages", gems: 500, credits: 3000 },
-  { id: "first-ten", title: "Just one more pull…", description: "Recruit 10 characters.", goal: 10, kind: "pulls", gems: 320, credits: 1500 },
-  { id: "full-squad", title: "Better together", description: "Own 6 different characters.", goal: 6, kind: "roster", gems: 400, credits: 2000 },
+  { id: "stages-8", title: "Approved field expenses", description: "Clear 8 different campaign stages.", goal: 8, kind: "stages", gems: 480, credits: 20000 },
+  { id: "stages-10", title: "Two chapters, still solvent", description: "Clear 10 different campaign stages.", goal: 10, kind: "stages", gems: 800, credits: 35000 },
+  { id: "stages-13", title: "Emergency training fund", description: "Clear 13 different campaign stages.", goal: 13, kind: "stages", gems: 640, credits: 35000 },
+  { id: "stages-15", title: "Half the paperwork survived", description: "Clear 15 different campaign stages.", goal: 15, kind: "stages", gems: 960, credits: 50000 },
+  { id: "stages-18", title: "The resistance gets a raise", description: "Clear 18 different campaign stages.", goal: 18, kind: "stages", gems: 800, credits: 50000 },
+  { id: "stages-20", title: "Hostile takeover allowance", description: "Clear 20 different campaign stages.", goal: 20, kind: "stages", gems: 1280, credits: 75000 },
+  { id: "stages-23", title: "The final push is funded", description: "Clear 23 different campaign stages.", goal: 23, kind: "stages", gems: 960, credits: 75000 },
   { id: "all-stages", title: "The ledger is balanced", description: "Complete all 25 campaign stages.", goal: 25, kind: "stages", gems: 2000, credits: 15000 },
+  // Recruitment counts pulls, including duplicates, not current roster size.
+  { id: "pulls-1", title: "A connection worth making", description: "Make your first recruitment pull.", goal: 1, kind: "pulls", gems: 160, credits: 5000 },
+  { id: "first-ten", title: "Just one more pull…", description: "Make 10 recruitment pulls, including duplicates.", goal: 10, kind: "pulls", gems: 320, credits: 1500 },
+  { id: "pulls-25", title: "The terminal knows your name", description: "Make 25 recruitment pulls, including duplicates.", goal: 25, kind: "pulls", gems: 480, credits: 15000 },
+  { id: "pulls-50", title: "Fifty questionable decisions", description: "Make 50 recruitment pulls, including duplicates.", goal: 50, kind: "pulls", gems: 800, credits: 25000 },
+  { id: "pulls-100", title: "A hundred reasons to stay", description: "Make 100 recruitment pulls, including duplicates.", goal: 100, kind: "pulls", gems: 1600, credits: 40000 },
+  { id: "pulls-200", title: "Council recruitment drive", description: "Make 200 recruitment pulls, including duplicates.", goal: 200, kind: "pulls", gems: 2400, credits: 60000 },
+  { id: "pulls-300", title: "The academy is well connected", description: "Make 300 recruitment pulls, including duplicates.", goal: 300, kind: "pulls", gems: 3200, credits: 80000 },
+  // Collection rewards finding different recruits, including the free UR.
+  { id: "roster-4", title: "Room for one more", description: "Own 4 different characters.", goal: 4, kind: "roster", gems: 320, credits: 5000 },
+  { id: "full-squad", title: "Better together", description: "Own 6 different characters.", goal: 6, kind: "roster", gems: 400, credits: 2000 },
+  { id: "roster-10", title: "A bigger council table", description: "Own 10 different characters.", goal: 10, kind: "roster", gems: 640, credits: 15000 },
+  { id: "roster-15", title: "Friends in every classroom", description: "Own 15 different characters.", goal: 15, kind: "roster", gems: 960, credits: 30000 },
+  { id: "roster-20", title: "Nobody fights alone", description: "Own 20 different characters.", goal: 20, kind: "roster", gems: 1280, credits: 45000 },
+  { id: "roster-30", title: "An academy worth defending", description: "Own 30 different characters.", goal: 30, kind: "roster", gems: 1600, credits: 65000 },
+  // Training grants use the highest current level; old upgrades count too.
+  { id: "level-10", title: "Training pays off", description: "Raise any character to level 10.", goal: 10, kind: "level", gems: 320, credits: 10000 },
+  { id: "level-20", title: "Ready for the next chapter", description: "Raise any character to level 20.", goal: 20, kind: "level", gems: 640, credits: 25000 },
+  { id: "level-30", title: "The council's finest", description: "Raise any character to level 30.", goal: 30, kind: "level", gems: 960, credits: 40000 },
+  { id: "level-40", title: "A very good investment", description: "Raise any character to level 40.", goal: 40, kind: "level", gems: 1280, credits: 60000 },
+  { id: "level-50", title: "Fully funded hero", description: "Raise any character to level 50.", goal: 50, kind: "level", gems: 1600, credits: 90000 },
 ] as const;
-export function missionProgress(state: GameState, kind: string) { return kind === "welcome" ? 1 : kind === "stages" ? state.cleared.length : kind === "pulls" ? state.totalPulls : state.roster.length; }
+export type MissionKind = typeof missions[number]["kind"];
+export function missionProgress(state: GameState, kind: MissionKind): number {
+  switch (kind) {
+    case "welcome": return 1;
+    case "stages": return new Set(state.cleared).size;
+    case "pulls": return state.totalPulls;
+    case "roster": return new Set(state.roster.map(owned => owned.id)).size;
+    case "level": return state.roster.reduce((highest, owned) => Math.max(highest, owned.level), 0);
+    default: return 0;
+  }
+}
