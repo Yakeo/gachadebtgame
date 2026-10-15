@@ -629,3 +629,59 @@
 .sprite-stage[data-character="alice"]{ --recruit-color:#b95a9b; }
 .sprite-stage[data-character="alice"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
 @media(prefers-reduced-motion:reduce){.sprite-stage[data-character="aster"] .sprite-rig,.sprite-stage[data-character="vesper"] .sprite-rig,.sprite-stage[data-character="maribel"] .sprite-rig,.sprite-stage[data-character="cobalt"] .sprite-rig,.sprite-stage[data-character="octavia"] .sprite-rig,.sprite-stage[data-character="flint"] .sprite-rig,.sprite-stage[data-character="seraphine"] .sprite-rig,.sprite-stage[data-character="rook"] .sprite-rig,.sprite-stage[data-character="morrow"] .sprite-rig,.sprite-stage[data-character="tala"] .sprite-rig,.sprite-stage[data-character="pip"] .sprite-rig,.sprite-stage[data-character="mira"] .sprite-rig,.sprite-stage[data-character="quill"] .sprite-rig,.sprite-stage[data-character="brass"] .sprite-rig,.sprite-stage[data-character="lumi"] .sprite-rig,.sprite-stage[data-character="altria"] .sprite-rig,.sprite-stage[data-character="alice"] .sprite-rig{animation:none!important}}
+
+/* Operator command inspection: select first, explicitly activate second. */
+.battle-command-panel{display:grid;grid-template-columns:minmax(140px,.8fr) minmax(320px,3fr) minmax(160px,1fr);gap:18px;padding:15px;border:1px solid #38526c;background:linear-gradient(120deg,#14283b,#20374b);color:#edf5fc;box-shadow:0 8px 20px #10283b16;border-left:3px solid var(--operator-color)}
+.operator-brief{display:flex;align-items:center;gap:8px;min-width:0}
+.operator-model{width:65px;height:136px;flex-shrink:0;background:radial-gradient(ellipse at bottom,color-mix(in srgb,var(--operator-color) 25%,transparent),transparent 75%)}
+.operator-model>.chibi{width:100%;height:100%;object-fit:contain}
+.operator-brief .eyebrow{color:#91aeca;font-size:7px;letter-spacing:1px}
+.operator-brief strong{display:block;font-size:23px;font-family:var(--display);font-style:italic;line-height:1.1;margin-top:7px}
+.operator-brief small{display:block;font-size:9px;color:#adbed0;margin-top:6px}
+.operator-energy{display:flex;align-items:center;gap:4px;color:#9edcff;font-size:8px;margin-top:12px;font-weight:700}
+.command-inspection{min-width:0}
+.command-selector{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.inspect-command{position:relative;display:grid;grid-template-columns:18px 1fr;column-gap:5px;text-align:left;align-items:center;background:#ffffff0b;border:1px solid #748ca44d;padding:10px 8px;color:#b6cadb;min-height:51px;border-radius:2px}
+.inspect-command>span{position:absolute;top:3px;right:5px;font-size:7px;opacity:.55}
+.inspect-command strong{font-size:11px}
+.inspect-command small{grid-column:2;font-size:7px;letter-spacing:.5px;margin-top:3px}
+.inspect-command.selected{background:#e9f5ff;color:#143a58;border-color:#83c8ff;box-shadow:inset 0 -3px 0 var(--operator-color)}
+.inspect-command.ultimate.selected{background:#fff0c6;border-color:#f2d07c;color:#805319}
+.inspect-command:focus-visible,.activate-command:focus-visible{outline:2px solid #9cddff;outline-offset:3px}
+.command-detail{padding:12px 0 0;min-height:110px}
+.command-detail-heading{display:flex;flex-direction:column;gap:4px}
+.command-detail-heading>span{font-size:7px;letter-spacing:1.2px;color:#94b9d6}
+.command-detail-heading>strong{font-family:var(--display);font-size:22px;font-weight:700;line-height:1.1}
+.command-detail>p{font-size:12px;line-height:1.6;color:#d3e0ed;margin-top:7px}
+.command-target{display:flex;align-items:center;gap:6px;color:#91bddb;font-size:9px;margin-top:7px}
+.command-activation{display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:10px}
+.command-readiness{font-size:8px;font-weight:700;letter-spacing:1px;color:#a9dca4;text-align:center}
+.command-readiness.charging{color:#f4c78e}
+.activate-command{display:flex;align-items:center;justify-content:center;gap:8px;min-height:49px;padding:12px 10px;background:#2994e9;border:1px solid #74c0ff;color:white;font-weight:700;font-size:12px;text-transform:capitalize}
+.activate-command.ultimate{background:#e7ba61;border-color:#ffe3a5;color:#33270e}
+.command-activation>small{font-size:8px;line-height:1.7;color:#9bb3c8;text-align:center}
+/* Keep each chapter's painting visible instead of hiding it behind the floor tint. */
+.battle-arena>img{image-rendering:auto!important;filter:saturate(1.04) brightness(.96)!important;object-fit:cover;object-position:center 56%}
+.battle-arena .arena-shade{background:linear-gradient(180deg,#0c203133,transparent 35%,#122a464d)}
+.battle-arena .arena-grid{opacity:.07}
+.battle-arena .battle-versus{opacity:.13}
+@media(min-width:901px){
+  .game-frame .battle-screen{min-height:0;height:100%}
+  .game-frame .battle-arena{min-height:240px;flex:1}
+  .game-frame .battle-dashboard{padding-top:12px;padding-bottom:12px;flex-shrink:0}
+  .game-frame .ally-hud{margin-bottom:12px}
+}
+@media(max-width:900px){
+  .battle-command-panel{grid-template-columns:minmax(0,1fr) 150px;gap:12px;padding:13px}
+  .operator-brief{display:none}
+}
+@media(max-width:650px){
+  .battle-command-panel{grid-template-columns:1fr;gap:10px;padding:12px}
+  .command-selector{gap:5px}
+  .inspect-command{padding:10px 6px;grid-template-columns:16px 1fr;column-gap:4px}
+  .inspect-command strong{font-size:10px}
+  .inspect-command>svg{width:16px;height:16px}
+  .command-detail>p{font-size:12px}
+  .command-activation{display:grid;grid-template-columns:1fr 1.3fr;align-items:center;gap:8px}
+  .command-activation>small{grid-column:1/-1}
+}

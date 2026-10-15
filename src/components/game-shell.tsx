@@ -2,6 +2,7 @@
 import { useState, type FormEvent, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp, Clock3, Crosshair, Expand, Gift, Heart, Info, ListChecks, LogIn, LogOut, Mail, MessageCircle, Plus, Radio, RefreshCw, Settings, ShieldCheck, ShoppingBag, Sparkles, Star, UsersRound, Volume2, VolumeX, Zap, Eye, EyeOff } from "lucide-react";
 import { useCallback, useEffect, useState as useBootState } from "react";
+import { GameViewport } from "./game-viewport";
 import { GameProvider, useGame } from "./game-context";
 import { LoadingScreen, LoginScreen, TitleScreen } from "./boot-screen";
 import { Avatar, Battlefield, Chibi, Credit, Gem, Logo, Modal, ProgressBar, Spinner } from "./ui";
@@ -10,7 +11,7 @@ import { battlefieldFor, chapters, stages } from "@/lib/campaign";
 import { characterById, companionLines } from "@/lib/game-data";
 type View = "home" | "campaign" | "characters" | "recruit" | "missions" | "archive" | "exchange";
 type Dialog = "account" | "settings" | "mail" | "notices" | "daily" | null;
-export default function Game() { return <GameProvider><BootFlow /></GameProvider>; }
+export default function Game() { return <GameViewport><GameProvider><BootFlow /></GameProvider></GameViewport>; }
 function BootFlow() {
   const [phase, setPhase] = useBootState<"loading" | "title" | "login" | "game">("loading");
   const { clearSession } = useGame();
