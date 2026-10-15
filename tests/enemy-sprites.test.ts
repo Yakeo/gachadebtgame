@@ -247,7 +247,7 @@ test("a blow and its answer are two separate beats", () => {
   const panel = read("src/components/battle-command-panel.tsx");
   assert.match(panel, /disabled=\{locked\}/, "inspection ignores the animation lock");
   assert.match(panel, /disabled=\{locked \|\| \(insufficient/, "activation ignores the animation lock");
-  assert.match(panel, /if \(!locked && !insufficient\) onActivate/, "keyboard activation ignores the lock");
+  assert.match(panel, /if \(!locked && !insufficient\) \{[^}]*setExpanded\(false\);[^}]*onActivate\(selected\);/, "activation must respect the lock and dismiss inspection before dispatch");
 });
 
 test("only the enemy that was struck reacts to a blow", () => {

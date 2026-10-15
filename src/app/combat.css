@@ -1098,7 +1098,7 @@
 .compact-dock .command-inspection{position:static}
 .compact-dock .command-selector{gap:12px}
 .compact-dock .inspect-command{min-height:65px}
-.compact-dock .command-detail{display:none;position:absolute;z-index:10;left:24px;right:24px;bottom:calc(100% + 12px);padding:20px 50px 20px 22px;min-height:0;max-height:45vh;overflow:auto;background:#10283df5;border:1px solid #83b5d3;box-shadow:0 10px 30px #0005}
+.compact-dock .command-detail{display:none;position:absolute;z-index:10;left:24px;right:24px;bottom:calc(100% + 12px);padding:20px 50px 20px 22px;min-height:0;max-height:45vh;overflow:auto;background:#10283db3;border:1px solid #83b5d399;box-shadow:0 8px 24px #0003}
 .compact-dock.is-inspecting .command-detail{display:block}
 .close-command-detail{position:absolute;right:12px;top:12px;background:#31536e;color:white;border:1px solid #698ba6;padding:6px}
 .compact-dock .command-activation{gap:7px}
