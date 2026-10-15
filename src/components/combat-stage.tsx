@@ -91,7 +91,13 @@ function CombatSprite({ id, label, pose, side }: { id: string; label?: string; p
 }
 
 export function BattleScreen({ battle, stage, onStory, onRetreat, onMainMenu }: { battle: Battle; stage: Stage; onStory: () => void; onRetreat: () => void; onMainMenu: () => void }) {
-  const { state, action, busy } = useGame();
+  const { state, action, busy, reducedMotion } = useGame();
+  const [openingRoll, setOpeningRoll] = useState(() => battle.turn === 1 && battle.status === "active" && !!battle.initiative?.some(entry => entry.roll !== undefined));
+  useEffect(() => {
+    if (!openingRoll) return;
+    const timer = setTimeout(() => setOpeningRoll(false), reducedMotion ? 100 : 650);
+    return () => clearTimeout(timer);
+  }, [openingRoll, reducedMotion]);
   const [target, setTarget] = useState(() => Math.max(0, battle.enemies.findIndex(enemy => enemy.hp > 0)));
   const [auto, setAuto] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -140,7 +146,7 @@ export function BattleScreen({ battle, stage, onStory, onRetreat, onMainMenu }: 
   }, [poses]);
 
   const command = useCallback(async (cmd: string) => {
-    if (busy || beat || battle.status !== "active") return;
+    if (openingRoll || busy || beat || battle.status !== "active") return;
     acting.current = true;
     const pose = (cmd === "attack" || cmd === "skill" || cmd === "guard" || cmd === "ultimate" ? cmd : "attack") as Pose;
     // Every blow aimed at the enemy carries the fighter there first: measure
@@ -216,10 +222,10 @@ export function BattleScreen({ battle, stage, onStory, onRetreat, onMainMenu }: 
       await new Promise(resolve => setTimeout(resolve, COUNTER_HOLD_MS));
     }
     setBeat(false);
-  }, [action, active.id, battle.allies, battle.enemies, battle.status, battle.turn, beat, busy, target, c.color]);
+  }, [action, active.id, battle.allies, battle.enemies, battle.status, battle.turn, beat, busy, target, c.color, openingRoll]);
 
   useEffect(() => {
-    if (!auto || busy || beat || battle.status !== "active" || paused || log) return;
+    if (!auto || openingRoll || busy || beat || battle.status !== "active" || paused || log) return;
     const timer = setTimeout(() => {
       const healing = ["Support", "Healer"].includes(c.role) && battle.allies.some(ally => ally.hp > 0 && ally.hp < ally.maxHp * .65);
       void command(active.energy >= 100 ? "ultimate" : active.energy >= 20 && healing ? "skill" : "attack");
@@ -228,12 +234,13 @@ export function BattleScreen({ battle, stage, onStory, onRetreat, onMainMenu }: 
       // here would stack on top of that hold and crawl.
     }, 400);
     return () => clearTimeout(timer);
-  }, [active.energy, auto, battle, beat, busy, c.role, command, log, paused]);
+  }, [active.energy, auto, battle, beat, busy, c.role, command, log, paused, openingRoll]);
 
 
   const firstClear = !state.cleared.includes(stage.id);
   return <section className={`battle-screen ${impact ? "has-impact" : ""}`} style={{ "--impact-color": impactColor } as CSSProperties}>
     <div className="combat-overlay-toolbar"><div><small>OPERATION {stage.id} · ROUND {battle.turn}</small><strong>{stage.title}</strong></div><div><button onClick={() => setAuto(!auto)} disabled={paused || busy || beat || battle.status !== "active"}>{auto ? "Auto ON" : "Auto OFF"}</button><button onClick={() => { setAuto(false); setPaused(true); }} aria-label="Pause battle"><Pause size={20} />Pause</button></div></div>
+    {openingRoll && <div className="initiative-roll-intro" data-reduced-motion={reducedMotion} role="status" aria-label="Rolling D20 initiative"><svg className="initiative-die" viewBox="0 0 100 112" aria-hidden="true"><path d="M50 3 94 28v56l-44 25L6 84V28Z" fill="#338fdb" stroke="#b0f4ff" strokeWidth="3"/><path d="m50 3-30 75h60L50 3M6 28l14 50-14 6m88-56L80 78l14 6M20 78l30 31 30-31" fill="none" stroke="#b0f4ff" strokeWidth="2"/><text x="50" y="64" textAnchor="middle" fill="white" fontSize="22" fontWeight="bold">D20</text></svg><strong>ROLL FOR INITIATIVE!</strong><span>Speed + D20 · highest total goes first</span></div>}
     <div className="combat-initiative-overlay"><InitiativeStrip battle={battle} /></div>
     <div className={`battle-arena chapter-${stage.chapter}`}><Battlefield key={stage.chapter} src={battlefieldFor(stage.chapter)} alt={`The battlefield at ${stage.location.toLowerCase()}`} /><div className="arena-shade" /><div className="arena-grid" /><div className="arena-topline"><span><Radio size={12} /> TACTICAL LINK ESTABLISHED</span><span>{battle.enemies.filter(enemy => enemy.hp > 0).length} HOSTILES REMAINING</span></div><div className="battle-versus" aria-hidden="true">VS<span>COUNCIL / CORPORATE</span></div>
       <div className="combat-teams" ref={arenaRef}>
@@ -243,7 +250,7 @@ export function BattleScreen({ battle, stage, onStory, onRetreat, onMainMenu }: 
       <div className="arena-bottom-line"><span>{stage.location}</span><span>SELECT AN ENEMY. MAKE YOUR MOVE.</span></div>
     </div>
     <div className="battle-dashboard">
-      <BattleCommandPanel compact key={`${battle.stageId}-${battle.turn}-${active.id}`} character={c} actor={active} targetName={battle.enemies[target]?.name ?? "Choose a target"} locked={busy || beat || battle.status !== "active" || paused || log} onInspect={() => setAuto(false)} onActivate={cmd => { setAuto(false); void command(cmd); }} />
+      <BattleCommandPanel compact key={`${battle.stageId}-${battle.turn}-${active.id}`} character={c} actor={active} targetName={battle.enemies[target]?.name ?? "Choose a target"} locked={busy || beat || openingRoll || battle.status !== "active" || paused || log} onInspect={() => setAuto(false)} onActivate={cmd => { setAuto(false); void command(cmd); }} />
       <div className="battle-log-line"><span>{busy ? <Spinner /> : <ChevronRight size={15} />}</span><p aria-live="polite">{battle.log[0]}</p><button onClick={() => setLog(true)}>Full combat log <History size={13} /></button></div>
     </div>
     {battle.status !== "active" && <div className="battle-result-overlay"><div className={`battle-result ${battle.status}`}><span className="eyebrow">{battle.status === "victory" ? "COUNCIL OPERATIONS / SUCCESS" : "COUNCIL OPERATIONS / REGROUP"}</span><div className="victory-stars">{battle.status === "victory" ? [0, 1, 2].map(i => <Star key={i} size={35} fill="currentColor" style={{ animationDelay: `${i * 180}ms` }} />) : <Shield size={55} />}</div><h2>{battle.status === "victory" ? <>Operation<br /><span>complete.</span></> : <>Not the<br /><span>last chapter.</span></>}</h2><p>{battle.status === "victory" ? "A little teamwork. A very big difference." : "A tactical retreat isn't the end. Upgrade your squad, then try again."}</p>{battle.status === "victory" && <div className="victory-rewards">{firstClear && <span><Gem size={22} /><strong>200</strong><small>GEMS</small></span>}<span><Credit size={23} /><strong>{campaignCredits(stages.findIndex(s => s.id === battle.stageId) + 1, firstClear).toLocaleString()}</strong><small>CREDITS</small></span><span><Flag size={22} /><strong>{battle.turn}</strong><small>TURNS</small></span></div>}<button className="primary-button full-width" onClick={battle.status === "victory" ? onStory : onRetreat}>{battle.status === "victory" ? <><BookOpen size={18} />Continue the story <ArrowRight size={18} /></> : <><ArrowLeft size={17} />Return to the campaign</>}</button><small className="battle-result-note">{battle.status === "victory" ? "Complete the after-battle story to collect your rewards." : "Your characters recover fully between operations."}</small></div></div>}

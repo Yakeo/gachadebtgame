@@ -79,7 +79,7 @@ export function LoadingScreen({ onComplete }: { onComplete: (next: "title" | "lo
   }, [step, serverReady, serverError, reducedMotion, onComplete, attempt]);
 
   return <section className="boot-screen loading-screen" aria-busy={!serverReady} aria-label="Loading Gacha Debt">
-    <img src="/images/academy.jpg" alt="" className="boot-bg" />
+    <img src="/images/loading-campus.jpg" alt="" className="boot-bg" />
     <div className="boot-shade" />
     <div className="boot-frame"><span /><span /><span /><span /></div>
     <div className="loading-brand"><Logo /><span>PREVIEW 0.1</span></div>
