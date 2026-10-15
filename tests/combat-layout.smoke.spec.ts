@@ -32,6 +32,16 @@ for (const [width, height] of [[1366, 680], [1920, 1080], [390, 844], [844, 390]
       expect(r!.y).toBeGreaterThanOrEqual(arena!.y);
       expect(r!.y + r!.height).toBeLessThanOrEqual(arena!.y + arena!.height + 1);
     }
+    await expect(page.locator(".ally-hud, .enemy-hud")).toHaveCount(0);
+    for (const vitals of await page.locator(".model-vitals, .enemy-unit .combat-unit-label").all()) {
+      // The sprite is the positioning parent: never another row/card beneath the arena.
+      expect(await vitals.evaluate(e => e.parentElement!.classList.contains("combat-unit-art"))).toBe(true);
+      await expect(vitals).toHaveCSS("position", "absolute");
+      await expect(vitals).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      const art = await vitals.locator("..").boundingBox();
+      const bar = await vitals.boundingBox();
+      expect(Math.abs(bar!.y - (art!.y + art!.height))).toBeLessThan(12);
+    }
     await expect(page.locator(".command-detail")).toBeHidden();
     await page.screenshot({ path: `.cache/battlefield-${width}.png` });
     await page.getByRole("button", { name: /2 Skill/ }).click();

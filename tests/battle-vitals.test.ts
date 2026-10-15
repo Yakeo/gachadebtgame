@@ -19,7 +19,8 @@ function ruleValue(text: string, selector: string, prop: string): number | null 
 
 test("vitals now live beneath the models instead of in duplicate dashboard cards", () => {
   assert.doesNotMatch(stage, /className="enemy-hud"|className="ally-hud"/);
-  assert.match(stage, /className="model-vitals"/);
+  assert.match(stage, /side="ally" \/><div className="model-vitals"/, "bars must be children of the model art, not a HUD row");
+  assert.match(panel, /\.game-shell\.is-combat \.model-vitals\{position:absolute;[^}]*background:none;border:0/, "foot bars must not create another card");
   assert.match(stage, /value=\{ally.energy\} max=\{100\}/);
   assert.match(stage, /<ProgressBar value=\{enemy\.hp\} max=\{enemy\.maxHp\} className="enemy-health" \/>/);
   assert.match(panel, /\.enemy-unit \.combat-unit-label\{[^}]*order:2/);

@@ -1111,3 +1111,25 @@
   .compact-dock.battle-command-panel{padding:8px;grid-template-columns:minmax(0,1fr) 105px;gap:8px}.compact-dock .command-selector{gap:4px}.compact-dock .inspect-command{min-height:54px;display:flex;flex-direction:column;padding:6px 2px;gap:3px}.compact-dock .inspect-command strong{font-size:9px}.compact-dock .inspect-command small{font-size:8px}.compact-dock .inspect-command>span{display:none}.compact-dock .command-readiness{font-size:9px}.compact-dock .activate-command{font-size:11px;padding:7px;gap:4px}.compact-dock .command-detail{left:8px;right:8px;padding:16px 42px 16px 16px}.compact-dock .command-detail-heading>strong{font-size:21px}
 }
 @media(max-height:500px){.combat-initiative-overlay{display:none}.game-shell.is-combat .combat-teams{padding-top:60px;padding-bottom:10px}.game-shell.is-combat .combat-unit-art{height:80px}.compact-dock .inspect-command{min-height:40px}.compact-dock.battle-command-panel{padding:4px 12px}.compact-dock .command-readiness{display:none}.compact-dock .activate-command{min-height:38px}}
+
+/* Vitals belong to the sprite's feet, not a second set of status cards.
+   Absolute anchoring keeps them out of team layout and reserves no HUD rows. */
+.game-shell.is-combat .combat-unit-art{overflow:visible}
+.game-shell.is-combat .model-vitals{position:absolute;top:calc(100% - 6px);left:50%;transform:translateX(-50%);width:132px;max-width:115%;margin:0;padding:0;background:none;border:0;border-radius:0;box-shadow:none;text-shadow:0 1px 3px #000;z-index:5}
+.game-shell.is-combat .model-vitals .ally-name{font-size:12px;line-height:1.2;margin:0 0 2px;display:block}
+.game-shell.is-combat .model-vitals>span{font-size:11px;line-height:1.2;margin:0 0 3px;display:block}
+.game-shell.is-combat .model-vitals .progress-track{height:6px;background:#122436d9;border:1px solid #d1e9ff99;box-shadow:0 1px 4px #0008}
+.game-shell.is-combat .model-vitals>div:last-child{margin-top:3px;line-height:1;font-size:10px}
+.game-shell.is-combat .model-vitals>div:last-child>.progress-track{height:4px}
+.game-shell.is-combat .enemy-unit .combat-unit-label{position:absolute;top:calc(100% - 6px);left:50%;transform:translateX(-50%);right:auto;width:132px;max-width:115%;margin:0;padding:0;background:none;border:0;box-shadow:none;text-shadow:0 1px 3px #000;z-index:5}
+.game-shell.is-combat .enemy-unit .combat-unit-label>span{font-size:12px;margin-bottom:3px}
+.game-shell.is-combat .enemy-unit .combat-unit-label>small{font-size:11px;margin-top:3px}
+.game-shell.is-combat .enemy-unit .target-label{position:absolute;bottom:auto;top:calc(100% + 55px);left:50%;transform:translateX(-50%);margin:0}
+.game-shell.is-combat .combat-units{padding-bottom:90px}
+@media(max-width:650px){
+  .game-shell.is-combat .model-vitals,.game-shell.is-combat .enemy-unit .combat-unit-label{width:88px;max-width:110%}
+  .game-shell.is-combat .model-vitals .ally-name,.game-shell.is-combat .enemy-unit .combat-unit-label>span{font-size:10px}
+  .game-shell.is-combat .model-vitals>span,.game-shell.is-combat .enemy-unit .combat-unit-label>small{font-size:9px}
+  .game-shell.is-combat .combat-units{row-gap:85px;padding-bottom:80px}
+}
+@media(max-height:500px){.game-shell.is-combat .combat-units{padding-bottom:70px}}
