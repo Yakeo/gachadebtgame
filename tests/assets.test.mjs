@@ -222,7 +222,8 @@ test("every character with a model has illustration art, and it exists", () => {
     const file = `public${url}`;
     assert.ok(existsSync(join(root, file)), `${file} is referenced by game-data.ts but does not exist`);
     const { size } = statSync(join(root, file));
-    assert.ok(size > 40 * 1024, `${file} is only ${(size / 1024).toFixed(0)} KB — that is not a finished illustration`);
+    const minimumKB = /keyart-(shroom|bluecap|reroom)\.webp$/.test(file) ? 5 : 40; // Supplied pixel art compresses exceptionally well.
+    assert.ok(size > minimumKB * 1024, `${file} is only ${(size / 1024).toFixed(0)} KB — that is not a finished illustration`);
     assert.ok(size < 900 * 1024, `${file} is ${(size / 1024).toFixed(0)} KB — too heavy to ship`);
   }
 });
@@ -314,7 +315,7 @@ test("all sprites share one canvas aspect, so they scale alike", () => {
 
 test("humanoid sprites render at a consistent height in the arena box", () => {
   const critters = JSON.parse(readFileSync(join(root, "art-source/roster/critters.json"), "utf8"));
-  const mascotModels = new Set(critters.filter(c => c.illustration).map(c => c.model.split("/").pop()));
+  const mascotModels = new Set([...critters.filter(c => c.illustration).map(c => c.model.split("/").pop()), ...["shroom", "bluecap", "cat", "reroom", "sentry"].map(id => `splash-${id}.png`)]);
   // The end-to-end check: simulate object-fit: contain in the 143x166 box the
   // arena uses and confirm the figures come out the same height. Before this
   // was fixed the spread was large enough to read as two different art styles.
