@@ -33,6 +33,14 @@ for (const [width, height] of [[1366, 680], [1920, 1080], [390, 844], [844, 390]
       expect(r!.y + r!.height).toBeLessThanOrEqual(arena!.y + arena!.height + 1);
     }
     await expect(page.locator(".ally-hud, .enemy-hud")).toHaveCount(0);
+    await expect(page.locator(".pose-enter")).toHaveCount(0); // Measure settled size, not the entrance squash.
+    for (const image of await page.locator(".ally-unit .sprite-art").all()) {
+      const box = await image.boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(width > 900 ? 170 : 95);
+      // Enlarged models must not disappear over a phone's outer screen edges.
+      expect(box!.x).toBeGreaterThanOrEqual(-1);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+    }
     for (const vitals of await page.locator(".model-vitals, .enemy-unit .combat-unit-label").all()) {
       // The sprite is the positioning parent: never another row/card beneath the arena.
       expect(await vitals.evaluate(e => e.parentElement!.classList.contains("combat-unit-art"))).toBe(true);
