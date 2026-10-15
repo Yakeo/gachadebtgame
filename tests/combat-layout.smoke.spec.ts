@@ -33,6 +33,25 @@ for (const [width, height] of [[1366, 680], [1920, 1080], [390, 844], [844, 390]
       expect(r!.y + r!.height).toBeLessThanOrEqual(arena!.y + arena!.height + 1);
     }
     await expect(page.locator(".ally-hud, .enemy-hud")).toHaveCount(0);
+    // Selection cues must remain white and visible on the dark chapter-5 field.
+    const selected = page.locator(".enemy-unit.targeted");
+    await expect(selected).toHaveAttribute("aria-pressed", "true");
+    await expect(selected.locator(".target-pointer")).toBeVisible();
+    await expect(selected.locator(".target-pointer")).toHaveCSS("color", "rgb(255, 255, 255)");
+    await expect(page.locator(".turn-pointer")).toHaveCount(1);
+    await expect(page.locator(".ally-unit.current .turn-pointer")).toBeVisible();
+    await expect(page.locator(".target-reticle")).toHaveCount(0);
+    for (const energy of await page.locator(".model-vitals>div:last-child").all()) {
+      await expect(energy).toHaveCSS("background-color", "rgb(244, 250, 255)");
+      await expect(energy).toHaveCSS("color", "rgb(16, 40, 61)");
+    }
+    const nextTarget = page.locator(".enemy-unit:not(.defeated):not(.targeted)").first();
+    if (await nextTarget.count()) {
+      await nextTarget.click();
+      await expect(page.locator(".enemy-unit[aria-pressed=true]")).toHaveCount(1);
+      await expect(page.locator(".target-pointer")).toHaveCount(1);
+    }
+
     for (const vitals of await page.locator(".model-vitals, .enemy-unit .combat-unit-label").all()) {
       // The sprite is the positioning parent: never another row/card beneath the arena.
       expect(await vitals.evaluate(e => e.parentElement!.classList.contains("combat-unit-art"))).toBe(true);
