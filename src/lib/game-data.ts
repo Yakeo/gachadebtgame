@@ -160,11 +160,113 @@ export function characterById(id: string) { return characters.find(c => c.id ===
 export type OwnedCharacter = { id: string; level: number; potential: number; duplicates: number };
 export type Combatant = { id: string; name: string; hp: number; maxHp: number; energy: number; attack: number; defense: number; level?: number; sprite?: string; guard?: boolean; boss?: boolean; shield?: number; audited?: boolean; stunned?: boolean };
 export type Battle = { stageId: string; enemies: Combatant[]; allies: Combatant[]; turn: number; active: number; status: "active" | "victory" | "defeat"; log: string[]; lastHit?: { target: string; amount: number; critical: boolean }; streak?: number };
-export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[]; choices: Record<string, string> };
+export type GameState = { gems: number; credits: number; energy: number; energyAt: number; pity: number; totalPulls: number; roster: OwnedCharacter[]; squad: string[]; cleared: string[]; claimed: string[]; lastDaily: string | null; battle: Battle | null; pullHistory: { id: string; date: string; rarity: Rarity }[]; choices: Record<string, string>; companion: string };
 export type Player = { id: string; name: string; email: string | null; guest: boolean };
 export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guaranteed: boolean };
+/**
+ * What each character says while they are your home-screen companion.
+ *
+ * The companion used to be Ynna alone, with four hardcoded lines in the shell.
+ * Anyone in the roster can hold the job now, so the lines live here next to the
+ * people who say them. Three each: a greeting, a bit of business, and one that
+ * is a bad idea. Voices follow `campaign_script.md`.
+ */
+export const companionQuotes: Record<string, string[]> = {
+  ynna: [
+    "Just one more pull… What could possibly go wrong?",
+    "Welcome back! Ninette says we're not allowed near the treasury. Again.",
+    "A whole new adventure, and my favorite person to share it with. Ready?",
+    "It's not a spending problem. It's a character-building experience!",
+  ],
+  ninette: [
+    "Welcome back. I've already logged this visit under 'miscellaneous expenses.'",
+    "The books balance. My patience, less so. What do you need?",
+    "Whoever approved that purchase order is answering to me. That's you. That's always you.",
+  ],
+  penelope: [
+    "I made lunch! The fire alarm is just the meal's way of announcing itself.",
+    "Don't worry, I measured everything. The pan decided the portions.",
+    "The kitchen is fine. The kitchen is FINE. ...Do you own a fire extinguisher?",
+  ],
+  ruta: [
+    "Perimeter secure. Treasury... present. You may proceed.",
+    "Rest while it's quiet. It won't stay quiet.",
+    "I don't bend. Not the rules, not the lance, and not my schedule.",
+  ],
+  purp: [
+    "The basement is quiet at this hour. Perfect for forbidden research.",
+    "I fixed the campus network. Then I improved it. Then it asked me questions.",
+    "Sleep is a suggestion. The deadline is a fact.",
+  ],
+  edgelord: [
+    "The abyss gazed back... and then asked for my homework.",
+    "Shadow Blade stands ready. Also, do you have snacks?",
+    "Eternal night can wait until after the meeting.",
+  ],
+  solari: [
+    "By the sacred ledger, your accounts are... almost acceptable.",
+    "A blessing on your pulls. Rates are still rates, of course.",
+    "Purity of spirit. Purity of spreadsheets. Both are non-negotiable.",
+  ],
+  escanooor: [
+    "You have my attention. For exactly four minutes.",
+    "A deadline is a promise. I collect on promises.",
+    "Rest. Tomorrow we train. That wasn't encouragement.",
+  ],
+  angelina: [
+    "A legend never checks the drop table. A legend believes.",
+    "Every banner is a stage, darling. Wave to the crowd.",
+    "Limited time? Please. I'm limited edition.",
+  ],
+  byte: [
+    "I have admin access and zero supervision. Best combination.",
+    "Ping! All systems nominal. Mostly. Don't open the logs.",
+    "If it has a terminal, I can befriend it.",
+  ],
+  shroom: [
+    "Hi! I'm helping! ...Am I helping?",
+    "Googly eyes: ON. Morale: IMMACULATE.",
+    "I was recruited from the west wing. I miss the dust sometimes.",
+  ],
+  bluecap: [
+    "Damp corners are underrated. Five stars. Would loiter again.",
+    "Purp says hi. From the basement. Where it's damp. Which is perfect.",
+    "I watered the moss. The moss says thanks. We're friends now.",
+  ],
+  cat: [
+    "Purr... That will be three credits in late fees.",
+    "Head pats accepted. Overdue books: less so.",
+    "The heart ticks, the world turns, the fines compound.",
+  ],
+  reroom: [
+    "I'm not yelling. This is just my voice!",
+    "Somebody poked me with a ruler. I remember everything.",
+    "Angry? Me? ...Okay, a little. All the time.",
+  ],
+  vane: [
+    "Let's chat. Consider this conversation non-binding. Mostly.",
+    "Every clause has a fee. Friendship included.",
+    "Sign here. And here. Don't read page nine.",
+  ],
+  sorcerer: [
+    "You've been reading the fine print. Good. Keep reading.",
+    "The face under the hood? Trade secret. Ask the ledger.",
+    "Everything balances. Eventually. One way or another.",
+  ],
+  sentry: [
+    "Server integrity: 100%. Library fines: still overdue.",
+    "Threat level: minimal. Tea level: also minimal. Fix that.",
+    "I protect my friends. And the Wi-Fi. Mostly the Wi-Fi.",
+  ],
+};
+
+/** The companion's lines, falling back to Ynna's if a character has none. */
+export function companionLines(id: string): string[] {
+  return companionQuotes[id] ?? companionQuotes.ynna;
+}
+
 export function initialState(): GameState {
-  return { gems: 4800, credits: 25000, energy: 120, energyAt: Date.now(), pity: 0, totalPulls: 0, roster: ["ynna", "ninette", "edgelord"].map(id => ({ id, level: 1, potential: 0, duplicates: 0 })), squad: ["ynna", "ninette", "edgelord"], cleared: [], claimed: [], lastDaily: null, battle: null, pullHistory: [], choices: {} };
+  return { gems: 4800, credits: 25000, energy: 120, energyAt: Date.now(), pity: 0, totalPulls: 0, roster: ["ynna", "ninette", "edgelord"].map(id => ({ id, level: 1, potential: 0, duplicates: 0 })), squad: ["ynna", "ninette", "edgelord"], cleared: [], claimed: [], lastDaily: null, battle: null, pullHistory: [], choices: {}, companion: "ynna" };
 }
 export function stats(owned: OwnedCharacter) {
   const c = characterById(owned.id);
