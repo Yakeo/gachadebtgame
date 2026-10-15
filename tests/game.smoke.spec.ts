@@ -88,8 +88,9 @@ test("story, turn-based battle, post-story, rewards, and archive loop", async ({
   await expect(page.locator(".battle-header")).toBeVisible();
   for (let i = 0; i < 20; i++) {
     if (await page.locator(".battle-result.victory").isVisible()) break;
+    await page.locator(".inspect-command.attack").click();
     const response = page.waitForResponse(r => r.url().endsWith("/api/game") && r.request().method() === "POST");
-    await page.locator(".command.attack").click();
+    await page.locator(".activate-command").click();
     expect((await response).ok()).toBeTruthy();
     await page.waitForTimeout(150);
   }

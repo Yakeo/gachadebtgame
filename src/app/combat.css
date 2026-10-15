@@ -630,36 +630,385 @@
 .sprite-stage[data-character="alice"].pose-ultimate .sprite-fx i:nth-child(3){background:radial-gradient(circle,var(--recruit-color),transparent 68%)}
 @media(prefers-reduced-motion:reduce){.sprite-stage[data-character="aster"] .sprite-rig,.sprite-stage[data-character="vesper"] .sprite-rig,.sprite-stage[data-character="maribel"] .sprite-rig,.sprite-stage[data-character="cobalt"] .sprite-rig,.sprite-stage[data-character="octavia"] .sprite-rig,.sprite-stage[data-character="flint"] .sprite-rig,.sprite-stage[data-character="seraphine"] .sprite-rig,.sprite-stage[data-character="rook"] .sprite-rig,.sprite-stage[data-character="morrow"] .sprite-rig,.sprite-stage[data-character="tala"] .sprite-rig,.sprite-stage[data-character="pip"] .sprite-rig,.sprite-stage[data-character="mira"] .sprite-rig,.sprite-stage[data-character="quill"] .sprite-rig,.sprite-stage[data-character="brass"] .sprite-rig,.sprite-stage[data-character="lumi"] .sprite-rig,.sprite-stage[data-character="altria"] .sprite-rig,.sprite-stage[data-character="alice"] .sprite-rig{animation:none!important}}
 
+/* ========================== ATTACK TRAVEL =============================
+   Every blow aimed at an enemy carries the fighter there first: the advance
+   crosses the measured gap (--dash-x/--dash-y, set by combat-stage.tsx),
+   lands on contact at 42% - the frame combat-stage.tsx reveals the hit on -
+   recoils and doubles back home. The rig keeps its own swing on top of this,
+   so a fighter flies over AND brings the pan down.
+
+   Rs share one generic dash; every other character gets their own advance,
+   shaped to their weapon and temperament. Keep every contact stop at 42%. */
+.combat-unit.is-dashing{z-index:9}
+.combat-unit.is-dashing .sprite-stage{animation:dash-strike 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes dash-strike{
+  0%{transform:translate(0,0)}
+  16%{transform:translate(calc(var(--dash-x,0px) * .12),calc(var(--dash-y,0px) * .12 - 6px))}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px))}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96))}
+  74%{transform:translate(calc(var(--dash-x,0px) * .42),calc(var(--dash-y,0px) * .42))}
+  100%{transform:translate(0,0)}}
+
+/* Penelope cartwheels in, pan first. */
+.combat-unit.is-dashing .sprite-stage[data-character="penelope"]{animation:penelope-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes penelope-advance{
+  0%{transform:translate(0,0)}
+  12%{transform:translate(calc(var(--dash-x,0px) * .08),calc(var(--dash-y,0px) * .08 - 10px)) rotate(-10deg) scale(1.06)}
+  30%{transform:translate(calc(var(--dash-x,0px) * .55),calc(var(--dash-y,0px) * .55 - 18px)) rotate(200deg) scale(1.1)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(360deg) scale(1.12)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .94),calc(var(--dash-y,0px) * .94)) rotate(352deg) scale(.94)}
+  74%{transform:translate(calc(var(--dash-x,0px) * .38),calc(var(--dash-y,0px) * .38)) rotate(366deg)}
+  100%{transform:translate(0,0)}}
+
+/* Ruta is a straight line and nothing else: wind back, hard stop at contact. */
+.combat-unit.is-dashing .sprite-stage[data-character="ruta"]{animation:ruta-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes ruta-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.08),calc(var(--dash-y,0px) * -.08)) rotate(-4deg) scale(.97)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-2deg) scale(1.03)}
+  56%{transform:translate(calc(var(--dash-x,0px) * 1.02),calc(var(--dash-y,0px) * 1.02)) scale(1.01)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .35),calc(var(--dash-y,0px) * .35))}
+  100%{transform:translate(0,0)}}
+
+/* Purp glides: the grimoire carries him, barely touching the floor. */
+.combat-unit.is-dashing .sprite-stage[data-character="purp"]{animation:purp-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes purp-advance{
+  0%{transform:translate(0,0)}
+  20%{transform:translate(calc(var(--dash-x,0px) * .26),calc(var(--dash-y,0px) * .26 - 14px)) scale(1.05)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.08)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96 - 8px)) scale(1.04)}
+  74%{transform:translate(calc(var(--dash-x,0px) * .4),calc(var(--dash-y,0px) * .4 - 4px))}
+  100%{transform:translate(0,0)}}
+
+/* Edgelord69 draws back, then is simply not there until he is. */
+.combat-unit.is-dashing .sprite-stage[data-character="edgelord"]{animation:edgelord-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes edgelord-advance{
+  0%{transform:translate(0,0)}
+  14%{transform:translate(calc(var(--dash-x,0px) * -.06),0) rotate(-4deg) scale(.96)}
+  30%{transform:translate(calc(var(--dash-x,0px) * .85),calc(var(--dash-y,0px) * .85)) rotate(3deg) scale(1.12)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-2deg) scale(1.06)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .9),calc(var(--dash-y,0px) * .9))}
+  100%{transform:translate(0,0)}}
+
+/* Ynna bounces in like the odds are in her favour. */
+.combat-unit.is-dashing .sprite-stage[data-character="ynna"]{animation:ynna-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes ynna-advance{
+  0%{transform:translate(0,0)}
+  14%{transform:translate(calc(var(--dash-x,0px) * .1),calc(var(--dash-y,0px) * .1 - 12px)) rotate(6deg) scale(1.05)}
+  30%{transform:translate(calc(var(--dash-x,0px) * .5),calc(var(--dash-y,0px) * .5 - 8px)) rotate(-8deg) scale(.97)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(4deg) scale(1.07)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .95),calc(var(--dash-y,0px) * .95 - 10px)) rotate(-5deg)}
+  74%{transform:translate(calc(var(--dash-x,0px) * .42),calc(var(--dash-y,0px) * .42 - 6px)) rotate(3deg)}
+  100%{transform:translate(0,0)}}
+
+/* Ninette arrives exactly on time, binder raised. */
+.combat-unit.is-dashing .sprite-stage[data-character="ninette"]{animation:ninette-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes ninette-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.04),calc(var(--dash-y,0px) * -.04)) rotate(-3deg)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .52),calc(var(--dash-y,0px) * .52 - 12px)) rotate(2deg) scale(1.03)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.05)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) rotate(-2deg)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .32),calc(var(--dash-y,0px) * .32))}
+  100%{transform:translate(0,0)}}
+
+/* Solari glides in like a processional, staff first. */
+.combat-unit.is-dashing .sprite-stage[data-character="solari"]{animation:solari-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes solari-advance{
+  0%{transform:translate(0,0)}
+  22%{transform:translate(calc(var(--dash-x,0px) * .2),calc(var(--dash-y,0px) * .2 - 16px)) scale(1.04)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.08)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .97),calc(var(--dash-y,0px) * .97 - 6px)) scale(1.05)}
+  76%{transform:translate(calc(var(--dash-x,0px) * .36),calc(var(--dash-y,0px) * .36 - 3px))}
+  100%{transform:translate(0,0)}}
+
+/* Escanooor winds up like a freight door, then the floor is in the way. */
+.combat-unit.is-dashing .sprite-stage[data-character="escanooor"]{animation:escanooor-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes escanooor-advance{
+  0%{transform:translate(0,0)}
+  20%{transform:translate(calc(var(--dash-x,0px) * -.1),calc(var(--dash-y,0px) * -.1 + 6px)) rotate(-8deg) scale(.94)}
+  38%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 + 4px)) rotate(5deg) scale(1.12)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(3deg) scale(1.14)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .95),calc(var(--dash-y,0px) * .95)) rotate(-2deg) scale(1.02)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3)) scale(1.01)}
+  100%{transform:translate(0,0)}}
+
+/* Angelina is a streak of starlight that happens to have a rapier. */
+.combat-unit.is-dashing .sprite-stage[data-character="angelina"]{animation:angelina-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes angelina-advance{
+  0%{transform:translate(0,0)}
+  10%{transform:translate(calc(var(--dash-x,0px) * .16),calc(var(--dash-y,0px) * .16)) scale(1.12)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .88),calc(var(--dash-y,0px) * .88)) scale(.94)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.1)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .93),calc(var(--dash-y,0px) * .93)) scale(1.02)}
+  100%{transform:translate(0,0)}}
+
+/* Byte does not run there. Byte is patched in. */
+.combat-unit.is-dashing .sprite-stage[data-character="byte"]{animation:byte-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes byte-advance{
+  0%{transform:translate(0,0)}
+  12%{transform:translate(calc(var(--dash-x,0px) * .06),calc(var(--dash-y,0px) * .06)) scale(.6)}
+  32%{transform:translate(calc(var(--dash-x,0px) * .92),calc(var(--dash-y,0px) * .92)) scale(.82)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.08)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) scale(.9)}
+  100%{transform:translate(0,0)}}
+
+/* Vane walks. The market comes to him anyway. */
+.combat-unit.is-dashing .sprite-stage[data-character="vane"]{animation:vane-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes vane-advance{
+  0%{transform:translate(0,0)}
+  24%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3)) rotate(2deg) scale(1.02)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-2deg) scale(1.05)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .97),calc(var(--dash-y,0px) * .97)) rotate(2deg)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .34),calc(var(--dash-y,0px) * .34))}
+  100%{transform:translate(0,0)}}
+
+/* The Sorcerer drifts closer and the lights dim on the way. */
+.combat-unit.is-dashing .sprite-stage[data-character="sorcerer"]{animation:sorcerer-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes sorcerer-advance{
+  0%{transform:translate(0,0)}
+  26%{transform:translate(calc(var(--dash-x,0px) * .32),calc(var(--dash-y,0px) * .32 - 12px)) rotate(-5deg) scale(1.06)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-3deg) scale(1.1)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .95),calc(var(--dash-y,0px) * .95 - 8px)) rotate(3deg)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .28),calc(var(--dash-y,0px) * .28 - 4px))}
+  100%{transform:translate(0,0)}}
+
+/* Aster vaults: a surveyor measures the gap and clears it in one hop. */
+.combat-unit.is-dashing .sprite-stage[data-character="aster"]{animation:aster-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes aster-advance{
+  0%{transform:translate(0,0)}
+  22%{transform:translate(calc(var(--dash-x,0px) * .24),calc(var(--dash-y,0px) * .24 - 26px)) rotate(-6deg) scale(1.05)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(4deg) scale(1.06)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96 - 6px))}
+  78%{transform:translate(calc(var(--dash-x,0px) * .36),calc(var(--dash-y,0px) * .36 - 8px)) rotate(-3deg)}
+  100%{transform:translate(0,0)}}
+
+/* Vesper closes in on the beat: quick-quick-slow, baton up. */
+.combat-unit.is-dashing .sprite-stage[data-character="vesper"]{animation:vesper-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes vesper-advance{
+  0%{transform:translate(0,0)}
+  14%{transform:translate(calc(var(--dash-x,0px) * .18),calc(var(--dash-y,0px) * .18 - 6px)) rotate(4deg)}
+  28%{transform:translate(calc(var(--dash-x,0px) * .38),calc(var(--dash-y,0px) * .38)) rotate(-3deg) scale(1.02)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(5deg) scale(1.06)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) rotate(-4deg)}
+  70%{transform:translate(calc(var(--dash-x,0px) * .52),calc(var(--dash-y,0px) * .52 - 5px)) rotate(3deg)}
+  86%{transform:translate(calc(var(--dash-x,0px) * .22),calc(var(--dash-y,0px) * .22)) rotate(-2deg)}
+  100%{transform:translate(0,0)}}
+
+/* Maribel hurries over with both hands full of greenhouse. */
+.combat-unit.is-dashing .sprite-stage[data-character="maribel"]{animation:maribel-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes maribel-advance{
+  0%{transform:translate(0,0)}
+  16%{transform:translate(calc(var(--dash-x,0px) * .16),calc(var(--dash-y,0px) * .16 - 8px)) rotate(6deg) scale(1.03)}
+  32%{transform:translate(calc(var(--dash-x,0px) * .48),calc(var(--dash-y,0px) * .48)) rotate(-5deg) scale(.98)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(3deg) scale(1.05)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) rotate(-3deg)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3)) rotate(2deg)}
+  100%{transform:translate(0,0)}}
+
+/* Cobalt slides in low, knees bent, radio crackling. */
+.combat-unit.is-dashing .sprite-stage[data-character="cobalt"]{animation:cobalt-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes cobalt-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * .14),calc(var(--dash-y,0px) * .14 + 6px)) rotate(-7deg) scale(1.02, .94)}
+  36%{transform:translate(calc(var(--dash-x,0px) * .7),calc(var(--dash-y,0px) * .7 + 4px)) rotate(-3deg) scale(1.06, .95)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.08, .96)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96 + 3px)) rotate(4deg)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3 + 2px)) rotate(2deg)}
+  100%{transform:translate(0,0)}}
+
+/* Octavia advances behind the bell-tower shield, one heavy step at a time. */
+.combat-unit.is-dashing .sprite-stage[data-character="octavia"]{animation:octavia-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes octavia-advance{
+  0%{transform:translate(0,0)}
+  22%{transform:translate(calc(var(--dash-x,0px) * .22),calc(var(--dash-y,0px) * .22 + 4px)) rotate(3deg) scale(1.05, .97)}
+  36%{transform:translate(calc(var(--dash-x,0px) * .58),calc(var(--dash-y,0px) * .58)) rotate(-2deg) scale(.98, 1.03)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.1, .98)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96 + 3px))}
+  80%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3 + 2px)) rotate(-2deg)}
+  100%{transform:translate(0,0)}}
+
+/* Flint leaps with the hammer overhead and lands like a dropped anvil. */
+.combat-unit.is-dashing .sprite-stage[data-character="flint"]{animation:flint-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes flint-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * .1),calc(var(--dash-y,0px) * .1 - 20px)) rotate(-9deg) scale(1.08)}
+  36%{transform:translate(calc(var(--dash-x,0px) * .78),calc(var(--dash-y,0px) * .78 - 30px)) rotate(6deg) scale(1.12)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(8deg) scale(1.14, .92)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .95),calc(var(--dash-y,0px) * .95)) scale(1.02)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .32),calc(var(--dash-y,0px) * .32 - 12px)) rotate(-4deg)}
+  100%{transform:translate(0,0)}}
+
+/* Seraphine turns the approach into a little victory lap. */
+.combat-unit.is-dashing .sprite-stage[data-character="seraphine"]{animation:seraphine-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes seraphine-advance{
+  0%{transform:translate(0,0)}
+  20%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3 - 10px)) rotate(180deg) scale(1.05)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(360deg) scale(1.08)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) rotate(364deg)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .34),calc(var(--dash-y,0px) * .34)) rotate(358deg)}
+  100%{transform:translate(0,0)}}
+
+/* Rook lowers the goalpost and charges like a shoulder barge. */
+.combat-unit.is-dashing .sprite-stage[data-character="rook"]{animation:rook-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes rook-advance{
+  0%{transform:translate(0,0)}
+  16%{transform:translate(calc(var(--dash-x,0px) * -.05),calc(var(--dash-y,0px) * -.05 + 4px)) rotate(-9deg) scale(1.04, .95)}
+  36%{transform:translate(calc(var(--dash-x,0px) * .76),calc(var(--dash-y,0px) * .76 + 2px)) rotate(-6deg) scale(1.08, .96)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-4deg) scale(1.1, .97)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) rotate(-2deg)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .28),calc(var(--dash-y,0px) * .28))}
+  100%{transform:translate(0,0)}}
+
+/* Morrow drifts in behind the lantern, feet optional. */
+.combat-unit.is-dashing .sprite-stage[data-character="morrow"]{animation:morrow-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes morrow-advance{
+  0%{transform:translate(0,0)}
+  24%{transform:translate(calc(var(--dash-x,0px) * .28),calc(var(--dash-y,0px) * .28 - 14px)) rotate(5deg) scale(1.04)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(-4deg) scale(1.09)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .95),calc(var(--dash-y,0px) * .95 - 10px)) rotate(4deg)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .26),calc(var(--dash-y,0px) * .26 - 6px)) rotate(-3deg)}
+  100%{transform:translate(0,0)}}
+
+/* Tala's lance is a firework: up fast, down faster, applause after. */
+.combat-unit.is-dashing .sprite-stage[data-character="tala"]{animation:tala-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes tala-advance{
+  0%{transform:translate(0,0)}
+  14%{transform:translate(calc(var(--dash-x,0px) * .08),calc(var(--dash-y,0px) * .08 - 8px)) rotate(-6deg) scale(1.05)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .72),calc(var(--dash-y,0px) * .72 - 28px)) rotate(8deg) scale(1.12)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(4deg) scale(1.1, .94)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) scale(1.02)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .34),calc(var(--dash-y,0px) * .34 - 10px)) rotate(-3deg)}
+  100%{transform:translate(0,0)}}
+
+/* Pip slingshots over: pull back, let go, arrive. */
+.combat-unit.is-dashing .sprite-stage[data-character="pip"]{animation:pip-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes pip-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * -.07),calc(var(--dash-y,0px) * -.07 - 6px)) rotate(-8deg) scale(.94)}
+  34%{transform:translate(calc(var(--dash-x,0px) * .7),calc(var(--dash-y,0px) * .7 - 18px)) rotate(10deg) scale(1.12)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(2deg) scale(1.06)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96 - 4px)) rotate(-4deg)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3))}
+  100%{transform:translate(0,0)}}
+
+/* Mira runs there, first-aid kit in hand, no time to waste. */
+.combat-unit.is-dashing .sprite-stage[data-character="mira"]{animation:mira-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes mira-advance{
+  0%{transform:translate(0,0)}
+  16%{transform:translate(calc(var(--dash-x,0px) * .14),calc(var(--dash-y,0px) * .14 - 9px)) rotate(4deg) scale(1.03)}
+  32%{transform:translate(calc(var(--dash-x,0px) * .52),calc(var(--dash-y,0px) * .52 + 3px)) rotate(-3deg) scale(.98)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(2deg) scale(1.05)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96 - 6px)) rotate(-2deg)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .32),calc(var(--dash-y,0px) * .32 - 3px))}
+  100%{transform:translate(0,0)}}
+
+/* Quill signs off on the approach in one flourish of a spin. */
+.combat-unit.is-dashing .sprite-stage[data-character="quill"]{animation:quill-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes quill-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * .2),calc(var(--dash-y,0px) * .2 - 8px)) rotate(-24deg) scale(1.04)}
+  36%{transform:translate(calc(var(--dash-x,0px) * .74),calc(var(--dash-y,0px) * .74)) rotate(220deg) scale(1.08)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(360deg) scale(1.06)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) rotate(356deg)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .34),calc(var(--dash-y,0px) * .34)) rotate(362deg)}
+  100%{transform:translate(0,0)}}
+
+/* Brass trundles in behind the wrench-shield like a rolling toolbox. */
+.combat-unit.is-dashing .sprite-stage[data-character="brass"]{animation:brass-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes brass-advance{
+  0%{transform:translate(0,0)}
+  20%{transform:translate(calc(var(--dash-x,0px) * .18),calc(var(--dash-y,0px) * .18 + 5px)) rotate(7deg) scale(1.06, .94)}
+  38%{transform:translate(calc(var(--dash-x,0px) * .68),calc(var(--dash-y,0px) * .68 - 4px)) rotate(-6deg) scale(.96, 1.05)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) rotate(3deg) scale(1.08)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96 + 3px)) rotate(-3deg)}
+  80%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3)) rotate(2deg)}
+  100%{transform:translate(0,0)}}
+
+/* Lumi crosses the field without spilling a single drop of tea. */
+.combat-unit.is-dashing .sprite-stage[data-character="lumi"]{animation:lumi-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes lumi-advance{
+  0%{transform:translate(0,0)}
+  24%{transform:translate(calc(var(--dash-x,0px) * .3),calc(var(--dash-y,0px) * .3 - 3px)) scale(1.01)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.03)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .97),calc(var(--dash-y,0px) * .97 - 2px)) scale(1.01)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .36),calc(var(--dash-y,0px) * .36))}
+  100%{transform:translate(0,0)}}
+
+/* Altria closes like a royal decree: instantly, and with the sword already drawn. */
+.combat-unit.is-dashing .sprite-stage[data-character="altria"]{animation:altria-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes altria-advance{
+  0%{transform:translate(0,0)}
+  12%{transform:translate(calc(var(--dash-x,0px) * .12),calc(var(--dash-y,0px) * .12)) scale(1.12)}
+  32%{transform:translate(calc(var(--dash-x,0px) * .86),calc(var(--dash-y,0px) * .86 - 6px)) scale(1.06)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.12)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .97),calc(var(--dash-y,0px) * .97)) scale(1.06)}
+  74%{transform:translate(calc(var(--dash-x,0px) * .44),calc(var(--dash-y,0px) * .44)) scale(1.02)}
+  100%{transform:translate(0,0)}}
+
+/* Alice steps through the looking-glass and comes out the other side. */
+.combat-unit.is-dashing .sprite-stage[data-character="alice"]{animation:alice-advance 1.05s cubic-bezier(.42,0,.18,1) both}
+@keyframes alice-advance{
+  0%{transform:translate(0,0)}
+  18%{transform:translate(calc(var(--dash-x,0px) * .16),calc(var(--dash-y,0px) * .16)) scale(.2, 1.12) rotate(-8deg)}
+  36%{transform:translate(calc(var(--dash-x,0px) * .84),calc(var(--dash-y,0px) * .84)) scale(1.16, 1.04) rotate(4deg)}
+  42%{transform:translate(var(--dash-x,0px),var(--dash-y,0px)) scale(1.06)}
+  56%{transform:translate(calc(var(--dash-x,0px) * .96),calc(var(--dash-y,0px) * .96)) scale(.92, 1.04)}
+  78%{transform:translate(calc(var(--dash-x,0px) * .32),calc(var(--dash-y,0px) * .32)) scale(1.02)}
+  100%{transform:translate(0,0)}}
+
+/* ============ THE SR/UR TRIO: THEIR OWN BODY LANGUAGE =================
+   Ninette, Byte and Angelina were the only non-R fighters still borrowing
+   the generic swing. Each command now has its own motion: the binder slap,
+   the tablet flick, the rapier flurry. (Their travel is above.) */
+.sprite-stage[data-character="ninette"].pose-attack .sprite-rig{animation:ninette-binderslap 0.86s ease-in-out both}
+@keyframes ninette-binderslap{0%,100%{transform:none}18%{transform:rotate(-7deg) translateY(-6px) scale(1.03)}46%{transform:translateX(calc(var(--facing) * 18px)) rotate(12deg) translateY(4px) scale(.94)}70%{transform:rotate(-3deg) scale(1.02)}}
+.sprite-stage[data-character="ninette"].pose-skill .sprite-rig{animation:ninette-audit 0.94s ease-in-out both}
+@keyframes ninette-audit{0%,100%{transform:none}24%{transform:translateY(-9px) rotate(-4deg)}52%{transform:translateX(calc(var(--facing) * 30px)) rotate(6deg) scale(1.06)}76%{transform:translateX(calc(var(--facing) * 14px)) rotate(-2deg)}}
+.sprite-stage[data-character="ninette"].pose-ultimate .sprite-rig{animation:ninette-collection 1.06s cubic-bezier(.3,0,.2,1) both}
+@keyframes ninette-collection{0%,100%{transform:none}16%{transform:rotate(-10deg) translateY(-12px) scale(1.05)}40%{transform:rotate(280deg) translateY(-8px) scale(1.08)}58%{transform:translateX(calc(var(--facing) * 26px)) rotate(352deg) translateY(10px) scale(.92)}78%{transform:rotate(360deg) translateY(-3px) scale(1.03)}}
+.sprite-stage[data-character="byte"].pose-attack .sprite-rig{animation:byte-swipe 0.82s ease-in-out both}
+@keyframes byte-swipe{0%,100%{transform:none}22%{transform:translateX(calc(var(--facing) * -8px)) rotate(-5deg) scale(.97)}50%{transform:translateX(calc(var(--facing) * 34px)) rotate(4deg) scale(1.05)}74%{transform:translateX(calc(var(--facing) * 12px)) rotate(-2deg)}}
+.sprite-stage[data-character="byte"].pose-skill .sprite-rig{animation:byte-ping 0.92s ease-in-out both}
+@keyframes byte-ping{0%,100%{transform:none}18%{transform:translateY(-8px) scale(1.04)}36%{transform:translateY(-8px) scale(1.1)}54%{transform:translateY(-6px) scale(1.02) rotate(3deg)}72%{transform:scale(1.06) rotate(-2deg)}}
+.sprite-stage[data-character="byte"].pose-ultimate .sprite-rig{animation:byte-patch 1.04s cubic-bezier(.3,0,.2,1) both}
+@keyframes byte-patch{0%,100%{transform:none}14%{transform:translateY(-16px) rotate(-8deg) scale(1.06)}34%{transform:translateY(-22px) rotate(4deg) scale(1.16)}56%{transform:translateY(6px) rotate(-2deg) scale(.94)}78%{transform:translateY(-4px) scale(1.05)}}
+.sprite-stage[data-character="angelina"].pose-attack .sprite-rig{animation:angelina-flurry 0.84s ease-in-out both}
+@keyframes angelina-flurry{0%,100%{transform:none}16%{transform:translateX(calc(var(--facing) * -6px)) rotate(-3deg)}38%{transform:translateX(calc(var(--facing) * 38px)) rotate(4deg) scale(1.06)}54%{transform:translateX(calc(var(--facing) * 20px)) rotate(-4deg) scale(1.02)}70%{transform:translateX(calc(var(--facing) * 34px)) rotate(3deg) scale(1.05)}}
+.sprite-stage[data-character="angelina"].pose-skill .sprite-rig{animation:angelina-twirl 0.94s ease-in-out both}
+@keyframes angelina-twirl{0%,100%{transform:none}22%{transform:rotate(-14deg) translateY(-10px)}50%{transform:rotate(340deg) translateY(-6px) scale(1.08)}74%{transform:translateX(calc(var(--facing) * 18px)) rotate(364deg) scale(1.03)}}
+.sprite-stage[data-character="angelina"].pose-ultimate .sprite-rig{animation:angelina-starfall 1.08s cubic-bezier(.3,0,.2,1) both}
+@keyframes angelina-starfall{0%,100%{transform:none}18%{transform:translateY(-24px) rotate(-10deg) scale(1.1)}42%{transform:translateY(-30px) rotate(6deg) scale(1.16)}60%{transform:translateY(12px) rotate(-4deg) scale(.9)}80%{transform:translateY(-4px) rotate(2deg) scale(1.04)}}
 /* Operator command inspection: select first, explicitly activate second. */
 .battle-command-panel{display:grid;grid-template-columns:minmax(140px,.8fr) minmax(320px,3fr) minmax(160px,1fr);gap:18px;padding:15px;border:1px solid #38526c;background:linear-gradient(120deg,#14283b,#20374b);color:#edf5fc;box-shadow:0 8px 20px #10283b16;border-left:3px solid var(--operator-color)}
 .operator-brief{display:flex;align-items:center;gap:8px;min-width:0}
 .operator-model{width:65px;height:136px;flex-shrink:0;background:radial-gradient(ellipse at bottom,color-mix(in srgb,var(--operator-color) 25%,transparent),transparent 75%)}
 .operator-model>.chibi{width:100%;height:100%;object-fit:contain}
-.operator-brief .eyebrow{color:#91aeca;font-size:7px;letter-spacing:1px}
-.operator-brief strong{display:block;font-size:23px;font-family:var(--display);font-style:italic;line-height:1.1;margin-top:7px}
-.operator-brief small{display:block;font-size:9px;color:#adbed0;margin-top:6px}
-.operator-energy{display:flex;align-items:center;gap:4px;color:#9edcff;font-size:8px;margin-top:12px;font-weight:700}
+.operator-brief .eyebrow{color:#91aeca;font-size:11px;letter-spacing:1px}
+.operator-brief strong{display:block;font-size:27px;font-family:var(--display);font-style:italic;line-height:1.1;margin-top:7px}
+.operator-brief small{display:block;font-size:12px;color:#adbed0;margin-top:6px}
+.operator-energy{display:flex;align-items:center;gap:4px;color:#9edcff;font-size:11px;margin-top:12px;font-weight:700}
 .command-inspection{min-width:0}
 .command-selector{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
-.inspect-command{position:relative;display:grid;grid-template-columns:18px 1fr;column-gap:5px;text-align:left;align-items:center;background:#ffffff0b;border:1px solid #748ca44d;padding:10px 8px;color:#b6cadb;min-height:51px;border-radius:2px}
-.inspect-command>span{position:absolute;top:3px;right:5px;font-size:7px;opacity:.55}
-.inspect-command strong{font-size:11px}
-.inspect-command small{grid-column:2;font-size:7px;letter-spacing:.5px;margin-top:3px}
+.inspect-command{position:relative;display:grid;grid-template-columns:18px 1fr;column-gap:5px;text-align:left;align-items:center;background:#ffffff0b;border:1px solid #748ca44d;padding:10px 8px;color:#b6cadb;min-height:58px;border-radius:2px}
+.inspect-command>span{position:absolute;top:3px;right:5px;font-size:10px;opacity:.55}
+.inspect-command strong{font-size:15px}
+.inspect-command small{grid-column:2;font-size:11px;letter-spacing:.5px;margin-top:3px}
 .inspect-command.selected{background:#e9f5ff;color:#143a58;border-color:#83c8ff;box-shadow:inset 0 -3px 0 var(--operator-color)}
 .inspect-command.ultimate.selected{background:#fff0c6;border-color:#f2d07c;color:#805319}
 .inspect-command:focus-visible,.activate-command:focus-visible{outline:2px solid #9cddff;outline-offset:3px}
 .command-detail{padding:12px 0 0;min-height:110px}
 .command-detail-heading{display:flex;flex-direction:column;gap:4px}
-.command-detail-heading>span{font-size:7px;letter-spacing:1.2px;color:#94b9d6}
-.command-detail-heading>strong{font-family:var(--display);font-size:22px;font-weight:700;line-height:1.1}
-.command-detail>p{font-size:12px;line-height:1.6;color:#d3e0ed;margin-top:7px}
-.command-target{display:flex;align-items:center;gap:6px;color:#91bddb;font-size:9px;margin-top:7px}
+.command-detail-heading>span{font-size:11px;letter-spacing:1.2px;color:#94b9d6}
+.command-detail-heading>strong{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1}
+.command-detail>p{font-size:15px;line-height:1.6;color:#d3e0ed;margin-top:7px}
+.command-target{display:flex;align-items:center;gap:6px;color:#91bddb;font-size:12px;margin-top:7px}
 .command-activation{display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:10px}
-.command-readiness{font-size:8px;font-weight:700;letter-spacing:1px;color:#a9dca4;text-align:center}
+.command-readiness{font-size:11px;font-weight:700;letter-spacing:1px;color:#a9dca4;text-align:center}
 .command-readiness.charging{color:#f4c78e}
-.activate-command{display:flex;align-items:center;justify-content:center;gap:8px;min-height:49px;padding:12px 10px;background:#2994e9;border:1px solid #74c0ff;color:white;font-weight:700;font-size:12px;text-transform:capitalize}
+.activate-command{display:flex;align-items:center;justify-content:center;gap:8px;min-height:49px;padding:12px 10px;background:#2994e9;border:1px solid #74c0ff;color:white;font-weight:700;font-size:15px;text-transform:capitalize}
 .activate-command.ultimate{background:#e7ba61;border-color:#ffe3a5;color:#33270e}
-.command-activation>small{font-size:8px;line-height:1.7;color:#9bb3c8;text-align:center}
+.command-activation>small{font-size:11px;line-height:1.7;color:#9bb3c8;text-align:center}
 /* Keep each chapter's painting visible instead of hiding it behind the floor tint. */
 .battle-arena>img{image-rendering:auto!important;filter:saturate(1.04) brightness(.96)!important;object-fit:cover;object-position:center 56%}
 .battle-arena .arena-shade{background:linear-gradient(180deg,#0c203133,transparent 35%,#122a464d)}
@@ -681,7 +1030,7 @@
   .inspect-command{padding:10px 6px;grid-template-columns:16px 1fr;column-gap:4px}
   .inspect-command strong{font-size:10px}
   .inspect-command>svg{width:16px;height:16px}
-  .command-detail>p{font-size:12px}
+  .command-detail>p{font-size:15px}
   .command-activation{display:grid;grid-template-columns:1fr 1.3fr;align-items:center;gap:8px}
   .command-activation>small{grid-column:1/-1}
 }
@@ -702,3 +1051,11 @@
 .operator-statblock{display:flex;gap:8px;flex-wrap:wrap;font-size:8px;color:#9bb6cc;margin-top:10px}
 .operator-statblock b{color:#eaf5ff}
 @media(max-width:650px){.initiative-strip{padding:8px 12px;gap:9px}.initiative-caption strong{font-size:9px}.initiative-caption span{font-size:7px}.initiative-strip li{padding:6px;min-width:92px}}
+
+/* Share the vitals row on desktop: retain main's readable enemy cards without
+   pushing the initiative bar or command activation below the game frame. */
+@media(min-width:901px){
+  .game-frame .battle-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:12px;padding-top:10px;padding-bottom:10px}
+  .game-frame .enemy-hud,.game-frame .ally-hud{min-width:0;margin-bottom:10px}
+  .game-frame .battle-command-panel,.game-frame .battle-log-line{grid-column:1/-1}
+}
