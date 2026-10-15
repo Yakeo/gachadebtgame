@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as gameEngine from "../src/lib/game-engine";
 import { applyGameAction, regenerateEnergy } from "../src/lib/game-engine";
-import { characterById, initialState, stats } from "../src/lib/game-data";
+import { characterById, companionLines, characters, initialState, stats } from "../src/lib/game-data";
 import { stages } from "../src/lib/campaign";
 const ordinary = () => .8;
 test("The campaign has five chapters with five complete stages each", () => {
@@ -273,3 +273,32 @@ test("A developed squad can finish all 25 stages and recruit story allies", () =
   assert.ok(state.roster.some(c => c.id === "purp"));
   assert.ok(state.roster.some(c => c.id === "solari"));
 });
+
+test("The home-screen companion can be changed to anyone in the roster", () => {
+  const state = initialState();
+  assert.equal(state.companion, "ynna", "the companion starts as Ynna");
+  const result = applyGameAction(state, { action: "companion", id: "edgelord" }, ordinary);
+  assert.equal(result.state.companion, "edgelord");
+  assert.match(result.message ?? "", /Edgelord69/);
+});
+test("A companion must actually be recruited first", () => {
+  const state = initialState();
+  assert.throws(() => applyGameAction(state, { action: "companion", id: "penelope" }, ordinary), /Recruit them first/);
+  assert.equal(state.companion, "ynna", "a rejected change leaves the companion alone");
+});
+test("Saves from before the companion existed default to Ynna", () => {
+  const legacy = initialState() as Partial<typeof state0>;
+  delete (legacy as Record<string, unknown>).companion;
+  const result = applyGameAction(legacy as typeof state0, { action: "init" }, ordinary);
+  assert.equal(result.state.companion, "ynna");
+});
+test("Every character has companion lines and they are in their own voice", () => {
+  for (const c of characters) {
+    const lines = companionLines(c.id);
+    assert.ok(lines.length >= 3, `${c.name} has ${lines.length} companion lines`);
+    assert.ok(lines.every(l => l.length > 10 && !l.includes("\"")), `${c.name} has a suspicious line`);
+    assert.equal(new Set(lines).size, lines.length, `${c.name} repeats a line`);
+  }
+  assert.equal(companionLines("nobody-at-all").length, companionLines("ynna").length, "unknown ids fall back to Ynna");
+});
+const state0 = initialState();

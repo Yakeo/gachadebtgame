@@ -4,10 +4,10 @@ import { ArrowRight, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronDow
 import { useCallback, useState as useBootState } from "react";
 import { GameProvider, useGame } from "./game-context";
 import { LoadingScreen, LoginScreen, TitleScreen } from "./boot-screen";
-import { Avatar, Battlefield, Credit, Gem, Logo, Modal, ProgressBar, Spinner } from "./ui";
+import { Avatar, Battlefield, Chibi, Credit, Gem, Logo, Modal, ProgressBar, Spinner } from "./ui";
 import { ArchiveView, CampaignView, CharactersView, ExchangeView, MissionsView, RecruitView } from "./game-views";
 import { battlefieldFor, chapters, stages } from "@/lib/campaign";
-import { missionProgress, missions } from "@/lib/game-data";
+import { characterById, companionLines, missionProgress, missions } from "@/lib/game-data";
 type View = "home" | "campaign" | "characters" | "recruit" | "missions" | "archive" | "exchange";
 type Dialog = "account" | "settings" | "mail" | "notices" | "daily" | null;
 const navigation = [
@@ -59,10 +59,12 @@ function GameShell({ onSignedOut }: { onSignedOut: () => void }) {
   </div>;
 }
 function HomeView({ navigate, openDialog, dailyReady }: { navigate: (view: View) => void; openDialog: (dialog: Dialog) => void; dailyReady: boolean }) {
-  const { state, player } = useGame();
+  const { state, player, action, busy } = useGame();
   const [quote, setQuote] = useState(0);
   const [banner, setBanner] = useState(0);
-  const quotes = ["Just one more pull… What could possibly go wrong?", "Welcome back! Ninette says we're not allowed near the treasury. Again.", "A whole new adventure, and my favorite person to share it with. Ready?", "It's not a spending problem. It's a character-building experience!"];
+  const [pickingCompanion, setPickingCompanion] = useState(false);
+  const companion = characterById(state.companion || "ynna");
+  const quotes = companionLines(companion.id);
   const next = stages[Math.min(state.cleared.length, 24)];
   const chapter = chapters[next.chapter - 1];
   return <div className="home-scene">
@@ -71,8 +73,9 @@ function HomeView({ navigate, openDialog, dailyReady }: { navigate: (view: View)
     <div className="scene-location"><span className="location-cross"><Crosshair size={18} /></span><div><strong>STUDENT COUNCIL ROOM</strong><small>ACADEMY DISTRICT 07 <span> / </span> AFTER SCHOOL</small></div></div>
     <div className="scene-welcome"><span>HOME TERMINAL</span><div>It’s good to have you back, <strong>{player?.name || "President"}.</strong><span className="tiny-spark">✦</span></div></div>
     <div className="floating-particles" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <i key={i} style={{ "--i": i } as CSSProperties} />)}</div>
-    <div className="companion-tools"><button onClick={() => setQuote((quote + 1) % quotes.length)} aria-label="Talk to Ynna"><MessageCircle size={19} /></button><button onClick={() => openDialog("notices")} aria-label="About the game"><Info size={18} /></button></div>
-    <div className="companion-dialogue" key={quote}><div className="companion-name"><span>Ynna</span><small>YOUR COUNCIL COMPANION</small><Sparkles size={14} /></div><button className="companion-quote" onClick={() => setQuote((quote + 1) % quotes.length)} aria-label="Next companion dialogue"><span>“{quotes[quote]}”</span><span className="quote-next">▾</span></button><span className="companion-caption">A LITTLE LUCK. A LOT OF TROUBLE.</span></div>
+    <div className="companion-tools"><button onClick={() => setQuote((quote + 1) % quotes.length)} aria-label={`Talk to ${companion.name}`}><MessageCircle size={19} /></button><button onClick={() => setPickingCompanion(true)} aria-label="Change your companion"><UsersRound size={18} /></button><button onClick={() => openDialog("notices")} aria-label="About the game"><Info size={18} /></button></div>
+    <div className="companion-figure" key={companion.id} style={{ "--character-color": companion.color } as CSSProperties} aria-hidden="true"><span className="companion-figure-glow" /><Chibi id={companion.id} /></div>
+    <div className="companion-dialogue" key={`${companion.id}-${quote}`}><div className="companion-name"><span>{companion.name}</span><small>{companion.title}</small><Sparkles size={14} /></div><button className="companion-quote" onClick={() => setQuote((quote + 1) % quotes.length)} aria-label="Next companion dialogue"><span>“{quotes[quote % quotes.length]}”</span><span className="quote-next">▾</span></button><span className="companion-caption">A LITTLE LUCK. A LOT OF TROUBLE.</span></div>
     <div className="featured-wrap"><button className={`featured-banner banner-${banner}`} onClick={() => banner === 1 ? openDialog("daily") : navigate(banner === 2 ? "campaign" : "recruit")}><img className={banner === 1 ? "" : "banner-sprite"} src={banner === 2 ? "/images/academy.jpg" : banner === 0 ? "/images/splash-penelope.png" : "/images/splash-purp.png"} alt="" /><div className="featured-shade" /><div className="featured-copy"><span className="eyebrow"><i />{banner === 0 ? "FEATURED RECRUITMENT" : banner === 1 ? "A GIFT FROM THE COUNCIL" : "YOUR STORY STARTS HERE"}</span><h3>{banner === 0 ? <>KITCHEN <span>CATASTROPHE</span></> : banner === 1 ? <>A LITTLE <span>GOOD LUCK</span></> : <>MIDNIGHT <span>MISCHIEF</span></>}</h3><p>{banner === 0 ? <><span className="gold-text">SSR</span> Penelope <b>RATE UP ↑</b></> : banner === 1 ? "160 gems. Every day. On the house." : <><span className="gold-text">SSR</span> Purp <b>IN THE POOL</b></>}</p></div><span className="featured-arrow"><ArrowUpRight size={21} /></span></button><div className="banner-indicators">{[0, 1, 2].map(i => <button key={i} aria-label={`Show featured notice ${i + 1}`} aria-pressed={banner === i} className={banner === i ? "active" : ""} onClick={() => setBanner(i)} />)}<span>COUNCIL NEWS <span>01—03</span></span></div></div>
     <div className="home-menu"><div className="menu-kicker"><span><i /> THE NEXT CHAPTER IS YOURS</span><Star size={14} /></div>
       <button className="campaign-tile menu-tile" onClick={() => navigate("campaign")}><Battlefield src={battlefieldFor(next.chapter)} alt="" /><div className="campaign-tile-shade" /><span className="tile-chapter-watermark">0{next.chapter}</span><div className="campaign-tile-top"><span className="tile-tag"><BookOpen size={12} /> MAIN STORY</span><span className="chapter-index">CHAPTER <b>0{next.chapter}</b></span></div><h1>Campaign<span className="heading-arrow"><ArrowUpRight size={34} strokeWidth={1.5} /></span></h1><p>{chapter.title}</p><div className="campaign-tile-bottom"><span className="next-label">{state.cleared.length >= 25 ? "COMPLETE" : "UP NEXT"}</span><span>{next.id}<b> / </b>{next.title}</span><ChevronRight size={17} /></div></button>
@@ -81,6 +84,7 @@ function HomeView({ navigate, openDialog, dailyReady }: { navigate: (view: View)
       <button className={`daily-strip ${!dailyReady ? "claimed" : ""}`} onClick={() => openDialog("daily")}><span className="daily-gift-icon">{dailyReady ? <Gift size={26} /> : <CheckCheck size={26} />}</span><span><strong>{dailyReady ? "A little gift. A big adventure." : "A little luck, delivered."}</strong><small>{dailyReady ? "Your daily council supplies are ready!" : "Your next council gift arrives tomorrow."}</small></span><span className="daily-claim">{dailyReady ? "CLAIM" : "CLAIMED"}<ChevronRight size={15} /></span>{dailyReady && <i className="daily-dot" />}</button>
       <div className="home-menu-note"><ShieldCheck size={12} /><span>NO REAL-MONEY PURCHASES. JUST GOOD ADVENTURES.</span></div>
     </div>
+    {pickingCompanion && <Modal title="Choose your companion" eyebrow="WHO WELCOMES YOU HOME" onClose={() => setPickingCompanion(false)} className="companion-modal"><p className="modal-description">They stand on the home screen, greet you between missions, and say increasingly questionable things. Anyone in your roster can do it.</p><div className="companion-picker">{state.roster.map(owned => { const c = characterById(owned.id); return <button key={c.id} className={`companion-choice ${state.companion === c.id ? "current" : ""}`} style={{ "--character-color": c.color } as CSSProperties} disabled={busy} onClick={async () => { const result = await action("companion", { id: c.id }); if (result) { setQuote(0); setPickingCompanion(false); } }}><Avatar id={c.id} /><strong>{c.name}</strong><small>{c.title}</small>{state.companion === c.id && <span className="companion-check"><Check size={11} /> COMPANION</span>}</button>; })}</div></Modal>}
   </div>;
 }
 function AccountDialog({ onClose, onSignedOut }: { onClose: () => void; onSignedOut: () => void }) {

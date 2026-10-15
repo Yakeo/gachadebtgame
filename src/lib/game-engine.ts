@@ -48,6 +48,8 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
   const state = regenerateEnergy(structuredClone(original));
   // Saves written before the campaign had choices simply do not have the field.
   if (!state.choices) state.choices = {};
+  // Same for the home-screen companion, which arrived after launch saves.
+  if (!state.companion) state.companion = "ynna";
   let message = "Progress saved.";
   let pulls: PullResult[] | undefined;
   const id = typeof input.id === "string" ? input.id : "";
@@ -129,6 +131,14 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
         state.squad.push(id);
         message = `${characterById(id).name} joined your squad.`;
       }
+      break;
+    }
+    case "companion": {
+      // Your home-screen companion must be someone you actually recruited.
+      if (!state.roster.some(c => c.id === id)) throw new Error("Recruit them first — your companion has to be someone in your roster.");
+      const pick = characterById(id);
+      state.companion = id;
+      message = `${pick.name} will be keeping you company.`;
       break;
     }
     case "daily": {
