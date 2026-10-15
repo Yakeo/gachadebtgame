@@ -469,3 +469,17 @@ test("no portrait has loose key-colour specks on its silhouette", () => {
   assert.deepEqual(offenders, [],
     `these portraits have key-colour specks on the silhouette: ${offenders.join(", ")}`);
 });
+
+test("the home companion shows the illustration, with the model as fallback", () => {
+  // The companion stood on the home screen as the pixel model while the
+  // painted illustration existed the whole time. The illustration is what the
+  // companion slot should show; characters without one keep their model.
+  const shell = read("src/components/game-shell.tsx");
+  assert.match(shell, /companion\.keyart \? <img className="companion-splash"/,
+    "the companion should prefer the character's key art");
+  assert.match(shell, /<Chibi id=\{companion\.id\} \/>/,
+    "characters without key art should still get their model");
+  const css = read("src/app/globals.css");
+  assert.match(css, /\.companion-splash\{[^}]*mask-image/,
+    "the illustration should be masked into the scene, not pasted as a rectangle");
+});
