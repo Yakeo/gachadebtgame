@@ -5,10 +5,10 @@ import { applyGameAction } from "../src/lib/game-engine";
 const noRolls = () => { throw new Error("A selector must never roll RNG"); };
 const act = (state: ReturnType<typeof initialState>, id: unknown) => applyGameAction(state, { action: "starterUr", id }, noRolls).state;
 
-test("a fresh save gets 60 pulls' worth of gems and a free UR entitlement", () => {
+test("a fresh save gets 80 pulls' worth of gems and a free UR entitlement", () => {
   const state = initialState();
-  assert.equal(STARTER_GEMS, 9600);
-  assert.equal(state.gems / 160, 60);
+  assert.equal(STARTER_GEMS, 12800);
+  assert.equal(state.gems / 160, 80);
   assert.equal(state.credits, STARTER_CREDITS);
   assert.equal(state.starterUrClaimed, null);
   assert.ok(starterUrPool().length >= 3);

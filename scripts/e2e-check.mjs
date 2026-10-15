@@ -52,12 +52,12 @@ check("GET /api/health", JSON.stringify(health), '{"ok":true}');
 console.log("2. guest session");
 const guest = await call("/api/game", { action: "init" });
 check("player.guest", guest.player?.guest, true);
-check("starting gems", guest.state?.gems, 9600);
+check("starting gems", guest.state?.gems, 12800);
 
 console.log("3. ten-pull");
 const pulls = await call("/api/game", { action: "pull", count: 10 });
 check("pulls returned", pulls.pulls?.length, 10);
-check("gems after ten-pull", pulls.state?.gems, 8000);
+check("gems after ten-pull", pulls.state?.gems, 11200);
 check("totalPulls", pulls.state?.totalPulls, 10);
 const roster = pulls.state?.roster ?? [];
 check("roster has characters", roster.length > 0, true);
