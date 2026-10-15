@@ -1265,6 +1265,26 @@
 @media(prefers-reduced-motion:reduce){.initiative-die{animation:none}}
 .initiative-roll-intro[data-reduced-motion=true] .initiative-die{animation:none}
 
+/* Combat-sized models: remove the old roster-era 143/165px width ceiling.
+   Grow the art, not the dock or vitals; keep animation transforms independent. */
+.game-shell.is-combat .combat-unit{max-width:none}
+.game-shell.is-combat .combat-unit-art{
+  width:140%;max-width:min(340px,36vh);height:auto;aspect-ratio:861/1000;
+  flex-shrink:0;margin-left:0;margin-right:0;
+}
+/* All recruit/new enemy canvases put their feet at 90%; original slimes at 84%.
+   Move their transparent canvas padding below the ground, not between feet/bars. */
+.game-shell.is-combat .sprite-rig img.chibi{position:relative;top:calc(10% - 6px)}
+.game-shell.is-combat .sprite-stage[data-enemy=slime] .sprite-rig img.chibi{top:calc(16% - 6px)}
+.game-shell.is-combat .sprite-rig{transform-origin:50% calc(100% - 6px)}
+@media(max-width:650px){
+  /* Two rows still need room for the foot bars and the initiative strip. */
+  .game-shell.is-combat .combat-teams{padding-left:5%;padding-right:5%}
+  .game-shell.is-combat .combat-unit-art{width:145%;max-width:min(145px,calc((82dvh - 330px) * .4305))}
+}
+@media(max-height:500px){
+  .game-shell.is-combat .combat-unit-art{width:135%;max-width:min(135px,26vh)}
+}
 /* Stage-independent combat contrast. Light the sprite layer, not the rig:
    hit/ultimate filters and travel transforms must still animate normally. */
 .battle-screen .combat-unit:not(.defeated) .sprite-art{

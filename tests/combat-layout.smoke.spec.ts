@@ -33,6 +33,14 @@ for (const [width, height] of [[1366, 680], [1920, 1080], [390, 844], [844, 390]
       expect(r!.y + r!.height).toBeLessThanOrEqual(arena!.y + arena!.height + 1);
     }
     await expect(page.locator(".ally-hud, .enemy-hud")).toHaveCount(0);
+    await expect(page.locator(".pose-enter")).toHaveCount(0); // Measure settled size, not the entrance squash.
+    for (const image of await page.locator(".ally-unit .sprite-art").all()) {
+      const box = await image.boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(width > 900 ? 170 : 95);
+      // Enlarged models must not disappear over a phone's outer screen edges.
+      expect(box!.x).toBeGreaterThanOrEqual(-1);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+    }
     // Selection cues must remain white and visible on the dark chapter-5 field.
     const selected = page.locator(".enemy-unit.targeted");
     await expect(selected).toHaveAttribute("aria-pressed", "true");
