@@ -1059,3 +1059,55 @@
   .game-frame .enemy-hud,.game-frame .ally-hud{min-width:0;margin-bottom:10px}
   .game-frame .battle-command-panel,.game-frame .battle-log-line{grid-column:1/-1}
 }
+
+/* Battlefield-first combat: arena is 82% of the full game frame. */
+.game-shell.is-combat>.topbar,.game-shell.is-combat>.bottom-bar{display:none}
+.game-shell.is-combat .game-main{overflow:hidden;padding:0;min-height:0}
+.game-shell.is-combat .battle-screen{height:100%;min-height:0;display:flex;position:relative;overflow:hidden}
+.game-shell.is-combat .battle-arena{height:82%;flex:0 0 82%;min-height:0;overflow:hidden}
+.game-shell.is-combat .battle-dashboard{height:18%;flex:0 0 18%;min-height:0;display:flex;padding:0;position:relative;background:#142b40}
+.combat-overlay-toolbar{position:absolute;z-index:8;top:12px;left:20px;right:20px;display:flex;justify-content:space-between;gap:15px;pointer-events:none;color:white}
+.combat-overlay-toolbar>div{background:#11283de6;padding:9px 13px;display:flex;gap:10px;align-items:center;pointer-events:auto;border:1px solid #91accf66}
+.combat-overlay-toolbar>div:first-child{display:block;max-width:46%}
+.combat-overlay-toolbar small{display:block;font-size:10px;letter-spacing:1px;color:#a7d8ff}
+.combat-overlay-toolbar strong{display:block;font-family:var(--display);font-size:21px}
+.combat-overlay-toolbar button{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#31536e;color:white;border:1px solid #799bb7;font-size:13px;min-height:38px}
+.combat-initiative-overlay{position:absolute;z-index:7;top:85px;left:20px;right:20px;pointer-events:none}
+.combat-initiative-overlay .initiative-strip{padding:4px 8px;background:#11283dca;max-width:fit-content;pointer-events:auto;border:0}
+.combat-initiative-overlay .initiative-strip li{padding:4px 7px;min-width:85px}
+.combat-initiative-overlay .initiative-caption{display:none}
+.game-shell.is-combat .arena-topline,.game-shell.is-combat .arena-bottom-line,.game-shell.is-combat .battle-versus,.game-shell.is-combat .battle-log-line{display:none}
+.game-shell.is-combat .combat-teams{align-items:center;padding-top:115px;padding-bottom:35px}
+.game-shell.is-combat .combat-unit{position:relative;min-width:0}
+.game-shell.is-combat .combat-unit-art{height:clamp(170px,30vh,280px)}
+.game-shell.is-combat .ally-name{font-size:14px;margin:5px 0;color:white;text-shadow:0 1px 3px #000}
+.model-vitals{width:min(150px,100%);margin:0 auto;padding:6px;background:#10283de6;border:1px solid #a7c8de66;border-radius:3px;color:#fff;text-shadow:none;position:relative;z-index:4}
+.model-vitals>span{font-size:13px;display:block;margin-bottom:4px;white-space:nowrap}
+.model-vitals .progress-track{height:6px}
+.model-vitals>div:last-child{display:flex;gap:4px;align-items:center;margin-top:5px;font-size:11px;color:#a7d8ff}
+.model-vitals>div:last-child>.progress-track{flex:1}
+.model-vitals>div:last-child>.progress-track>span{background:#9fafff}
+.game-shell.is-combat .enemy-unit{display:flex;flex-direction:column;align-items:center}
+.game-shell.is-combat .enemy-unit .combat-unit-label{position:relative;order:2;top:auto;left:auto;right:auto;width:min(170px,100%);padding:7px;background:#351e2ce6;border:1px solid #edb0ae99;margin-top:7px;text-shadow:none}
+.game-shell.is-combat .combat-unit-label>span{font-size:14px}
+.game-shell.is-combat .combat-unit-label>small{font-size:12px}
+.game-shell.is-combat .enemy-unit .target-label{position:relative;order:3;bottom:auto;margin-top:4px}
+.game-shell.is-combat .ally-ready-label{font-size:10px}
+.compact-dock.battle-command-panel{width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,220px);gap:20px;padding:12px 24px;border:0;border-top:2px solid var(--operator-color);align-items:center;box-shadow:none}
+.compact-dock .operator-brief,.compact-dock .command-activation>small{display:none}
+.compact-dock .command-inspection{position:static}
+.compact-dock .command-selector{gap:12px}
+.compact-dock .inspect-command{min-height:65px}
+.compact-dock .command-detail{display:none;position:absolute;z-index:10;left:24px;right:24px;bottom:calc(100% + 12px);padding:20px 50px 20px 22px;min-height:0;max-height:45vh;overflow:auto;background:#10283df5;border:1px solid #83b5d3;box-shadow:0 10px 30px #0005}
+.compact-dock.is-inspecting .command-detail{display:block}
+.close-command-detail{position:absolute;right:12px;top:12px;background:#31536e;color:white;border:1px solid #698ba6;padding:6px}
+.compact-dock .command-activation{gap:7px}
+.compact-dock .activate-command{min-height:46px}
+.combat-pause-actions{display:grid;gap:12px;margin-top:20px}
+@media(max-width:650px){
+  .combat-overlay-toolbar{left:8px;right:8px;top:8px;gap:6px}.combat-overlay-toolbar>div{padding:6px;gap:5px}.combat-overlay-toolbar>div:first-child{max-width:52%}.combat-overlay-toolbar strong{font-size:15px}.combat-overlay-toolbar small{font-size:8px}.combat-overlay-toolbar button{padding:6px;font-size:11px;min-height:34px}
+  .combat-initiative-overlay{top:77px;left:8px;right:8px}.combat-initiative-overlay .initiative-strip{max-width:100%}
+  .game-shell.is-combat .combat-teams{padding:110px 2% 25px;gap:4%}.game-shell.is-combat .combat-units{flex-basis:48%;gap:5px;flex-wrap:wrap;justify-content:center;align-content:flex-end;row-gap:20px}.game-shell.is-combat .combat-unit{flex:0 1 46%;width:46%}.game-shell.is-combat .combat-unit-art{height:105px}.game-shell.is-combat .combat-unit-label>span,.game-shell.is-combat .ally-name{font-size:10px}.game-shell.is-combat .combat-unit-label>small{font-size:10px}.model-vitals{padding:4px}.model-vitals>span{font-size:9px}.model-vitals>div:last-child{font-size:8px}.game-shell.is-combat .ally-ready-label{font-size:7px}
+  .compact-dock.battle-command-panel{padding:8px;grid-template-columns:minmax(0,1fr) 105px;gap:8px}.compact-dock .command-selector{gap:4px}.compact-dock .inspect-command{min-height:54px;display:flex;flex-direction:column;padding:6px 2px;gap:3px}.compact-dock .inspect-command strong{font-size:9px}.compact-dock .inspect-command small{font-size:8px}.compact-dock .inspect-command>span{display:none}.compact-dock .command-readiness{font-size:9px}.compact-dock .activate-command{font-size:11px;padding:7px;gap:4px}.compact-dock .command-detail{left:8px;right:8px;padding:16px 42px 16px 16px}.compact-dock .command-detail-heading>strong{font-size:21px}
+}
+@media(max-height:500px){.combat-initiative-overlay{display:none}.game-shell.is-combat .combat-teams{padding-top:60px;padding-bottom:10px}.game-shell.is-combat .combat-unit-art{height:80px}.compact-dock .inspect-command{min-height:40px}.compact-dock.battle-command-panel{padding:4px 12px}.compact-dock .command-readiness{display:none}.compact-dock .activate-command{min-height:38px}}

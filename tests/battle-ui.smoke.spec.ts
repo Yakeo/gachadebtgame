@@ -23,6 +23,9 @@ for (const width of [1440, 390]) {
     await page.addInitScript(() => localStorage.setItem("gd-motion", "true"));
     await page.goto(`${base}/?signedIn=1`);
     await expect(page.locator(".battle-command-panel")).toBeVisible();
+    await expect(page.locator(".command-detail")).toBeHidden();
+    await page.getByRole("button", { name: /2 Skill/ }).click();
+    await expect(page.locator(".command-detail p")).toBeVisible();
     await expect(page.locator(".command-detail p")).toHaveText(actor.skillNote);
     await page.getByRole("button", { name: /4.*Ultimate/ }).click();
     await expect(page.locator(".command-detail p")).toHaveText(actor.ultimateNote);

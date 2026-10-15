@@ -1,0 +1,10 @@
+# Battlefield-first combat layout
+
+- Combat hides the normal account/resources header and music/status footer. Other screens keep their existing chrome.
+- The arena occupies 82% of the full game frame; a compact command dock uses the remaining 18%. Operation, round, initiative, Auto and Pause are overlaid on the arena instead of consuming separate rows.
+- Ally HP/energy bars and numeric values sit directly beneath each model. Enemy names/HP sit beneath their models and remain clickable as part of the target unit. Duplicate dashboard vitals rows are removed.
+- Selecting a command opens a readable, dismissible description above the dock without issuing an action. The collapsed dock's Inspect button only opens the description; explicit Activate is still required. Low-energy commands remain inspectable through their command buttons.
+- Pause stops Auto and locks command shortcuts. The pause menu offers Resume, Combat log and Main menu. Main menu opens a separate confirmation explaining retreat, no energy refund and lost uncollected rewards. Cancel returns to Pause; confirmed exit calls the existing retreat action, and navigates home only on success.
+- Four-member squads and three-hostile encounters are checked on laptop, desktop, portrait-phone and landscape-phone sizes. Model vitals stay inside the arena.
+
+Validation: 188 unit/asset tests, TypeScript, targeted lint, and 17 scoped browser checks passed. The four layout/exit checks were also rerun with a full level-40 squad in stage 5-4. Existing database-dependent end-to-end and repository-wide lint limitations remain unchanged.

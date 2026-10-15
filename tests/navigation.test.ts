@@ -47,7 +47,7 @@ test("a battle in progress owns the screen", () => {
 
 test("focused scenes report themselves so the shell can lock", () => {
   const views = read("src/components/game-views.tsx");
-  assert.match(views, /CampaignView\(\{ onImmersive \}:/);
+  assert.match(views, /CampaignView\(\{ onImmersive, onMainMenu \}:/);
   assert.match(views, /ArchiveView\(\{ onImmersive \}:/);
   assert.match(views, /onImmersive\(phase !== "map"\)/,
     "story and battle phases are focused scenes");

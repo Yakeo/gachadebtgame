@@ -246,7 +246,7 @@ test("a blow and its answer are two separate beats", () => {
   assert.match(stage, /<BattleCommandPanel[^\n]*locked=\{busy \|\| beat/);
   const panel = read("src/components/battle-command-panel.tsx");
   assert.match(panel, /disabled=\{locked\}/, "inspection ignores the animation lock");
-  assert.match(panel, /disabled=\{locked \|\| insufficient\}/, "activation ignores the animation lock");
+  assert.match(panel, /disabled=\{locked \|\| \(insufficient/, "activation ignores the animation lock");
   assert.match(panel, /if \(!locked && !insufficient\) onActivate/, "keyboard activation ignores the lock");
 });
 
