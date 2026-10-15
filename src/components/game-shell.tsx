@@ -1,18 +1,15 @@
 "use client";
 import { useState, type FormEvent, type CSSProperties } from "react";
-import { ArrowRight, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp, Clock3, Crosshair, Expand, Gift, Heart, Home, Info, ListChecks, LogIn, LogOut, Mail, MessageCircle, Plus, Radio, RefreshCw, Settings, ShieldCheck, ShoppingBag, Sparkles, Star, UsersRound, Volume2, VolumeX, Waypoints, Zap, Eye, EyeOff } from "lucide-react";
-import { useCallback, useState as useBootState } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp, Clock3, Crosshair, Expand, Gift, Heart, Info, ListChecks, LogIn, LogOut, Mail, MessageCircle, Plus, Radio, RefreshCw, Settings, ShieldCheck, ShoppingBag, Sparkles, Star, UsersRound, Volume2, VolumeX, Zap, Eye, EyeOff } from "lucide-react";
+import { useCallback, useEffect, useState as useBootState } from "react";
 import { GameProvider, useGame } from "./game-context";
 import { LoadingScreen, LoginScreen, TitleScreen } from "./boot-screen";
 import { Avatar, Battlefield, Chibi, Credit, Gem, Logo, Modal, ProgressBar, Spinner } from "./ui";
 import { ArchiveView, CampaignView, CharactersView, ExchangeView, MissionsView, RecruitView } from "./game-views";
 import { battlefieldFor, chapters, stages } from "@/lib/campaign";
-import { characterById, companionLines, missionProgress, missions } from "@/lib/game-data";
+import { characterById, companionLines } from "@/lib/game-data";
 type View = "home" | "campaign" | "characters" | "recruit" | "missions" | "archive" | "exchange";
 type Dialog = "account" | "settings" | "mail" | "notices" | "daily" | null;
-const navigation = [
-  { id: "home", name: "Home", icon: Home }, { id: "campaign", name: "Campaign", icon: Waypoints }, { id: "characters", name: "Characters", icon: UsersRound }, { id: "recruit", name: "Recruit", icon: Sparkles }, { id: "missions", name: "Missions", icon: ListChecks }, { id: "archive", name: "Archives", icon: BookOpen },
-] as const;
 export default function Game() { return <GameProvider><BootFlow /></GameProvider>; }
 function BootFlow() {
   const [phase, setPhase] = useBootState<"loading" | "title" | "login" | "game">("loading");
@@ -25,36 +22,60 @@ function BootFlow() {
   return <GameShell onSignedOut={signedOut} />;
 }
 function GameShell({ onSignedOut }: { onSignedOut: () => void }) {
-  const { state, player, loading, busy, error, action, sound, setSound } = useGame();
+  const { state, player, loading, busy, error, action, sound, setSound, notify } = useGame();
   const [view, setView] = useState<View>("home");
+  const [history, setHistory] = useState<View[]>([]);
   const [dialog, setDialog] = useState<Dialog>(null);
-  const readyMissions = missions.filter(m => !state.claimed.includes(m.id) && missionProgress(state, m.kind) >= m.goal).length;
+  const [immersive, setImmersive] = useState(false);
   const dailyReady = state.lastDaily !== new Date().toISOString().slice(0, 10);
   const level = 1 + Math.floor(state.cleared.length * 1.5);
+  // A battle or story scene owns the screen: no tabbing out mid-fight, and a
+  // reload during a battle lands back in the operation instead of the lobby.
+  const navLocked = immersive || Boolean(state.battle);
+  const lockNotice = () => notify(state.battle ? "Finish or retreat from your battle first." : "The scene is still playing — head back to the map first.");
+  useEffect(() => { if (state.battle && view !== "campaign") { setView("campaign"); setHistory([]); } }, [state.battle, view]);
+  function navigate(next: View) {
+    if (next === view) return;
+    if (navLocked) { lockNotice(); return; }
+    setHistory(h => [...h, view]);
+    setView(next);
+  }
+  function goBack() {
+    if (navLocked) { lockNotice(); return; }
+    const prev = history[history.length - 1] ?? "home";
+    setHistory(history.slice(0, -1));
+    setView(prev);
+  }
+  function goHome() {
+    if (navLocked) { lockNotice(); return; }
+    setHistory([]);
+    setView("home");
+  }
   return <div className={`game-shell ${view === "home" ? "is-home" : ""}`}>
     <header className="topbar">
-      <button className="brand-button" onClick={() => setView("home")} aria-label="Gacha Debt home"><Logo /></button>
+      {view !== "home" && !navLocked && <button className="back-button" onClick={goBack} aria-label="Back to the previous screen"><ArrowLeft size={16} /><span>BACK</span></button>}
+      <button className="brand-button" onClick={goHome} aria-label="Gacha Debt home"><Logo /></button>
       <span className="header-divider" />
       <button className="profile-button" onClick={() => setDialog("account")} aria-label="Open account and save progress"><div className="profile-avatar"><Avatar id="ynna" /><span>{String(level).padStart(2, "0")}</span></div><div className="profile-copy"><strong>{player?.name || "President"}<ChevronDown size={12} /></strong><small>{loading ? "CONNECTING TO COUNCIL…" : player?.guest || !player ? "STUDENT COUNCIL · GUEST" : "STUDENT COUNCIL · LINKED"}</small></div></button>
-      <div className="resource-bar"><button className="resource energy-resource" onClick={() => setView("exchange")} title="Energy · regenerates 1 point every 4 minutes"><Zap size={20} fill="currentColor" /><span>{state.energy}<small> / 120</small></span><Plus size={14} className="resource-plus" /></button><button className="resource" onClick={() => setView("missions")} title="Earn gems through campaign and missions"><Gem size={21} /><span>{state.gems.toLocaleString()}</span><Plus size={14} className="resource-plus" /></button><button className="resource" onClick={() => setView("exchange")} title="Campus credits · open exchange"><Credit size={22} /><span>{state.credits.toLocaleString()}</span><Plus size={14} className="resource-plus" /></button></div>
+      <div className="resource-bar"><button className="resource energy-resource" onClick={() => navigate("exchange")} title="Energy · regenerates 1 point every 4 minutes"><Zap size={20} fill="currentColor" /><span>{state.energy}<small> / 120</small></span><Plus size={14} className="resource-plus" /></button><button className="resource" onClick={() => navigate("missions")} title="Earn gems through campaign and missions"><Gem size={21} /><span>{state.gems.toLocaleString()}</span><Plus size={14} className="resource-plus" /></button><button className="resource" onClick={() => navigate("exchange")} title="Campus credits · open exchange"><Credit size={22} /><span>{state.credits.toLocaleString()}</span><Plus size={14} className="resource-plus" /></button></div>
       <div className="header-actions"><button className="icon-button" onClick={() => setDialog("notices")} aria-label="Notices"><Bell size={21} /><i className="notification-dot" /></button><button className="icon-button" onClick={() => setDialog("mail")} aria-label="Open inbox"><Mail size={23} />{dailyReady && <i className="notification-dot" />}</button><button className="icon-button" onClick={() => setDialog("settings")} aria-label="Settings"><Settings size={22} /></button></div>
     </header>
     <main className={`game-main view-${view}`}>
       {error && <div className="connection-banner">We couldn’t reach your save. <button disabled={busy} onClick={() => action("init", {}, true)}>Reconnect <RefreshCw size={14} /></button></div>}
-      {view === "home" && <HomeView navigate={setView} openDialog={setDialog} dailyReady={dailyReady} />}
-      {view === "campaign" && <CampaignView />}
+      {view === "home" && <HomeView navigate={navigate} openDialog={setDialog} dailyReady={dailyReady} />}
+      {view === "campaign" && <CampaignView onImmersive={setImmersive} />}
       {view === "characters" && <CharactersView />}
       {view === "recruit" && <RecruitView />}
       {view === "missions" && <MissionsView />}
-      {view === "archive" && <ArchiveView />}
+      {view === "archive" && <ArchiveView onImmersive={setImmersive} />}
       {view === "exchange" && <ExchangeView />}
     </main>
-    <footer className="bottom-bar"><nav className="main-nav" aria-label="Game navigation">{navigation.map(item => <button key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}><item.icon size={23} strokeWidth={view === item.id ? 2.4 : 1.8} /><span>{item.name}</span>{item.id === "missions" && readyMissions > 0 && <span className="nav-count">{readyMissions}</span>}<span className="nav-index">0{navigation.indexOf(item) + 1}</span></button>)}</nav><div className="status-bar"><button className="music-button" onClick={() => setSound(!sound)} title={sound ? "Mute ambient music" : "Play ambient music"}>{sound ? <Volume2 size={13} /> : <VolumeX size={13} />}<span className={`equalizer ${sound ? "playing" : ""}`}><i/><i/><i/><i/></span><span>AFTER SCHOOL <b>—</b> A QUIET AFTERNOON</span></button><span className="build-label">GACHA DEBT <b>/</b> PREVIEW 0.1 · CONCEPT ART</span><span className="online-status"><i className={error ? "offline" : ""} />{loading ? "CONNECTING" : error ? "CONNECTION INTERRUPTED" : player?.guest ? "GUEST SESSION · LINK TO SAVE" : "ACCOUNT SYNCED"}</span></div></footer>
+    <footer className="bottom-bar"><div className="status-bar"><button className="music-button" onClick={() => setSound(!sound)} title={sound ? "Mute ambient music" : "Play ambient music"}>{sound ? <Volume2 size={13} /> : <VolumeX size={13} />}<span className={`equalizer ${sound ? "playing" : ""}`}><i/><i/><i/><i/></span><span>AFTER SCHOOL <b>—</b> A QUIET AFTERNOON</span></button><span className="build-label">GACHA DEBT <b>/</b> PREVIEW 0.1 · CONCEPT ART</span><span className="online-status"><i className={error ? "offline" : ""} />{loading ? "CONNECTING" : error ? "CONNECTION INTERRUPTED" : player?.guest ? "GUEST SESSION · LINK TO SAVE" : "ACCOUNT SYNCED"}</span></div></footer>
     {dialog === "account" && <AccountDialog onClose={() => setDialog(null)} onSignedOut={onSignedOut} />}
     {dialog === "settings" && <SettingsDialog onClose={() => setDialog(null)} openAccount={() => setDialog("account")} />}
     {dialog === "daily" && <DailyDialog onClose={() => setDialog(null)} />}
     {dialog === "mail" && <Modal title="Council inbox" eyebrow="YOU’VE GOT MAIL" onClose={() => setDialog(null)}><div className="mail-item"><div className="mail-icon"><Gift size={25} /></div><div><span className="eyebrow">FROM THE STUDENT COUNCIL</span><h3>A little help for your first chapter.</h3><p>Your starter supplies are already in your account: <strong>4,800 gems</strong> and <strong>25,000 credits</strong>. No real money. No fine print. Ninette insisted.</p><div className="delivered"><CheckCheck size={15} /> Starter supplies delivered</div></div></div><div className="mail-note"><Heart size={19} /><p>There’s also a new council gift every day. Stop by when you can!</p></div><button className="primary-button full-width" onClick={() => setDialog("daily")}>View daily gift <ArrowRight size={17} /></button></Modal>}
-    {dialog === "notices" && <Modal title="The council bulletin" eyebrow="WHAT’S NEW / PREVIEW 0.1" onClose={() => setDialog(null)}><div className="notice-hero"><Sparkles size={33} /><div><h3>Your very expensive adventure begins.</h3><p>A visual novel. A tactical RPG. A seriously questionable budget.</p></div></div><div className="notice-list"><p><Check size={16} /><span><strong>25 story stages</strong> across 5 chapters, from the first audit to the final override.</span></p><p><Check size={16} /><span><strong>Fair recruitment.</strong> An SSR or better within every 50 pulls. Published, fixed rates.</span></p><p><Check size={16} /><span><strong>Your progress is yours.</strong> Register to keep your squad and continue across devices.</span></p><p><Info size={16} /><span>All character illustrations are temporary concept art. Original designs will replace them.</span></p></div><button className="primary-button full-width" onClick={() => { setDialog(null); setView("campaign"); }}>Let’s make some questionable decisions <ArrowRight size={16} /></button></Modal>}
+    {dialog === "notices" && <Modal title="The council bulletin" eyebrow="WHAT’S NEW / PREVIEW 0.1" onClose={() => setDialog(null)}><div className="notice-hero"><Sparkles size={33} /><div><h3>Your very expensive adventure begins.</h3><p>A visual novel. A tactical RPG. A seriously questionable budget.</p></div></div><div className="notice-list"><p><Check size={16} /><span><strong>25 story stages</strong> across 5 chapters, from the first audit to the final override.</span></p><p><Check size={16} /><span><strong>Fair recruitment.</strong> An SSR or better within every 50 pulls. Published, fixed rates.</span></p><p><Check size={16} /><span><strong>Your progress is yours.</strong> Register to keep your squad and continue across devices.</span></p><p><Info size={16} /><span>All character illustrations are temporary concept art. Original designs will replace them.</span></p></div><button className="primary-button full-width" onClick={() => { setDialog(null); navigate("campaign"); }}>Let’s make some questionable decisions <ArrowRight size={16} /></button></Modal>}
     
   </div>;
 }

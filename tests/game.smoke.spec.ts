@@ -13,6 +13,10 @@ async function enterAsGuest(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Just looking? Play as guest" }).click();
   await expect(page.locator(".online-status")).toContainText("GUEST SESSION", { timeout: 15000 });
 }
+async function goHome(page: import("@playwright/test").Page) {
+  await page.locator(".back-button").click();
+  await expect(page.locator(".campaign-tile")).toBeVisible();
+}
 
 test("main menu, recruitment, upgrades, account binding, and session restoration", async ({ page }) => {
   const errors: string[] = [];
@@ -23,14 +27,17 @@ test("main menu, recruitment, upgrades, account binding, and session restoration
   await expect(page.locator(".online-status")).toContainText("GUEST SESSION");
   await expect(page.locator(".campaign-tile")).toBeVisible();
   await expect(page.locator(".home-keyart")).toBeVisible();
-  await page.locator(".main-nav").getByRole("button", { name: /Recruit/ }).click();
+  await expect(page.locator(".main-nav")).toHaveCount(0);
+  await page.locator(".recruit-tile").click();
+  await expect(page.locator(".back-button")).toBeVisible();
   await page.locator(".pull-button.ten").click();
   await expect(page.locator(".pull-result")).toHaveCount(10, { timeout: 20000 });
   await page.getByRole("button", { name: "Back to banner" }).click();
   let data = await page.evaluate(async () => (await fetch("/api/game")).json());
   expect(data.state.gems).toBe(3200);
   expect(data.state.totalPulls).toBe(10);
-  await page.locator(".main-nav").getByRole("button", { name: /Characters/ }).click();
+  await goHome(page);
+  await page.locator(".characters-tile").click();
   await page.getByRole("button", { name: /Level up/ }).click();
   await expect(page.locator(".level-section strong")).toContainText("02");
   await page.reload();
@@ -68,11 +75,17 @@ test("main menu, recruitment, upgrades, account binding, and session restoration
 test("story, turn-based battle, post-story, rewards, and archive loop", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await enterAsGuest(page);
-  await page.locator(".main-nav").getByRole("button", { name: /Campaign/ }).click();
+  await page.locator(".campaign-tile").click();
   await page.getByRole("button", { name: "Start operation" }).click();
   await expect(page.locator(".story-nameplate")).toContainText("Ninette");
   await page.getByRole("button", { name: "Skip", exact: true }).click();
   await expect(page.locator(".battle-header")).toContainText("The Audit");
+  // Mid-fight the screen is locked down: no back button, and the brand button
+  // refuses to tab out of combat.
+  await expect(page.locator(".back-button")).toBeHidden();
+  await page.locator(".brand-button").click();
+  await expect(page.locator(".toast")).toContainText("Finish or retreat from your battle first");
+  await expect(page.locator(".battle-header")).toBeVisible();
   for (let i = 0; i < 20; i++) {
     if (await page.locator(".battle-result.victory").isVisible()) break;
     const response = page.waitForResponse(r => r.url().endsWith("/api/game") && r.request().method() === "POST");
@@ -89,10 +102,12 @@ test("story, turn-based battle, post-story, rewards, and archive loop", async ({
   expect(data.state.cleared).toEqual(["1-1"]);
   expect(data.state.gems).toBe(5000);
   expect(data.state.battle).toBeNull();
-  await page.locator(".main-nav").getByRole("button", { name: /Missions/ }).click();
+  await goHome(page);
+  await page.locator(".quick-tile").filter({ hasText: "Missions" }).click();
   await page.locator(".mission-card").filter({ hasText: "The first step" }).getByRole("button", { name: "Claim rewards" }).click();
   await expect(page.locator(".mission-card").filter({ hasText: "The first step" }).getByRole("button", { name: "Claimed" })).toBeDisabled();
-  await page.locator(".main-nav").getByRole("button", { name: /Archives/ }).click();
+  await goHome(page);
+  await page.locator(".quick-tile").filter({ hasText: "Archives" }).click();
   await page.locator(".archive-stage").filter({ hasText: "The Audit" }).getByRole("button", { name: "After battle" }).click();
   await expect(page.locator(".story-topbar")).toContainText("STORY ARCHIVE");
 });
@@ -110,7 +125,8 @@ test("daily rewards, settings, mobile navigation, and narrow-screen layout", asy
   await expect(page.getByRole("switch", { name: "Reduced motion" })).toBeChecked();
   await page.getByRole("button", { name: "Close dialog" }).click();
   for (const name of ["Campaign", "Characters", "Recruit", "Missions", "Archives"]) {
-    await page.locator(".main-nav").getByRole("button", { name: new RegExp(name) }).click();
+    await page.locator(".home-menu").getByRole("button", { name: new RegExp(name) }).click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+    await goHome(page);
   }
 });
