@@ -263,7 +263,7 @@ export function applyGameAction(original: GameState, input: Record<string, unkno
       state.gems += mission.gems;
       state.credits += mission.credits;
       state.claimed.push(id);
-      message = `Mission complete! +${mission.gems} gems and +${mission.credits.toLocaleString()} credits.`;
+      message = `Mission complete! +${mission.gems} gems${mission.credits ? ` and +${mission.credits.toLocaleString()} credits` : ""}.`;
       break;
     }
     case "buy": {

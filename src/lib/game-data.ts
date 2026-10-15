@@ -706,11 +706,14 @@ export function stats(owned: OwnedCharacter) {
   const scale = (1 + (owned.level - 1) * .065) * (1 + owned.potential * .05);
   return { hp: Math.round(c.hp * scale), attack: Math.round(c.attack * scale), defense: Math.round(c.defense * scale), speed: c.speed + Math.floor((owned.level - 1) / 10) + owned.potential };
 }
+/** Available to every save, including guests created before starter-gem increases. */
+export const WELCOME_MISSION = { id: "welcome-gift", title: "Welcome to the game", description: "Start the game. Claim 3,200 free gems for 20 rolls—new and returning players are welcome!", goal: 1, kind: "welcome", gems: 3200, credits: 0 } as const;
 export const missions = [
+  WELCOME_MISSION,
   { id: "first-stage", title: "The first step", description: "Clear your first campaign stage.", goal: 1, kind: "stages", gems: 200, credits: 1000 },
   { id: "chapter-one", title: "A very expensive mistake", description: "Clear all 5 stages of Chapter 01.", goal: 5, kind: "stages", gems: 500, credits: 3000 },
   { id: "first-ten", title: "Just one more pull…", description: "Recruit 10 characters.", goal: 10, kind: "pulls", gems: 320, credits: 1500 },
   { id: "full-squad", title: "Better together", description: "Own 6 different characters.", goal: 6, kind: "roster", gems: 400, credits: 2000 },
   { id: "all-stages", title: "The ledger is balanced", description: "Complete all 25 campaign stages.", goal: 25, kind: "stages", gems: 2000, credits: 15000 },
 ] as const;
-export function missionProgress(state: GameState, kind: string) { return kind === "stages" ? state.cleared.length : kind === "pulls" ? state.totalPulls : state.roster.length; }
+export function missionProgress(state: GameState, kind: string) { return kind === "welcome" ? 1 : kind === "stages" ? state.cleared.length : kind === "pulls" ? state.totalPulls : state.roster.length; }
