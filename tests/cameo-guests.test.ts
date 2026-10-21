@@ -16,7 +16,7 @@ import { stages } from "../src/lib/campaign";
 const guests = ["chen", "hokusai"] as const;
 const manifest = JSON.parse(readFileSync("art-source/cameo/manifest.json", "utf8")) as {
   canvas: number[]; floor: number;
-  records: { id: string; origin: string; sourceFile: string; sourceSha256: string; model: string; modelSha256: string; keyart: string; keyartSha256: string; matte: string }[];
+  records: { id: string; origin: string; sourceFile: string; sourceSha256: string; illustration: string; illustrationSha256: string; model: string; modelSha256: string; keyart: string; keyartSha256: string; build: string }[];
 };
 const sha = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex");
 
@@ -67,16 +67,21 @@ test("the cameo manifest records provenance and the supplied sources are kept", 
   assert.deepEqual(ids, [...guests].sort());
   for (const record of manifest.records) {
     assert.match(record.origin, /Arknights|Fate/);
-    assert.match(record.matte, /alpha|GrabCut/, "the matte method must be recorded");
+    assert.match(record.build, /chroma key/i, "the build method must be recorded");
     assert.ok(existsSync(record.sourceFile), `${record.sourceFile} is missing`);
     assert.equal(sha(record.sourceFile), record.sourceSha256);
+    // The player-supplied illustration still supplies the keyart, so it stays
+    // recorded (and on disk) even though the battle model is drawn separately.
+    assert.ok(existsSync(record.illustration), `${record.illustration} is missing`);
+    assert.equal(sha(record.illustration), record.illustrationSha256);
   }
-  // Hokusai's painting has no matte upstream; the tool that cuts it out is the
-  // documented record of how the model was produced.
-  const tool = readFileSync("scripts/prepare-cameo-models.py", "utf8");
-  assert.match(tool, /grabCut/);
-  assert.match(tool, /seeded_matte/);
-  assert.match(tool, /focus/, "Chen is cropped to the figure rather than shipped as a whole diorama");
+  // The models are drawn sprites, not crops of the paintings: the tool that
+  // keys them must stay the documented record of how they were produced.
+  const tool = readFileSync("scripts/prepare-cameo-sprites.py", "utf8");
+  assert.match(tool, /chroma/i);
+  assert.match(tool, /Resampling.NEAREST/, "models are scaled without interpolation, like the roster's");
+  assert.match(tool, /FLOOR = 900/, "models stand on the roster's shared floor");
+  assert.doesNotMatch(tool, /grabCut|seeded_matte/, "the painting-crop pipeline is retired");
 });
 
 test("cameo guests fight, level, equip and speak like every other recruit", () => {

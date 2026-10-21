@@ -10,31 +10,35 @@
       "name": "Ch\u2019en",
       "origin": "Arknights",
       "rightsHolder": "Hypergryph / Studio Montagne",
-      "source": "Player-supplied E2 illustration (char_010_chen_2)",
-      "sourceFile": "art-source/cameo/chen-source.png",
-      "sourceSha256": "f118f0352732962b9a5bfe721e5d2093f4797598a0ba8561e9865e146993a1e4",
-      "matte": "alpha intersected with a seeded GrabCut pass (the source alpha contains the dragon and wreckage, so it is cropped to the figure and separated from the scenery)",
+      "source": "Generated pixel-art battle sprite; the roster's own models were supplied as style references",
+      "sourceFile": "art-source/cameo/models/chen-model-source.png",
+      "sourceSha256": "f9ff79620071a4c161c100ad8148dc4bf5a76d3af330cfc9b779d32848a06e83",
       "model": "/images/splash-chen.png",
-      "modelSha256": "0006bf1987f86b94be7631d08a2d83537a72ea52eb1128878cd15ca002ad8ebc",
+      "modelSha256": "a7436853a68de66e5b4f4b4c9d03fa8624177f350fc1eb09534b1e6004b35ef9",
       "keyart": "/images/keyart-chen.webp",
       "keyartSha256": "5534a291e2235ea89add997f94cb69b043d518728cfbdfd11755a332f9539e46",
-      "keyartNote": "cropped around the figure, margin bled from the painting's own edges and darkened so the square reads as a backdrop"
+      "keyartNote": "cropped around the figure, margin bled from the painting's own edges and darkened so the square reads as a backdrop",
+      "illustration": "art-source/cameo/chen-source.png",
+      "illustrationSha256": "f118f0352732962b9a5bfe721e5d2093f4797598a0ba8561e9865e146993a1e4",
+      "build": "chroma key on a flat green field, fringe colour reconstruction, 2x pixel re-grid, 128 colours, nearest-neighbour upscale onto the 861x1000 canvas"
     },
     {
       "id": "hokusai",
       "name": "Katsushika Hokusai",
       "origin": "Fate/Grand Order",
       "rightsHolder": "TYPE-MOON / Lasengle",
-      "source": "Player-supplied illustration (360\u00d7509, painted field, no matte)",
-      "sourceFile": "art-source/cameo/hokusai-source.png",
-      "sourceSha256": "213e43850a5a23181d7173926bd514b246a6280db679dff21643ce61234380c5",
-      "matte": "seeded GrabCut (painted field, see scripts/prepare-cameo-models.py)",
+      "source": "Generated pixel-art battle sprite; the roster's own models were supplied as style references",
+      "sourceFile": "art-source/cameo/models/hokusai-model-source.png",
+      "sourceSha256": "c5a05fb73f1e87f0088faaa990ebf086c52157d40424246136890c459208fe2a",
       "model": "/images/splash-hokusai.png",
-      "modelSha256": "76c13be21244251e27810d9251874c8dfac984d1f846ef07f6763a23b3e75b4a",
+      "modelSha256": "88098862b6534efdb9bc1c54a9863584886cf12ca53cae582f6d17cd0485dfe8",
       "keyart": "/images/keyart-hokusai.webp",
       "keyartSha256": "1a51d01a552c3c68ae0024a6593a8f1688bc1a53857828fcbefebab5f6ca0247",
-      "keyartNote": "2x Lanczos upscale of the supplied painting (360\u00d7509) with a mild unsharp pass; no detail invented"
+      "keyartNote": "2x Lanczos upscale of the supplied painting (360\u00d7509) with a mild unsharp pass; no detail invented",
+      "illustration": "art-source/cameo/hokusai-source.png",
+      "illustrationSha256": "213e43850a5a23181d7173926bd514b246a6280db679dff21643ce61234380c5",
+      "build": "chroma key on a flat green field, fringe colour reconstruction, 2x pixel re-grid, 128 colours, nearest-neighbour upscale onto the 861x1000 canvas"
     }
   ],
-  "notes": "Both figures are cut with scripts/prepare-cameo-models.py and composed onto the roster's 861x1000 canvas at the 900px floor, so they stand at the same height as the hand-drawn cast."
+  "notes": "Battle models are purpose-drawn pixel sprites in the roster idiom and are built by scripts/prepare-cameo-sprites.py onto the 861x1000 canvas at the 900px floor. The player-supplied illustrations are still kept as art-source and still supply the keyart used on character pages and pull results."
 }
