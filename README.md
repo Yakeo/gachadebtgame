@@ -153,7 +153,7 @@ To check that the database connection works, open [http://localhost:3000/api/hea
 - **Rarity:** UR (Ultra Rare) is the highest rarity in the game; SSR sits directly below it, then SR, then R. `src/lib/rarity.ts` owns that order and every badge, filter, sort and rates table reads it.
 - **Attack range:** melee fighters dash in and land the blow on contact; casters, healers and rangers hold their ground, cast, and send a projectile that reaches the enemy on the same frame. `src/lib/attack-range.ts` decides who is which, with a stated reason for every weapon that overrides its class.
 - **Cameo guests:** the UR pool includes visitors from other games (Ch'en — Arknights; Katsushika Hokusai — Fate/Grand Order). They are ordinary recruits mechanically and are labelled as cameos in the character page.
-- **Maintenance mode:** the game ships with the doors shut while a patch lands (`MAINTENANCE_MODE=off` reopens them). See `DEPLOYMENT.md` §8.
+- **Maintenance mode:** the game is open by default. `MAINTENANCE_MODE=on` closes it for a deploy — Penelope's notice, `503` on every game action, and open tabs evicted within ~15 s. See `DEPLOYMENT.md` §8.
 - **Characters:** level with credits. Duplicate pulls become potential tokens. Each potential adds 5% to all stats, up to 5. Potential 3 also adds 10% damage.
 - **Missions and the daily gift** are claimed once. The daily gift resets at 00:00 UTC.
 

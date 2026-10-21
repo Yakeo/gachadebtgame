@@ -1,11 +1,11 @@
 // Maintenance mode.
 //
-// The patch changes the rarity ladder, the combat choreography and the UR pool.
-// None of that should be applied underneath somebody mid-battle, so this branch
-// closes the game and puts Penelope in front of the door. These tests pin the
-// parts that are easy to get subtly wrong: the default, the way out, the
-// eviction of a tab that was already open, and the fact that nobody gets
-// trapped in a jumpscare.
+// Patch 0.2 shipped with the doors shut: a rarity realignment, a combat rewrite
+// and two new URs should not land underneath somebody mid-battle. The patch is
+// live now, so the default is back to open - but the machinery stays, because
+// the next patch will want it. These tests pin the parts that are easy to get
+// subtly wrong: the default, how to close it, the eviction of a tab that was
+// already open, and the fact that nobody gets trapped in a jumpscare.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -31,19 +31,20 @@ function withFlag<T>(value: string | undefined, fn: () => T): T {
   }
 }
 
-test("the game boots closed until somebody says otherwise", () => {
-  // Missing env var means maintenance is ON: an unpatchable game is worse than a
-  // sign that stays up for an hour.
-  for (const value of [undefined, "", "true", "1", "yes", "lol"]) {
-    withFlag(value, () => assert.equal(maintenanceEnabled(), true, `MAINTENANCE_MODE=${value} must keep the game closed`));
+test("the game is open unless an operator deliberately closes it", () => {
+  // Patch 0.2 is live, so the doors are open by default. Closing the game is now
+  // a deliberate act: a missing variable, an explicit "off", or a typo must not
+  // take the game down by accident.
+  for (const value of [undefined, "", "off", "OFF", " false ", "0", "no", "open", "live", "maintanence"]) {
+    withFlag(value, () => assert.equal(maintenanceEnabled(), false, `MAINTENANCE_MODE=${value} must leave the game open`));
   }
-  for (const value of ["off", "OFF", " false ", "0", "no", "disabled", "live"]) {
-    withFlag(value, () => assert.equal(maintenanceEnabled(), false, `MAINTENANCE_MODE=${value} must open the game`));
+  for (const value of ["on", "ON", " true ", "1", "yes", "maintenance", "closed", "down"]) {
+    withFlag(value, () => assert.equal(maintenanceEnabled(), true, `MAINTENANCE_MODE=${value} must close the game`));
   }
 });
 
 test("the broadcast names the patch, the star and what is being changed", () => {
-  const status = maintenanceStatus();
+  const status = withFlag("on", maintenanceStatus);
   assert.equal(status.active, true);
   assert.match(status.patch, /^0\.\d+$/);
   assert.match(status.name, /RARITY/);
@@ -55,10 +56,12 @@ test("the broadcast names the patch, the star and what is being changed", () => 
     assert.ok(text.includes(subject), `the patch notes never mention ${subject}`);
   }
   // The payload the browser polls is the same story, without the internal flag.
-  const payload = maintenancePayload();
+  const payload = withFlag("on", maintenancePayload);
   assert.equal(payload.maintenance, true);
   assert.equal(payload.star.name, "Penelope");
   assert.equal("active" in payload, false);
+  // And with the doors open it says so, which is what lets a player through.
+  assert.equal(withFlag(undefined, () => maintenancePayload().maintenance), false);
 });
 
 test("the page gate runs before the game, per request", () => {

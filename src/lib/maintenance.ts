@@ -1,16 +1,17 @@
 /**
  * Maintenance mode.
  *
- * The game ships with this ON. A patch that changes the rarity ladder, the
- * combat choreography and the UR pool should not be applied underneath someone
- * who is mid-battle, so the first thing this branch does when it deploys is
- * close the door, put Penelope in front of it, and refuse game actions until a
- * human opens it again.
+ * The game is OPEN unless somebody deliberately closes it. Patch 0.2 shipped
+ * with the doors shut (a rarity realignment, a combat rewrite and two new URs
+ * should not land underneath someone mid-battle), and once that deploy was
+ * verified the sign came down. The machinery stays: closing the game is one
+ * environment variable away, and it still kicks out whoever is playing.
  *
- * Turn it off with `MAINTENANCE_MODE=off` (Vercel → Project → Settings →
- * Environment Variables, or .env.local). Anything else - missing, "true",
- * "1", "lol yes" - leaves it on, because accidentally reopening the game during
- * a migration is worse than accidentally leaving the sign up for an hour.
+ * Close it with `MAINTENANCE_MODE=on` (Vercel → Project → Settings →
+ * Environment Variables, or .env.local). Missing, empty, `off`, `false`, `0`,
+ * `no`, `open`, `live` - and any typo - leave the game open: the shutdown is
+ * now a deliberate act, so an unrecognised value must not take the game down
+ * by accident.
  *
  * Read through `maintenanceStatus()` rather than at module scope: the value is
  * checked at request time so flipping the env var does not need a rebuild of
@@ -63,10 +64,13 @@ const BASE = {
   },
 } as const satisfies Omit<MaintenanceInfo, "active">;
 
-/** True unless the operator explicitly turned maintenance off. */
+/** Values that deliberately close the doors. Anything else leaves them open. */
+const CLOSED_FLAGS = new Set(["on", "true", "1", "yes", "y", "maintenance", "closed", "down", "shutdown"]);
+
+/** True only while an operator has explicitly closed the game. */
 export function maintenanceEnabled(): boolean {
   const flag = (process.env.MAINTENANCE_MODE ?? "").trim().toLowerCase();
-  return !["off", "false", "0", "no", "disabled", "live"].includes(flag);
+  return CLOSED_FLAGS.has(flag);
 }
 
 /** The full broadcast, including whether it is on right now. */
