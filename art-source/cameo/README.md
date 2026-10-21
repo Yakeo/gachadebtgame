@@ -1,45 +1,49 @@
 # Cameo guests
 
-Two URs are visitors from other games, added from art the player supplied.
-`manifest.json` records where each one came from, how its matte was produced and
-the hashes of every shipped file; `tests/cameo-guests.test.ts` checks all of it.
+Two URs are visitors from other games. `manifest.json` records where each one
+came from, how its art was built and the hashes of every shipped file;
+`tests/cameo-guests.test.ts` checks all of it.
 
-| Guest | Origin | Supplied source | Matte | Model | Illustration |
-| --- | --- | --- | --- | --- | --- |
-| Ch'en | Arknights (Hypergryph / Studio Montagne) | `chen-source.png` — E2 illustration, `char_010_chen_2` | alpha ∩ seeded GrabCut | `public/images/splash-chen.png` | `public/images/keyart-chen.webp` |
-| Katsushika Hokusai | Fate/Grand Order (TYPE-MOON / Lasengle) | `hokusai-source.png` — 360×509 painting, opaque | seeded GrabCut | `public/images/splash-hokusai.png` | `public/images/keyart-hokusai.webp` |
+| Guest | Origin | Battle model | Illustration / keyart |
+| --- | --- | --- | --- |
+| Ch'en | Arknights (Hypergryph / Studio Montagne) | `public/images/splash-chen.png` | `keyart-chen.webp` from `chen-source.png` (E2 illustration, `char_010_chen_2`) |
+| Katsushika Hokusai | Fate/Grand Order (TYPE-MOON / Lasengle) | `public/images/splash-hokusai.png` | `keyart-hokusai.webp` from `hokusai-source.png` (360×509 painting) |
 
 Both are ordinary UR recruits mechanically: same rates, same 50-pull promise,
 same roster, same combat rules, their own companion lines. They are labelled as
 cameos in the character page so nobody mistakes them for academy IP, and they
 are deliberately absent from the campaign script.
 
-## Rebuilding the battle models
+## Battle models
+
+The first cut of these two models was the player-supplied illustration, matted
+and dropped onto the roster canvas. It was recognisable and wrong: a painted
+figure with soft edges and its own scenery, standing next to hand-drawn pixel
+sprites. The cast's models are crisp multi-tone pixel figures on a shared
+canvas, and a crop can never become one.
+
+So the models are drawn as pixel-art sprites in the roster's own idiom —
+2–3px blocks, hard edges, a limited palette, dark outlines, flat two-tone
+shading, full body, neutral stance, facing slightly right — using the shipped
+roster models (Altria, Angelina, Morrow) as style references. They arrive on a
+flat chroma-green field, and the mechanical part is scripted:
 
 ```sh
-pip install pillow opencv-python-headless
-python scripts/prepare-cameo-models.py chen hokusai
+pip install pillow numpy scipy
+python scripts/prepare-cameo-sprites.py chen hokusai
 ```
 
-The two sources could not share one matte strategy:
+The tool keys the green field out, rebuilds the fringe colour from the nearest
+solid pixel so no green halo survives at card scale, drops keying specks,
+re-grids the art to a 2× coarser lattice, quantizes to 128 colours, upscales
+with nearest-neighbour and composes onto the roster's 861×1000 canvas at the
+900 px floor — the same standing height as everybody else in battle.
 
-* **Ch'en** arrives with a real alpha channel, but the *inside* of that alpha is
-  a whole scene: a dragon, wreckage, floodlights. Trimming the alpha gives a
-  small boxed diorama that reads as a cut-out photograph beside hand-drawn
-  characters. The source is therefore cropped to the superintendent, a seeded
-  GrabCut pass separates her from the wreckage, and the original alpha is
-  intersected with the result so nothing outside the diorama creeps back in.
-* **Hokusai** arrives as an opaque painting whose border is *scenery*, not a
-  blank field: blue waves, orange koi and a lantern. A white-matte flood removes
-  almost nothing (2% of the frame), and a naive chroma key eats the figure's own
-  blue sleeves. `prepare-cameo-models.py` therefore seeds a GrabCut pass with one
-  background region per corner and a foreground block over the face and torso.
-  The seeds are coarse on purpose, so the result is reproducible and reviewable.
-
-After the matte both follow the roster pipeline: downsample to readable pixel
-clusters, quantize to 128 colours, upscale with nearest-neighbour and compose
-onto the shared 861×1000 canvas at the 900px floor, so they stand at the same
-height as the rest of the cast in battle.
+The illustrations are not wasted: they still supply each guest's keyart, which
+is what the character page and pull results show. `art-source/cameo/*-source.png`
+stays in the repository as the record of the player-supplied art, and
+`art-source/cameo/models/*-model-source.png` is the raw sprite each shipped
+model is built from.
 
 ## Rights
 

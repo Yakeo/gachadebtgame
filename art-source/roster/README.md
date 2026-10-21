@@ -14,7 +14,7 @@ All are available through the existing shared rarity pools. Rarity rates, featur
 
 ## Art status and provenance
 
-All seventeen new illustrations are AI-generated, guided by the game's existing fine-lined anime artwork. Each has its own palette, clothing and club-specific props. No third-party sprite or illustration files were scraped or copied. The UR characters are fan crossover characters belonging to their respective rights holders, not original academy IP; no license to those characters is claimed. Review permissions before commercial distribution.
+All seventeen new illustrations are AI-generated, guided by the game's existing fine-lined anime artwork. Each has its own palette, clothing and club-specific props. No third-party sprite or illustration files were scraped or copied. The two cameo guests added later (Ch'en, Katsushika Hokusai) are recorded separately in `art-source/cameo/`: their battle models were drawn as pixel sprites in this roster's idiom, and their keyart comes from player-supplied illustrations. The UR characters are fan crossover characters belonging to their respective rights holders, not original academy IP; no license to those characters is claimed. Review permissions before commercial distribution.
 
 Rook, Morrow, Quill, Brass, Lumi, Altria and Alice received a follow-up redraw using the supplied Arknights references directly, targeting thinner contours, angular facial construction, textured painterly detail and preserved character-specific colors.
 
