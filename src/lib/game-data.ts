@@ -532,8 +532,8 @@ const characterDefinitions: Omit<Character, "speed" | "combatClass">[] = [
     keyart: "/images/keyart-redhood.webp"
   },
   {
-    // Cameo. Arknights' L.G.D. superintendent, using the E2 art the player
-    // supplied as both the model cutout and the illustration.
+    // Cameo. Arknights' L.G.D. superintendent: a purpose-drawn pixel battle
+    // model, separate from the player-supplied illustration used for keyart.
     id: "chen",
     name: "Ch’en",
     title: "Superintendent of the Sword",
@@ -555,8 +555,8 @@ const characterDefinitions: Omit<Character, "speed" | "combatClass">[] = [
     keyart: "/images/keyart-chen.webp"
   },
   {
-    // Cameo. Fate/Grand Order's Foreigner, cut from the splash art the player
-    // supplied: the painted field is a matte, so only the outer border is keyed.
+    // Cameo. Fate/Grand Order's Foreigner: a purpose-drawn pixel battle
+    // model; the player-supplied painting is retained only as keyart.
     id: "hokusai",
     name: "Katsushika Hokusai",
     title: "Thirty-Six Views of Debt",

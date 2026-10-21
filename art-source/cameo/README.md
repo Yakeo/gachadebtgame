@@ -50,3 +50,12 @@ model is built from.
 These characters and their art belong to their respective rights holders. No
 ownership is claimed, and the in-game note says so. Review permissions before
 any commercial distribution.
+
+## Model cache and deployment checks
+
+The shared `Chibi` renderer uses content-hashed model URLs so a browser cannot
+keep displaying the old illustration cutouts after a sprite replacement.
+`node scripts/gen-model-manifest.mjs` refreshes the committed hashes, and
+`next.config.ts` also runs it before development/production builds. The deploy
+fetches both cameo PNGs through those versioned URLs and compares their exact
+bytes with this redraw manifest, not merely with a successful homepage load.
