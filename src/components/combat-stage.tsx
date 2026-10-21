@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from "re
 import { ArrowDown, ArrowLeft, ArrowRight, BookOpen, ChevronRight, Crown, FastForward, Flag, History, Pause, Radio, Shield, Sparkles, Star, Swords, WandSparkles, Zap } from "lucide-react";
 import { characterById, characters, type Battle } from "@/lib/game-data";
 import { campaignCredits } from "@/lib/campaign-balance";
+import { attackRangeOf, isRanged, projectileKindOf, type ProjectileKind } from "@/lib/attack-range";
 import { stages, type Stage } from "@/lib/campaign";
 import { sceneForStage } from "@/lib/battle-scenes";
 import { SpriteFooting } from "./sprite-footing";
@@ -84,10 +85,17 @@ function CombatSprite({ id, label, pose, side }: { id: string; label?: string; p
   // impact reads pink and Escanooor's reads ember orange. Enemies keep the
   // stylesheet default: their ids are sprite names, not members of the cast.
   const known = side === "ally" && characters.some(character => character.id === id);
-  return <div className={`sprite-stage pose-${pose} side-${side}`} data-character={id}
+  // Range is part of the sprite, not just the command: a ranged fighter stands
+  // their ground and throws something, so the stage carries the class that
+  // swaps their rig's lunge for a cast, and the element that carries the shot.
+  const range = known ? attackRangeOf(id) : "melee";
+  const projectile: ProjectileKind | undefined = known && range === "ranged" ? projectileKindOf(id) : undefined;
+  return <div className={`sprite-stage pose-${pose} side-${side} is-${range}`} data-character={id}
     data-enemy={SLIME_IDS.has(id) ? "slime" : undefined} data-anim={pose}
+    data-projectile={projectile} data-range={range}
     style={known ? { "--character-color": characterById(id).color } as CSSProperties : undefined}>
     <div className="sprite-fx" aria-hidden="true"><i /><i /><i /><i /><i /></div>
+    {projectile && <span className="sprite-projectile" data-kind={projectile} aria-hidden="true" />}
     <div className="sprite-rig"><SpriteFooting id={id} label={label} /></div>
   </div>;
 }
@@ -155,6 +163,10 @@ export function BattleScreen({ battle, stage, onStory, onRetreat, onMainMenu }: 
     // the distance to the chosen foe and let the advance animation cross it.
     const note = cmd === "skill" ? c.skillNote : c.ultimateNote;
     const strike = cmd === "attack" || ((cmd === "skill" || cmd === "ultimate") && hitsFoes(note));
+    // Melee closes the distance; ranged stays put and sends the blow across.
+    // Both reach the enemy at CONTACT_MS, so the hit reaction, flash and damage
+    // number are revealed at the same moment either way.
+    const ranged = strike && isRanged(active.id);
     if (strike) {
       const unit = arenaRef.current?.querySelector<HTMLElement>(`[data-unit="${active.id}"]`);
       const art = unit?.querySelector(".sprite-stage");
@@ -166,10 +178,20 @@ export function BattleScreen({ battle, stage, onStory, onRetreat, onMainMenu }: 
         // with the attacker in front, feet on the same line.
         const fromRight = a.left >= t.left + t.width / 2;
         const landX = t.left + t.width * (fromRight ? 0.72 : 0.28);
-        unit.style.setProperty("--dash-x", `${Math.round(landX - (a.left + a.width / 2))}px`);
-        unit.style.setProperty("--dash-y", `${Math.round(t.bottom - a.bottom)}px`);
-        unit.classList.add("is-dashing");
-        setTimeout(() => unit.classList.remove("is-dashing"), POSE_HOLD_MS);
+        const travel = `${Math.round(landX - (a.left + a.width / 2))}px`;
+        if (ranged) {
+          // The projectile leaves from chest height and meets the enemy there,
+          // rather than being dragged down to their feet like a walking sprite.
+          unit.style.setProperty("--shot-x", travel);
+          unit.style.setProperty("--shot-y", `${Math.round(t.top + t.height * 0.46 - (a.top + a.height * 0.46))}px`);
+          unit.classList.add("is-firing");
+          setTimeout(() => unit.classList.remove("is-firing"), POSE_HOLD_MS);
+        } else {
+          unit.style.setProperty("--dash-x", travel);
+          unit.style.setProperty("--dash-y", `${Math.round(t.bottom - a.bottom)}px`);
+          unit.classList.add("is-dashing");
+          setTimeout(() => unit.classList.remove("is-dashing"), POSE_HOLD_MS);
+        }
       }
     }
     setImpactColor(c.color);

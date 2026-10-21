@@ -6,8 +6,11 @@ import { characterById, characters, companionLines, initialState, pullPool, pull
 import { applyGameAction } from "../src/lib/game-engine";
 
 test("Grimm and Red Hood join the UR pool without changing its total rate", () => {
+  // Five Black Souls / Fate guests when this test was written; Ch'en and
+  // Hokusai joined later, so the count is pinned to the current UR pool and the
+  // point of the assertion - the band total is unchanged - still holds.
   const pool = pullPool("UR");
-  assert.equal(pool.length, 5);
+  assert.equal(pool.length, 7);
   assert.ok(Math.abs(pullOdds().filter(o => o.rarity === "UR").reduce((sum,o) => sum+o.chance,0) - .001) < 1e-12);
   for (const id of ["grimm", "redhood"]) {
     const c = characterById(id);

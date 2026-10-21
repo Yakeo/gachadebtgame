@@ -1,6 +1,9 @@
 import { critterDefinitions, critterQuotes } from "./critter-data";
 import { baseStatBlock, type CombatClass } from "./character-stats";
+import { byRarity, RARITY_ORDER, RARITY_RANK, RARITY_TIERS, type RarityTier } from "./rarity";
 export type Rarity = "R" | "SR" | "SSR" | "UR";
+export { RARITY_ORDER, RARITY_RANK, RARITY_TIERS, byRarity };
+export type { RarityTier };
 export type Mechanic =
   | "standard" | "chaos" | "pierce" | "drain" | "riposte"
   // Story-cast kits. Each one changes how a turn resolves rather than just
@@ -528,7 +531,65 @@ const characterDefinitions: Omit<Character, "speed" | "combatClass">[] = [
     splash: "/images/splash-redhood.png",
     keyart: "/images/keyart-redhood.webp"
   },
+  {
+    // Cameo. Arknights' L.G.D. superintendent, using the E2 art the player
+    // supplied as both the model cutout and the illustration.
+    id: "chen",
+    name: "Ch’en",
+    title: "Superintendent of the Sword",
+    rarity: "UR",
+    element: "Lightning",
+    role: "Striker",
+    color: "#2f7dbd",
+    hair: "#3d4d74",
+    weapon: "Chi Xiao",
+    hp: 1470,
+    attack: 242,
+    defense: 70,
+    skill: "Sheathed Thunder",
+    ultimate: "Chi Xiao: Unsheathed",
+    skillNote: "A lightning-edged cut that ignores a quarter of the target's armor.",
+    ultimateNote: "The blade leaves the sheath once. Everything in front of it learns where the thunder was kept.",
+    description: "A visiting superintendent from Lungmen with a very short list of people she answers to. She read the council's treasury ledger once, declared it a crime scene, and then offered to help anyway.",
+    splash: "/images/splash-chen.png",
+    keyart: "/images/keyart-chen.webp"
+  },
+  {
+    // Cameo. Fate/Grand Order's Foreigner, cut from the splash art the player
+    // supplied: the painted field is a matte, so only the outer border is keyed.
+    id: "hokusai",
+    name: "Katsushika Hokusai",
+    title: "Thirty-Six Views of Debt",
+    rarity: "UR",
+    element: "Water",
+    role: "Caster",
+    color: "#d24b62",
+    hair: "#241c2c",
+    weapon: "Brush and Katana",
+    hp: 1310,
+    attack: 248,
+    defense: 50,
+    skill: "Sumi-e Undertow",
+    ultimate: "Great Wave of Unpaid Interest",
+    skillNote: "Arcane damage to every hostile, painted in one impossible brushstroke.",
+    ultimateNote: "The wave in the painting arrives. The academy's drainage system never recovers.",
+    description: "A painter who walked out of a woodblock print and into the west wing. She keeps trying to sign the walls, the ledger, and one very nervous creditor. Her daughter is somewhere in the ink.",
+    splash: "/images/splash-hokusai.png",
+    keyart: "/images/keyart-hokusai.webp"
+  },
 ];
+
+/**
+ * Cameo guests: characters who belong to another story.
+ *
+ * They are ordinary UR recruits in every mechanical sense - same pity, same
+ * rates, same roster, same combat rules - but their art and names belong to
+ * their rights holders. This list exists so the UI can say so plainly and the
+ * tests can check that a cameo never quietly becomes the featured banner
+ * character or a story-only unit.
+ */
+export const cameoGuestIds = ["altria", "alice", "grimm", "redhood", "chen", "hokusai"] as const;
+export const cameoGuests = cameoGuestIds.map(id => characterDefinitions.find(c => c.id === id)!);
 export const ssrFeaturedId = "penelope";
 /**
  * Pull probabilities. The engine and the "Rates & details" dialog both read
@@ -582,6 +643,8 @@ export type PullResult = { id: string; rarity: Rarity; duplicate: boolean; guara
 export const companionQuotes: Record<string, string[]> = {
     grimm: ["The ledger has an ending. That already makes it kinder than my story.", "Keep the lantern lit. Not everything outside is looking for a door.", "I have forgotten many names. I will try not to forget yours."],
     redhood: ["You call this a campus. I keep finding paths that lead back to the woods.", "A red cloak does not make someone easy to find. Remember that.", "If you hear someone calling from behind the trees, finish your tea first."],
+    chen: ["Sign the ledger. Do not make me ask twice.", "Your treasury is a crime scene. I said I would help. I did not say I would be gentle.", "Sheathe that attitude before someone audits it."],
+    hokusai: ["Hold still. The wave needs a witness.", "I painted your debt. It is very blue. It is also very large.", "Toto-sama says you look tired. He is usually right about that."],
 
   aster: ["The short route is under the campus. Bring a torch, not a permission slip.", "I drew a map. Facilities called it a security concern.", "Welcome back. Ready to find a way around the gates?"],
   vesper: ["Last shuttle is leaving. Council members ride free.", "They tried to install a fare meter. I installed a second exit.", "Welcome aboard. No one gets left behind tonight."],

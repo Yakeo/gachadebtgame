@@ -21,6 +21,9 @@ export const CHARACTER_PROFILES: Record<string, [CombatClass, number]> = {
   mira: ["Support", 2], quill: ["Arcanist", 3], brass: ["Vanguard", 1], lumi: ["Support", 5],
   altria: ["Warrior", 6], alice: ["Arcanist", 6],
   grimm: ["Vanguard", 5], redhood: ["Warrior", 10],
+  // Cameo guests. Ch'en is a guard with a sword and a lightning temper; Hokusai
+  // paints from a distance and hits like a wave.
+  chen: ["Warrior", 8], hokusai: ["Arcanist", 1],
   kidjester: ["Ranger", 6],
   mrblack: ["Warrior", 5],
   mreats: ["Support", -2],

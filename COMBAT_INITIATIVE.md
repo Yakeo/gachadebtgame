@@ -12,7 +12,7 @@ Each of the 44 recruits has an explicit class and speed offset in `src/lib/chara
 | Arcanist | Fragile mage | 950 | 195 | 35 | 95 |
 | Support | Healing / utility | 1150 | 160 | 50 | 103 |
 
-Final base HP/ATK/DEF blend 70% class baseline with 30% the character's existing individual stat, then apply the rarity factor: R .96, SR 1.00, SSR 1.06, UR 1.10. Thus rarity helps modestly, but a high-rarity mage is not automatically tankier than a lower-rarity Vanguard. Base speed is class speed + individual offset + rarity bonus (0/1/2/3).
+Final base HP/ATK/DEF blend 70% class baseline with 30% the character's existing individual stat, then apply the rarity factor: R .96, SR 1.00, SSR 1.06, UR 1.10. Thus rarity helps modestly, but a high-rarity mage is not automatically tankier than a lower-rarity Vanguard. Base speed is class speed + individual offset + rarity bonus (0/1/2/3), where the ladder is UR > SSR > SR > R (see `src/lib/rarity.ts`).
 
 HP/ATK/DEF keep the existing level/potential scaling. Speed increases by one every ten levels and one per potential, rather than multiplying with level. Roster details show the four stats, class explanation, skill notes, and initiative rules; upgrades preview SPD gains as well.
 

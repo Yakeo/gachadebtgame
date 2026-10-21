@@ -6,6 +6,7 @@ import { StarterUrDialog } from "./starter-ur-dialog";
 import { GameViewport } from "./game-viewport";
 import { GameProvider, useGame } from "./game-context";
 import { LoadingScreen, LoginScreen, TitleScreen } from "./boot-screen";
+import { MaintenanceScreen } from "./maintenance-screen";
 import { Avatar, Battlefield, Chibi, Credit, Gem, Logo, Modal, ProgressBar, Spinner } from "./ui";
 import { ArchiveView, CampaignView, CharactersView, ExchangeView, MissionsView, RecruitView } from "./game-views";
 import { battlefieldFor, chapters, stages } from "@/lib/campaign";
@@ -15,9 +16,13 @@ type Dialog = "account" | "settings" | "mail" | "notices" | "daily" | "starter" 
 export default function Game() { return <GameViewport><GameProvider><BootFlow /></GameProvider></GameViewport>; }
 function BootFlow() {
   const [phase, setPhase] = useBootState<"loading" | "title" | "login" | "game">("loading");
-  const { clearSession } = useGame();
+  const { clearSession, maintenance } = useGame();
   const finishLoading = useCallback((next: "title" | "login" | "game") => setPhase(next), []);
   const signedOut = useCallback(() => { clearSession(); setPhase("login"); }, [clearSession]);
+  // A patch went out while this tab was open. Whatever was on screen - a
+  // battle, a story scene, a pull animation - is replaced by Penelope. That is
+  // the eviction; there is no way back into the game without a reload.
+  if (maintenance) return <MaintenanceScreen info={maintenance} onRetry={() => window.location.reload()} />;
   if (phase === "loading") return <LoadingScreen onComplete={finishLoading} />;
   if (phase === "title") return <TitleScreen onStart={() => setPhase("login")} />;
   if (phase === "login") return <LoginScreen onEnter={() => setPhase("game")} />;
@@ -78,7 +83,7 @@ function GameShell({ onSignedOut }: { onSignedOut: () => void }) {
     {dialog === "settings" && <SettingsDialog onClose={() => setDialog(null)} openAccount={() => setDialog("account")} />}
     {dialog === "daily" && <DailyDialog onClose={() => setDialog(null)} />}
     {dialog === "mail" && <Modal title="Council inbox" eyebrow="YOU’VE GOT MAIL" onClose={() => setDialog(null)}><div className="mail-item"><div className="mail-icon"><Gift size={25} /></div><div><span className="eyebrow">FROM THE STUDENT COUNCIL</span><h3>A little help for your first chapter.</h3><p>New players now start with <strong>{STARTER_GEMS.toLocaleString()} gems</strong> ({STARTER_GEMS / 160} pulls), <strong>{STARTER_CREDITS.toLocaleString()} credits</strong>, and <strong>one free UR of their choice</strong>. Gems and credits are deposited when the save is created; choose your UR below. No real money. Ninette insisted.</p><button className="primary-button starter-inbox-button" onClick={() => setDialog("starter")}>{state.starterUrClaimed ? "View claimed UR gift" : "Choose your free UR"}<Gift size={16} /></button></div></div><div className="mail-note"><Heart size={19} /><p>There’s also a new council gift every day. Stop by when you can!</p></div><button className="primary-button full-width" onClick={() => setDialog("daily")}>View daily gift <ArrowRight size={17} /></button></Modal>}
-    {dialog === "notices" && <Modal title="The council bulletin" eyebrow="WHAT’S NEW / PREVIEW 0.1" onClose={() => setDialog(null)}><div className="notice-hero"><Sparkles size={33} /><div><h3>Your very expensive adventure begins.</h3><p>A visual novel. A tactical RPG. A seriously questionable budget.</p></div></div><div className="notice-list"><p><Check size={16} /><span><strong>25 story stages</strong> across 5 chapters, from the first audit to the final override.</span></p><p><Check size={16} /><span><strong>Fair recruitment.</strong> An SSR or better within every 50 pulls. Published, fixed rates.</span></p><p><Check size={16} /><span><strong>Your progress is yours.</strong> Register to keep your squad and continue across devices.</span></p><p><Info size={16} /><span>All character illustrations are temporary concept art. Original designs will replace them.</span></p></div><button className="primary-button full-width" onClick={() => { setDialog(null); navigate("campaign"); }}>Let’s make some questionable decisions <ArrowRight size={16} /></button></Modal>}
+    {dialog === "notices" && <Modal title="The council bulletin" eyebrow="WHAT’S NEW / PREVIEW 0.1" onClose={() => setDialog(null)}><div className="notice-hero"><Sparkles size={33} /><div><h3>Your very expensive adventure begins.</h3><p>A visual novel. A tactical RPG. A seriously questionable budget.</p></div></div><div className="notice-list"><p><Check size={16} /><span><strong>25 story stages</strong> across 5 chapters, from the first audit to the final override.</span></p><p><Check size={16} /><span><strong>Fair recruitment.</strong> An SSR or better within every 50 pulls. Published, fixed rates.</span></p><p><Check size={16} /><span><strong>UR is the top of the ladder.</strong> Ultra Rare sits above SSR, and the UR pool now includes cameo guests from other stories.</span></p><p><Check size={16} /><span><strong>Melee and ranged fight differently.</strong> Casters, healers and rangers stay back and throw; everyone else closes in.</span></p><p><Check size={16} /><span><strong>Your progress is yours.</strong> Register to keep your squad and continue across devices.</span></p><p><Info size={16} /><span>All character illustrations are temporary concept art. Original designs will replace them.</span></p></div><button className="primary-button full-width" onClick={() => { setDialog(null); navigate("campaign"); }}>Let’s make some questionable decisions <ArrowRight size={16} /></button></Modal>}
     
   </div>;
 }

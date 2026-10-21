@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { saves } from "@/db/schema";
 import { createGuest, currentUser, publicPlayer, validateOrigin } from "@/lib/auth";
 import { applyGameAction, regenerateEnergy } from "@/lib/game-engine";
+import { MAINTENANCE_BLOCK_MESSAGE, maintenanceEnabled } from "@/lib/maintenance";
 export const dynamic = "force-dynamic";
 export async function GET() {
   try {
@@ -17,6 +18,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     validateOrigin(request);
+    // Maintenance is checked before anything else, and before the database is
+    // touched: a patch in flight must not resolve a single game action, even
+    // from a tab that was already open when the doors shut.
+    if (maintenanceEnabled()) return NextResponse.json({ error: MAINTENANCE_BLOCK_MESSAGE, maintenance: true }, { status: 503 });
     const input = await request.json() as Record<string, unknown>;
     let user = await currentUser();
     if (!user && input.action === "init") user = await createGuest();
