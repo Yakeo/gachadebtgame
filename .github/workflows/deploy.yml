@@ -144,3 +144,7 @@ jobs:
       # the build, so "deployed" and "being served" are the same statement.
       - name: Verify deployed portraits match the build
         run: node scripts/verify-deployed-art.mjs "https://$PRODUCTION_DOMAIN" alvida
+
+      # Verify the actual redraws through the same content-hashed URLs as Chibi.
+      - name: Verify deployed cameo battle models
+        run: node scripts/verify-cameo-models.mjs "https://$PRODUCTION_DOMAIN"

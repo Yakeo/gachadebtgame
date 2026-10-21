@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Refresh the portrait content hashes before every build.
+ * Refresh portrait and battle-model content hashes before every build.
  *
  * This deliberately does not live in an npm `prebuild` script. The deploy runs
  * `vercel build`, which invokes `next build` directly and never fires npm
@@ -17,13 +17,17 @@ import { fileURLToPath } from "node:url";
  * valid, it would just be one revision behind. So warn and carry on.
  */
 const root = dirname(fileURLToPath(import.meta.url));
-const generator = join(root, "scripts", "gen-portrait-manifest.mjs");
+const generators = ["gen-portrait-manifest.mjs", "gen-model-manifest.mjs"];
 
-if (process.env.SKIP_ART_MANIFEST !== "1" && existsSync(generator)) {
-  try {
-    execFileSync(process.execPath, [generator], { cwd: root, stdio: "pipe" });
-  } catch (error) {
-    console.warn("[art] could not refresh the portrait manifest; using the committed one.", error);
+if (process.env.SKIP_ART_MANIFEST !== "1") {
+  for (const name of generators) {
+    const generator = join(root, "scripts", name);
+    if (!existsSync(generator)) continue;
+    try {
+      execFileSync(process.execPath, [generator], { cwd: root, stdio: "pipe" });
+    } catch (error) {
+      console.warn(`[art] could not refresh ${name}; using the committed manifest.`, error);
+    }
   }
 }
 
