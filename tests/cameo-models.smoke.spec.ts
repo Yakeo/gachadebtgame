@@ -37,6 +37,33 @@ for (const width of [1366, 390]) {
         expect(served.ok()).toBeTruthy();
         const hash = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
         expect(hash(await served.body())).toBe(hash(readFileSync(`public${characterById(id).splash}`)));
+        if (id === "hokusai") {
+          const pixels = await art.evaluate((img: HTMLImageElement) => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d")!;
+            ctx.drawImage(img, 0, 0);
+            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let bottom = 0, greenResidue = 0, crimson = 0, teal = 0, ivory = 0;
+            for (let i = 0; i < data.length; i += 4) {
+              if (!data[i + 3]) continue;
+              const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+              bottom = Math.floor(i / 4 / canvas.width) + 1;
+              if (g > Math.max(r, b) + 18) greenResidue++;
+              if (r > 70 && r > g * 1.3 && r > b * 1.3) crimson++;
+              if (g > r * 1.2 && b > r * 1.2 && g > 30 && b > 30 && Math.abs(g - b) < 50) teal++;
+              if (r > 160 && g > 150 && b > 100) ivory++;
+            }
+            return { bottom, greenResidue, crimson, teal, ivory, cornerAlpha: data[3] };
+          });
+          expect(pixels.bottom).toBe(900);
+          expect(pixels.cornerAlpha).toBe(0);
+          expect(pixels.greenResidue).toBe(0);
+          expect(pixels.crimson).toBeGreaterThan(100);
+          expect(pixels.teal).toBeGreaterThan(100);
+          expect(pixels.ivory).toBeGreaterThan(100);
+        }
+
       }
     }
     await page.screenshot({ path: `.cache/cameo-models-${width}.png`, fullPage: true });

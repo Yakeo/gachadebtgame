@@ -16,7 +16,7 @@ export const modelHashes: Record<string, string> = {
   "/images/splash-escanooor.png": "cedf8591",
   "/images/splash-flint.png": "7ebf311b",
   "/images/splash-grimm.png": "dee306a2",
-  "/images/splash-hokusai.png": "88098862",
+  "/images/splash-hokusai.png": "e7085af9",
   "/images/splash-kidjester.png": "e2cd4ac3",
   "/images/splash-lumi.png": "c9eabd8c",
   "/images/splash-maribel.png": "be071212",

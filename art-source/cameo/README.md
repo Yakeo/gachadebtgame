@@ -59,3 +59,25 @@ keep displaying the old illustration cutouts after a sprite replacement.
 `next.config.ts` also runs it before development/production builds. The deploy
 fetches both cameo PNGs through those versioned URLs and compares their exact
 bytes with this redraw manifest, not merely with a successful homepage load.
+
+## Hokusai's updated design
+
+`hokusai-design-reference.png` preserves the player's newer full-body reference.
+The battle sprite is redrawn from it rather than cropped: short wavy purple
+hair; a crimson-bow, purple-flower and gold-pin headdress; a teal ribbon; red,
+ivory and dark-purple kimono panels with bird motifs; a lacquered floral brush;
+and a floating octopus familiar. The separate painting/keyart is unchanged.
+
+Rebuild this version with:
+
+```sh
+python scripts/prepare-cameo-sprites.py hokusai --no-green
+node scripts/gen-model-manifest.mjs
+```
+
+`--no-green` replaces residual green-biased chroma clusters with neighbouring
+sprite colours after palette quantization. Teal is preserved. Use it only for
+designs without actual green clothing; Ch'en's existing build is unchanged.
+The reference, generated sprite source and final model hashes are recorded in
+`manifest.json`. The browser tests check transparent corners, the 900px floor,
+the red/ivory/teal palette and absence of green chroma residue.
