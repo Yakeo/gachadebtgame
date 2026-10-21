@@ -150,6 +150,10 @@ To check that the database connection works, open [http://localhost:3000/api/hea
 - **Register / sign in:** profile button in the header. Guest progress is kept when you create a new account on that same browser. Signing into an existing account loads that account's save instead.
 - **Campaign:** 5 chapters, 5 stages each. Every stage has a story before and after the battle.
 - **Recruit:** 160 gems per pull, 1,600 for ten. Pull 50 without an SSR or UR and the 50th is guaranteed to be SSR or higher.
+- **Rarity:** UR (Ultra Rare) is the highest rarity in the game; SSR sits directly below it, then SR, then R. `src/lib/rarity.ts` owns that order and every badge, filter, sort and rates table reads it.
+- **Attack range:** melee fighters dash in and land the blow on contact; casters, healers and rangers hold their ground, cast, and send a projectile that reaches the enemy on the same frame. `src/lib/attack-range.ts` decides who is which, with a stated reason for every weapon that overrides its class.
+- **Cameo guests:** the UR pool includes visitors from other games (Ch'en — Arknights; Katsushika Hokusai — Fate/Grand Order). They are ordinary recruits mechanically and are labelled as cameos in the character page.
+- **Maintenance mode:** the game ships with the doors shut while a patch lands (`MAINTENANCE_MODE=off` reopens them). See `DEPLOYMENT.md` §8.
 - **Characters:** level with credits. Duplicate pulls become potential tokens. Each potential adds 5% to all stats, up to 5. Potential 3 also adds 10% damage.
 - **Missions and the daily gift** are claimed once. The daily gift resets at 00:00 UTC.
 

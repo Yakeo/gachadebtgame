@@ -24,6 +24,7 @@ import { readFileSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { characters } from "@/lib/game-data";
+import { attackRangeOf } from "@/lib/attack-range";
 import { CONTACT_MS, POSE_HOLD_MS } from "@/components/combat-stage";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -33,8 +34,13 @@ const css = read("src/app/combat.css");
 const stage = read("src/components/combat-stage.tsx");
 
 const hold = POSE_HOLD_MS / 1000;
-const nonR = characters.filter((c) => c.rarity !== "R").map((c) => c.id);
-const rIds = characters.filter((c) => c.rarity === "R").map((c) => c.id);
+// Melee fighters cross the arena. Ranged fighters do not travel at all - they
+// stand and throw - so the advance rules only apply to the melee half of the
+// cast. That split is the whole point of src/lib/attack-range.ts.
+const melee = characters.filter((c) => attackRangeOf(c.id) === "melee");
+const ranged = characters.filter((c) => attackRangeOf(c.id) === "ranged");
+const nonR = melee.filter((c) => c.rarity !== "R").map((c) => c.id);
+const rIds = melee.filter((c) => c.rarity === "R").map((c) => c.id);
 
 /** Parse `@keyframes name{...}` blocks by matching braces. */
 function keyframeBlocks(cssText: string) {
@@ -88,8 +94,8 @@ test("moves that heal stay with the squad", () => {
     "the basic attack always travels; skills and ultimates travel when they strike");
 });
 
-test("every non-R character has their own advance animation", () => {
-  assert.ok(nonR.length >= 29, `expected the full non-R cast, found ${nonR.length}`);
+test("every non-R melee character has their own advance animation", () => {
+  assert.ok(nonR.length >= 12, `expected the melee half of the non-R cast, found ${nonR.length}`);
   for (const id of nonR) {
     const parsed = advanceOf(id);
     assert.ok(parsed, `${id} (rarity ${characters.find(c => c.id === id)?.rarity}) needs a per-character advance rule`);
@@ -98,6 +104,19 @@ test("every non-R character has their own advance animation", () => {
     assert.ok(parsed!.duration <= hold,
       `${parsed!.name} runs ${parsed!.duration}s > POSE_HOLD_MS ${hold}s and gets cut off`);
     assert.ok(blocks.has(parsed!.name), `${parsed!.name} is referenced but never defined`);
+  }
+});
+
+test("ranged fighters never dash: they stay put and the shot travels", () => {
+  assert.ok(ranged.length >= 8, `expected a ranged half of the cast, found ${ranged.length}`);
+  for (const c of ranged) {
+    assert.equal(advanceOf(c.id), null, `${c.id} is ranged and must not own a dash animation`);
+  }
+  for (const id of ["hokusai", "purp", "mira", "morrow", "angelina"]) {
+    assert.ok(ranged.some((c) => c.id === id), `${id} should fight at range`);
+  }
+  for (const id of ["penelope", "ruta", "edgelord", "chen", "grimm"]) {
+    assert.ok(melee.some((c) => c.id === id), `${id} should fight in melee`);
   }
 });
 

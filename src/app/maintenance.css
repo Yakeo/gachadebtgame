@@ -1,0 +1,141 @@
+/* Maintenance mode. See src/lib/maintenance.ts for why the game can be closed,
+   and src/components/maintenance-screen.tsx for the two jobs this screen has
+   (kick people out, then explain itself). */
+
+/* ---------- The jumpscare ------------------------------------------------ */
+.penelope-scare{
+  position:fixed;inset:0;z-index:9000;display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(circle at 50% 42%,#3b0d24 0,#170713 55%,#08040a 100%);
+  cursor:pointer;animation:scare-in .18s steps(2,end) both;
+}
+.penelope-scare.calm{animation:none}
+@keyframes scare-in{
+  0%{opacity:0;filter:brightness(3) saturate(.2)}
+  40%{opacity:1;filter:brightness(1.6)}
+  100%{opacity:1;filter:none}
+}
+.penelope-scare-flash{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    repeating-linear-gradient(0deg,#ffffff10 0 2px,transparent 2px 4px),
+    radial-gradient(circle at 50% 45%,#ff2f7a55,transparent 60%);
+  animation:scare-strobe .22s steps(2,end) 4 both;
+}
+@keyframes scare-strobe{0%{opacity:0}50%{opacity:1}100%{opacity:.2}}
+.penelope-scare-face{position:relative;animation:scare-slam .42s cubic-bezier(.2,1.6,.3,1) both;text-align:center}
+@keyframes scare-slam{
+  0%{transform:scale(.4) rotate(-7deg);opacity:0}
+  55%{transform:scale(1.18) rotate(3deg);opacity:1}
+  72%{transform:scale(.97) rotate(-1.5deg)}
+  100%{transform:scale(1.06) rotate(1deg)}
+}
+.penelope-scare.calm .penelope-scare-face{animation:none;transform:scale(1)}
+.penelope-scare-face img{
+  width:min(78vw,620px);height:auto;image-rendering:auto;
+  filter:drop-shadow(0 0 46px #ff3f8e88) contrast(1.08);
+  animation:scare-breathe .5s ease-in-out infinite alternate;
+}
+@keyframes scare-breathe{from{transform:scale(1)}to{transform:scale(1.035)}}
+.penelope-scare.calm .penelope-scare-face img{animation:none}
+.penelope-scare-word{
+  position:absolute;left:50%;bottom:2%;transform:translateX(-50%) rotate(-4deg);
+  font-family:var(--display,inherit);font-weight:900;font-style:italic;font-size:clamp(48px,11vw,150px);
+  color:#fff;letter-spacing:2px;
+  text-shadow:0 0 22px #ff2f7a,0 6px 0 #7c0d34,0 12px 40px #ff2f7a88;
+  animation:scare-word .5s cubic-bezier(.2,1.5,.3,1) .1s both;
+}
+@keyframes scare-word{from{transform:translateX(-50%) scale(.3) rotate(-14deg);opacity:0}to{transform:translateX(-50%) scale(1) rotate(-4deg);opacity:1}}
+.penelope-scare.calm .penelope-scare-word{animation:none}
+.penelope-scare-foot{
+  position:absolute;left:0;right:0;bottom:22px;display:flex;flex-direction:column;gap:6px;align-items:center;
+  color:#ffd7e6;font-size:11px;letter-spacing:2px;text-align:center;padding:0 20px;
+}
+.penelope-scare-foot strong{font-size:13px;letter-spacing:2.5px;color:#fff;text-shadow:0 0 14px #ff2f7a}
+.penelope-scare-foot span{opacity:.72;font-size:9px;letter-spacing:1.6px}
+
+/* ---------- The notice --------------------------------------------------- */
+.maintenance-screen{
+  position:fixed;inset:0;z-index:8000;overflow:auto;
+  background:
+    radial-gradient(ellipse at 12% 8%,#ff6ec01f,transparent 55%),
+    radial-gradient(ellipse at 92% 4%,#318fed26,transparent 50%),
+    linear-gradient(180deg,#0b1224,#131c33 38%,#0d1526);
+  color:#e9f2ff;
+  padding:clamp(16px,3vw,42px);
+}
+.maintenance-stripes{
+  position:fixed;inset:0;pointer-events:none;opacity:.14;
+  background:repeating-linear-gradient(115deg,#ffd34d 0 22px,transparent 22px 64px);
+  mask-image:linear-gradient(180deg,black,transparent 65%);
+}
+.maintenance-shell{
+  position:relative;max-width:1080px;margin:0 auto;background:#101a2fdd;
+  border:1px solid #2b3d5e;border-radius:6px;box-shadow:0 30px 90px #04070f99;
+  backdrop-filter:blur(6px);padding:clamp(16px,2.4vw,30px);
+}
+.maintenance-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  border-bottom:1px solid #24344f;padding-bottom:14px}
+.maintenance-tape{display:inline-flex;align-items:center;gap:7px;font-size:9px;font-weight:800;letter-spacing:2px;
+  color:#1a1204;background:linear-gradient(120deg,#ffd34d,#ffb02e);padding:6px 10px;border-radius:2px;
+  box-shadow:0 0 18px #ffb02e55}
+.maintenance-patch{font-size:9px;letter-spacing:2px;color:#87a4c7;font-weight:700}
+.maintenance-hero{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:clamp(14px,2.4vw,28px);
+  align-items:center;padding:clamp(14px,2.2vw,26px) 0}
+.maintenance-star{position:relative;border-radius:5px;overflow:hidden;border:1px solid #33507a;
+  background:radial-gradient(circle at 50% 20%,#ff6ec033,transparent 70%),#0c1526}
+.maintenance-star img{width:100%;height:clamp(220px,32vh,340px);object-fit:cover;object-position:50% 18%;display:block;
+  animation:star-breathe 4.5s ease-in-out infinite}
+@keyframes star-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+.maintenance-star-tag{position:absolute;left:10px;top:10px;display:inline-flex;gap:5px;align-items:center;
+  font-size:8px;font-weight:800;letter-spacing:1.6px;color:#2a0b16;background:#ff9ecb;padding:4px 7px;border-radius:2px}
+.maintenance-kicker{display:inline-flex;align-items:center;gap:7px;font-size:9px;letter-spacing:2.2px;
+  color:#8ec5ff;font-weight:800;margin-bottom:10px}
+.maintenance-copy h1{font-size:clamp(27px,4.2vw,46px);line-height:1.02;font-style:italic;font-weight:800;
+  letter-spacing:-1px;margin:0 0 12px;color:#fff;text-shadow:0 0 30px #2f8fff44}
+.maintenance-message{font-size:clamp(12px,1.35vw,14px);line-height:1.75;color:#b8cae0;max-width:62ch}
+.maintenance-quote{margin:16px 0 0;padding:12px 14px;border-left:3px solid #ff6ec0;background:#ff6ec014;
+  border-radius:0 4px 4px 0;font-size:clamp(12px,1.4vw,15px);line-height:1.6;font-style:italic;color:#ffd6ec}
+.maintenance-quote cite{display:block;margin-top:6px;font-size:9px;letter-spacing:1.4px;font-style:normal;color:#c39ab5}
+.maintenance-eta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 12px;border-radius:3px;
+  background:#14243d;border:1px solid #2b3f5d;font-size:10px;letter-spacing:1.3px;color:#9fc0e4;font-weight:700}
+.maintenance-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.maintenance-actions button{display:inline-flex;align-items:center;gap:8px;font-size:12px;padding:11px 15px}
+.maintenance-safe{display:flex;align-items:center;gap:7px;margin-top:14px;font-size:10px;line-height:1.6;color:#8fa8c4}
+.maintenance-safe svg{flex-shrink:0;color:#68d6b4}
+.maintenance-notes{margin-top:10px;border-top:1px solid #24344f;padding-top:18px}
+.maintenance-notes h2{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:1.6px;text-transform:uppercase;
+  color:#cfe2f7;margin:0 0 14px;font-weight:800}
+.maintenance-notes h2 svg{color:#ff6ec0}
+.maintenance-notes ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.maintenance-notes li{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:4px;
+  background:#0d1729;border:1px solid #22334d}
+.maintenance-notes li>svg{flex-shrink:0;margin-top:2px;color:#5fd0a8}
+.maintenance-notes strong{display:block;font-size:12px;color:#eaf4ff;margin-bottom:3px;letter-spacing:.3px}
+.maintenance-notes p{font-size:11px;line-height:1.7;color:#9db3cb}
+.maintenance-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:14px;
+  border-top:1px solid #24344f;font-size:8px;letter-spacing:1.6px;color:#6f88a6;font-weight:700}
+
+/* A phone gets the same information, stacked, without the squeeze. */
+@media(max-width:760px){
+  .maintenance-hero{grid-template-columns:1fr}
+  .maintenance-star img{height:clamp(180px,26vh,260px);object-position:50% 12%}
+  .maintenance-foot{flex-direction:column;gap:6px}
+  .penelope-scare-foot{bottom:14px}
+}
+/* Nobody should be flashed by a maintenance notice. */
+@media(prefers-reduced-motion:reduce){
+  .penelope-scare,.penelope-scare-flash,.penelope-scare-face,.penelope-scare-face img,.penelope-scare-word,
+  .maintenance-star img{animation:none!important}
+  .penelope-scare-flash{opacity:.18}
+}
+.reduce-motion .penelope-scare,.reduce-motion .penelope-scare-flash,.reduce-motion .penelope-scare-face,
+.reduce-motion .penelope-scare-face img,.reduce-motion .penelope-scare-word,.reduce-motion .maintenance-star img{animation:none!important}
+
+/* The script-less version of the notice, rendered inside the scare's <noscript>. */
+.maintenance-noscript{position:fixed;inset:0;z-index:9001;overflow:auto;padding:clamp(18px,4vw,48px);
+  background:#0d1526;color:#e9f2ff;font-size:13px;line-height:1.75}
+.maintenance-noscript h1{font-size:clamp(20px,3.2vw,32px);font-style:italic;margin:0 0 14px;color:#fff}
+.maintenance-noscript p{margin:0 0 12px;color:#b8cae0}
+.maintenance-noscript ul{margin:0;padding-left:18px;color:#9db3cb}
+.maintenance-noscript li{margin-bottom:8px}
+.maintenance-noscript strong{color:#eaf4ff}

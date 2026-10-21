@@ -444,3 +444,53 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 
 .home-menu>.starter-gift-mobile{display:none}
 @media(max-width:650px){.home-menu>.starter-gift-mobile{display:block}.home-scene:has(.starter-gift-button){min-height:1010px}}
+
+/* ============ RARITY LADDER: UR IS THE TOP ==============================
+   The colours used to say the opposite of the truth. SSR wore the gold, the
+   glow and the loudest pull card, while UR - the highest rarity in the game -
+   wore a quiet pink. These overrides put the gold on UR and demote SSR to a
+   deep, cool violet-blue so the ladder reads UR > SSR > SR > R at a glance.
+
+   src/lib/rarity.ts owns the order; this is only how that order looks. */
+.rarity-badge.rarity-UR{
+  color:#7a4a06;
+  background:linear-gradient(150deg,#fff7d9,#ffd977 55%,#ffb637);
+  border-color:#ffdf8d;
+  box-shadow:0 0 0 1px #fff6cf inset,0 2px 10px #ffb6374d;
+}
+.rarity-badge.rarity-SSR{color:#4b3f9e;background:linear-gradient(150deg,#f3f1ff,#d6d0fb);border-color:#b9b1f0}
+.rarity-badge.rarity-SR{color:#9470b1;background:#efe4fb;border-color:#d8c6e8}
+.pull-result.rarity-UR{
+  background:linear-gradient(150deg,#fff9e3,#ffe3a3 52%,#f3c261);
+  border-color:#fff3c4;
+  box-shadow:0 0 34px #ffc94e5c,0 0 0 1px #fff6d6 inset;
+}
+.pull-result.rarity-UR::after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(115deg,transparent 30%,#ffffffb0 46%,transparent 62%);
+  mix-blend-mode:soft-light;animation:ur-sheen 3.4s ease-in-out infinite;
+}
+@keyframes ur-sheen{0%,100%{opacity:0;transform:translateX(-30%)}50%{opacity:1;transform:translateX(30%)}}
+.pull-result.rarity-SSR{background:linear-gradient(150deg,#f4f2ff,#cdc4f6);border-color:#e0d9ff;box-shadow:0 0 25px #8f7df03b}
+.pull-result.rarity-SR{background:linear-gradient(150deg,#f7f0ff,#e0d2f2);border-color:#e8dcf6}
+/* The pull-reveal border colour, so a UR reveal is visibly the top of the
+   ladder rather than the quiet pink it used to be. */
+.reveal-overlay.revealed .pull-result{border-width:1px}
+
+/* The rates dialog: tier name, a one-line explanation, and the top-tier chip. */
+.rates-table>div>span:nth-child(2){display:flex;flex-direction:column;gap:2px}
+.rates-table .rates-tier-chip{
+  font-size:7px;letter-spacing:1px;font-weight:800;color:#8a5b00;
+  background:linear-gradient(120deg,#fff2c2,#ffd977);border:1px solid #ffd977;
+  padding:2px 5px;border-radius:2px;align-self:flex-start;
+}
+.rates-tier-blurb{font-size:9px;line-height:1.5;color:#8c9baf;font-weight:400;letter-spacing:0}
+.rates-pool-item .rates-pool-range{font-size:7px;letter-spacing:.5px;color:#93a7bb;font-weight:700}
+.rates-pool-item .rates-pool-range.ranged{color:#3f86c9}
+/* Roster + character detail: the range chip. */
+.range-chip{display:inline-flex;align-items:center;gap:4px;font-size:7px;letter-spacing:1px;font-weight:700;padding:3px 6px;border-radius:2px;background:#eaf3fb;color:#5f88ab;border:1px solid #d3e6f5}
+.range-chip.ranged{background:#e6f2ff;color:#2f7fca;border-color:#bcdcf7}
+.range-chip.melee{background:#fff2e6;color:#b97a3f;border-color:#f2ddc4}
+.character-detail-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
+.cameo-note{display:flex;gap:8px;align-items:flex-start;font-size:9px;line-height:1.6;color:#8a9bb0;background:#f5f9fd;border:1px solid #e2edf7;border-radius:3px;padding:8px 10px;margin-top:10px}
+.cameo-note>svg{flex-shrink:0;margin-top:1px;color:#7fa6c9}

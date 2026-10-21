@@ -226,6 +226,37 @@ Note that Supabase shows connection strings with a `[YOUR-PASSWORD]`
 placeholder — pasting that into a secret without substituting the real
 password is the single most common cause of this failure.
 
+## 8. Maintenance mode (this branch ships with the doors shut)
+
+Patch 0.2 changes the rarity ladder, the combat choreography and the UR pool, so
+the game closes itself while it lands. `src/lib/maintenance.ts` owns the switch:
+
+| `MAINTENANCE_MODE` | Result |
+| --- | --- |
+| missing, `true`, `1`, `yes`, anything else | **closed** (the default) |
+| `off`, `false`, `0`, `no`, `disabled`, `live` | open |
+
+While the doors are shut:
+
+* `/` renders the maintenance notice instead of the game — a Penelope jumpscare
+  on arrival (Reduced Motion gets the same face without the shake or the noise),
+  then the patch notes, the ETA and a reload button;
+* `POST /api/game` answers `503` with a short message **before** touching the
+  database, so no action from a tab that is already open can resolve;
+* an open tab is evicted within ~15 seconds: the client polls `/api/status`
+  (also on focus) and replaces whatever is on screen — battle included — with
+  the notice;
+* `/api/health` deliberately still answers `{"ok":true}` so the deploy workflow
+  can verify the release.
+
+To reopen the game after the deploy is green: Vercel → Project → Settings →
+Environment Variables → set `MAINTENANCE_MODE=off` (or delete it) → redeploy
+(env changes need a new deployment). `GET /api/status` should then report
+`"maintenance": false` and `/` should serve the game again.
+
+Locally, `MAINTENANCE_MODE=off npm run dev` plays the patched build, and
+`npm run dev` shows the notice.
+
 ## Art assets (not a deploy blocker)
 
 Character art ships in `public/images/` as `splash-<id>.png`

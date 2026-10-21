@@ -106,7 +106,7 @@ test("only the featured character may be advertised as rate up", () => {
 test("the rates dialog reads the live pool rather than a hardcoded list", () => {
   const view = read("src/components/game-views.tsx");
   assert.match(view, /pullOdds\(\)/, "the dialog must list the pool from pullOdds()");
-  assert.match(view, /PULL_RATES\./, "the dialog must read the shared rate constants");
+  assert.match(view, /PULL_RATES\s*[.[]/, "the dialog must read the shared rate constants");
   // a hardcoded percentage table is what drifted before
   assert.doesNotMatch(view, /\["UR", "Ultra Rare", "0\.10%"\]/,
     "the dialog still contains a hardcoded rate table");
