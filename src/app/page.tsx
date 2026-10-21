@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   const status = maintenanceStatus();
-  // The door is shut. Nobody boots into the game - not even to the title screen
-  // - while a patch is applying.
+  // Only while an operator has closed the game (MAINTENANCE_MODE=on). Nobody
+  // boots in - not even to the title screen - while a patch is applying.
   if (status.active) return <MaintenanceScreen info={status} />;
   return <Game />;
 }

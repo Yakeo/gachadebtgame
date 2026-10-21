@@ -226,15 +226,17 @@ Note that Supabase shows connection strings with a `[YOUR-PASSWORD]`
 placeholder — pasting that into a secret without substituting the real
 password is the single most common cause of this failure.
 
-## 8. Maintenance mode (this branch ships with the doors shut)
+## 8. Maintenance mode (open by default)
 
-Patch 0.2 changes the rarity ladder, the combat choreography and the UR pool, so
-the game closes itself while it lands. `src/lib/maintenance.ts` owns the switch:
+Patch 0.2 shipped with the doors shut so the rarity ladder, the combat rewrite
+and the new UR pool would not land underneath somebody mid-battle. That deploy
+is verified and the sign is down, so the game is **open by default**.
+`src/lib/maintenance.ts` owns the switch:
 
 | `MAINTENANCE_MODE` | Result |
 | --- | --- |
-| missing, `true`, `1`, `yes`, anything else | **closed** (the default) |
-| `off`, `false`, `0`, `no`, `disabled`, `live` | open |
+| `on`, `true`, `1`, `yes`, `maintenance`, `closed`, `down` | **closed** |
+| missing, `off`, `false`, `0`, `no`, `open`, `live`, any typo | open (the default) |
 
 While the doors are shut:
 
@@ -249,13 +251,17 @@ While the doors are shut:
 * `/api/health` deliberately still answers `{"ok":true}` so the deploy workflow
   can verify the release.
 
-To reopen the game after the deploy is green: Vercel → Project → Settings →
-Environment Variables → set `MAINTENANCE_MODE=off` (or delete it) → redeploy
-(env changes need a new deployment). `GET /api/status` should then report
-`"maintenance": false` and `/` should serve the game again.
+To close the game for the next patch: Vercel → Project → Settings →
+Environment Variables → set `MAINTENANCE_MODE=on` → redeploy (env changes need a
+new deployment). `GET /api/status` then reports `"maintenance": true`, `/`
+serves the notice, and open tabs are evicted within ~15 seconds.
 
-Locally, `MAINTENANCE_MODE=off npm run dev` plays the patched build, and
-`npm run dev` shows the notice.
+To reopen it afterwards: set `MAINTENANCE_MODE=off` (or delete the variable) and
+redeploy. `GET /api/status` should report `"maintenance": false` and `/` should
+serve the game again.
+
+Locally, `npm run dev` plays the game, and `MAINTENANCE_MODE=on npm run dev`
+shows the notice.
 
 ## Art assets (not a deploy blocker)
 
