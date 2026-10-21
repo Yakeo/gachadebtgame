@@ -29,15 +29,18 @@
       "rightsHolder": "TYPE-MOON / Lasengle",
       "source": "Generated pixel-art battle sprite; the roster's own models were supplied as style references",
       "sourceFile": "art-source/cameo/models/hokusai-model-source.png",
-      "sourceSha256": "c5a05fb73f1e87f0088faaa990ebf086c52157d40424246136890c459208fe2a",
+      "sourceSha256": "09413ca28c0a939fa633604eb6ecd8917a39498d45aa3879dff5deac7279fabb",
       "model": "/images/splash-hokusai.png",
-      "modelSha256": "88098862b6534efdb9bc1c54a9863584886cf12ca53cae582f6d17cd0485dfe8",
+      "modelSha256": "e7085af925cdce1faccc8e0d64c2f12ea0197a69acc620eaf4485ed2b7f4bd2d",
       "keyart": "/images/keyart-hokusai.webp",
       "keyartSha256": "1a51d01a552c3c68ae0024a6593a8f1688bc1a53857828fcbefebab5f6ca0247",
       "keyartNote": "2x Lanczos upscale of the supplied painting (360\u00d7509) with a mild unsharp pass; no detail invented",
       "illustration": "art-source/cameo/hokusai-source.png",
       "illustrationSha256": "213e43850a5a23181d7173926bd514b246a6280db679dff21643ce61234380c5",
-      "build": "chroma key on a flat green field, fringe colour reconstruction, 2x pixel re-grid, 128 colours, nearest-neighbour upscale onto the 861x1000 canvas"
+      "build": "chroma key on a flat green field, fringe colour reconstruction, 2x pixel re-grid, 128 colours, --no-green palette cleanup, nearest-neighbour upscale onto the 861x1000 canvas",
+      "designReference": "art-source/cameo/hokusai-design-reference.png",
+      "designReferenceSha256": "43ff76d202d9fc6346dbf6cd0d67ce8a0d143a5bc427dcc5d31f51335151726e",
+      "designNote": "Redrawn from the updated player reference: short wavy purple hair, ornate crimson bows and purple flowers, gold hairpins, teal ribbon, red/ivory bird-patterned kimono, lacquered floral brush and floating octopus familiar. Illustration/keyart unchanged."
     }
   ],
   "notes": "Battle models are purpose-drawn pixel sprites in the roster idiom and are built by scripts/prepare-cameo-sprites.py onto the 861x1000 canvas at the 900px floor. The player-supplied illustrations are still kept as art-source and still supply the keyart used on character pages and pull results."

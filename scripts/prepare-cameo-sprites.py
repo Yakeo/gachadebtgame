@@ -45,6 +45,8 @@ parser.add_argument("--blocks", type=int, default=2, help="pixel-block size in t
 parser.add_argument("--colors", type=int, default=128, help="palette size")
 parser.add_argument("--key-tolerance", type=float, default=70.0,
                     help="RGB distance from the chroma colour treated as background")
+parser.add_argument("--no-green", action="store_true",
+                    help="Remove residual green clusters after quantization; only for outfits without green fabric")
 args = parser.parse_args()
 
 
@@ -126,6 +128,20 @@ for character in args.ids:
     regridded = regridded.convert("RGB").quantize(colors=args.colors, dither=Image.Dither.NONE)
     regridded = regridded.convert("RGBA")
     regridded.putalpha(alpha)
+    if args.no_green:
+        # Dark chroma contamination can survive as tiny opaque pixel clusters.
+        # Preserve teal (blue and green balanced); replace green-biased clusters
+        # with nearby drawn colours, never erode the character's silhouette.
+        rgba = np.array(regridded)
+        rgb = rgba[..., :3]
+        solid = rgba[..., 3] > 0
+        bias = rgb[..., 1].astype(np.int16) - np.maximum(rgb[..., 0], rgb[..., 2]).astype(np.int16)
+        spill = solid & (bias > 18)
+        clean = solid & ~spill
+        if spill.any() and clean.any():
+            rgba[..., :3] = np.where(spill[..., None], nearest_colour(rgb, clean), rgb)
+            regridded = Image.fromarray(rgba, "RGBA")
+
 
     height = args.height
     width = round(grid_width * height / grid_height)

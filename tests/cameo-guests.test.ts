@@ -16,7 +16,7 @@ import { stages } from "../src/lib/campaign";
 const guests = ["chen", "hokusai"] as const;
 const manifest = JSON.parse(readFileSync("art-source/cameo/manifest.json", "utf8")) as {
   canvas: number[]; floor: number;
-  records: { id: string; origin: string; sourceFile: string; sourceSha256: string; illustration: string; illustrationSha256: string; model: string; modelSha256: string; keyart: string; keyartSha256: string; build: string }[];
+  records: { id: string; origin: string; sourceFile: string; sourceSha256: string; illustration: string; illustrationSha256: string; model: string; modelSha256: string; keyart: string; keyartSha256: string; build: string; designReference?: string; designReferenceSha256?: string; designNote?: string }[];
 };
 const sha = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex");
 
@@ -114,4 +114,16 @@ test("cameos are recruits, not story characters", () => {
   for (const stage of stages) for (const line of stage.pre) {
     if (line.kind === "line") assert.ok(!guests.includes(line.speaker as typeof guests[number]));
   }
+});
+
+
+test("Hokusai's remodeled sprite retains the updated player reference and reproducible recipe", () => {
+  const record = manifest.records.find(r => r.id === "hokusai")!;
+  assert.ok(record.designReference);
+  assert.ok(existsSync(record.designReference));
+  assert.equal(sha(record.designReference), record.designReferenceSha256);
+  assert.match(record.build, /--no-green/);
+  assert.match(record.designNote!, /teal ribbon/);
+  assert.match(record.designNote!, /octopus/);
+  assert.notEqual(record.designReference, record.sourceFile, "the reference is not substituted for the drawn sprite");
 });
