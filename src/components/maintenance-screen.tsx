@@ -96,7 +96,6 @@ export function MaintenanceScreen({ info, onRetry }: { info: MaintenanceInfo; on
     </div>;
   }
 
-  const [quoteIdx, setQuoteIdx] = useState(0);
   const quotes = [
     info.star.line,
     "I didn’t unplug the server. I needed the outlet for the waffle iron.",
