@@ -75,7 +75,7 @@ export function MaintenanceScreen({ info, onRetry }: { info: MaintenanceInfo; on
       aria-label="Penelope is screaming about the patch notes" onClick={() => setPhase("notice")}>
       <div className="penelope-scare-flash" aria-hidden="true" />
       <div className="penelope-scare-face">
-        <img src="/images/faces/penelope-shocked.png" alt="Penelope, screaming" draggable={false} />
+        <img src="/images/keyart-penelope.webp" alt="Penelope, screaming" draggable={false} />
         <span className="penelope-scare-word">PAN!</span>
       </div>
       <div className="penelope-scare-foot">

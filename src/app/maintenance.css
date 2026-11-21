@@ -56,6 +56,7 @@
 /* ---------- The notice --------------------------------------------------- */
 .maintenance-screen{
   position:fixed;inset:0;z-index:8000;overflow:auto;
+  display:grid;place-items:center;
   background:
     radial-gradient(ellipse at 12% 8%,#ff6ec01f,transparent 55%),
     radial-gradient(ellipse at 92% 4%,#318fed26,transparent 50%),
@@ -88,14 +89,14 @@
 @keyframes star-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
 .maintenance-star-tag{position:absolute;left:10px;top:10px;display:inline-flex;gap:5px;align-items:center;
   font-size:8px;font-weight:800;letter-spacing:1.6px;color:#2a0b16;background:#ff9ecb;padding:4px 7px;border-radius:2px}
-.maintenance-kicker{display:inline-flex;align-items:center;gap:7px;font-size:9px;letter-spacing:2.2px;
+.maintenance-kicker{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:2.4px;
   color:#8ec5ff;font-weight:800;margin-bottom:10px}
-.maintenance-copy h1{font-size:clamp(27px,4.2vw,46px);line-height:1.02;font-style:italic;font-weight:800;
-  letter-spacing:-1px;margin:0 0 12px;color:#fff;text-shadow:0 0 30px #2f8fff44}
-.maintenance-message{font-size:clamp(12px,1.35vw,14px);line-height:1.75;color:#b8cae0;max-width:62ch}
-.maintenance-quote{margin:16px 0 0;padding:12px 14px;border-left:3px solid #ff6ec0;background:#ff6ec014;
-  border-radius:0 4px 4px 0;font-size:clamp(12px,1.4vw,15px);line-height:1.6;font-style:italic;color:#ffd6ec}
-.maintenance-quote cite{display:block;margin-top:6px;font-size:9px;letter-spacing:1.4px;font-style:normal;color:#c39ab5}
+.maintenance-copy h1{font-size:clamp(32px,4.8vw,54px);line-height:1.02;font-style:italic;font-weight:900;
+  letter-spacing:-1px;margin:0 0 14px;color:#fff;text-shadow:0 0 30px #2f8fff44}
+.maintenance-message{font-size:clamp(15px,1.6vw,18px);line-height:1.7;color:#c9d8eb;max-width:58ch}
+.maintenance-quote{margin:18px 0 0;padding:14px 16px;border-left:4px solid #ff6ec0;background:#ff6ec018;
+  border-radius:0 6px 6px 0;font-size:clamp(15px,1.6vw,19px);line-height:1.55;font-style:italic;color:#ffd6ec}
+.maintenance-quote cite{display:block;margin-top:8px;font-size:11px;letter-spacing:1.6px;font-style:normal;color:#d6a9c7}
 .maintenance-eta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 12px;border-radius:3px;
   background:#14243d;border:1px solid #2b3f5d;font-size:10px;letter-spacing:1.3px;color:#9fc0e4;font-weight:700}
 .maintenance-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
