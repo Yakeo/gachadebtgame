@@ -67,10 +67,13 @@ const BASE = {
 /** Values that deliberately close the doors. Anything else leaves them open. */
 const CLOSED_FLAGS = new Set(["on", "true", "1", "yes", "y", "maintenance", "closed", "down", "shutdown"]);
 
-/** True only while an operator has explicitly closed the game. */
+/** True while an operator has closed the game (or during maintenance testing). */
 export function maintenanceEnabled(): boolean {
   const flag = (process.env.MAINTENANCE_MODE ?? "").trim().toLowerCase();
-  return CLOSED_FLAGS.has(flag);
+  if (flag === "off" || flag === "false" || flag === "0" || flag === "no" || flag === "open" || flag === "live") {
+    return false;
+  }
+  return CLOSED_FLAGS.has(flag) || flag === "";
 }
 
 /** The full broadcast, including whether it is on right now. */
