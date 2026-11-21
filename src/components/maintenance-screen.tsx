@@ -95,50 +95,50 @@ export function MaintenanceScreen({ info, onRetry }: { info: MaintenanceInfo; on
     </div>;
   }
 
+  const [quoteIdx, setQuoteIdx] = useState(0);
+  const quotes = [
+    info.star.line,
+    "I didn’t unplug the server. I needed the outlet for the waffle iron.",
+    "The treasurer said 'no touching the database' so I touched it with a spatula.",
+    "Everything is fine! The smoke means it’s cooking!",
+    "If you’re reading this, I’m currently holding the door shut with a frying pan.",
+  ];
+
   return <div className="maintenance-screen">
     <div className="maintenance-stripes" aria-hidden="true" />
     <div className="maintenance-shell">
       <header className="maintenance-head">
-        <span className="maintenance-tape"><AlertTriangle size={12} /> COUNCIL EMERGENCY BROADCAST · MAINTENANCE</span>
-        <span className="maintenance-patch">PATCH {info.patch} · {info.name}</span>
+        <span className="maintenance-tape"><AlertTriangle size={12} /> SYSTEM UNDER MAINTENANCE</span>
+        <span className="maintenance-patch">503 · PENELOPE ON DUTY</span>
       </header>
 
       <div className="maintenance-hero">
         <div className="maintenance-star">
           <img src="/images/keyart-penelope.webp" alt="Penelope, holding a frying pan" draggable={false} />
-          <span className="maintenance-star-tag"><Flame size={11} /> ON DUTY</span>
+          <span className="maintenance-star-tag"><Flame size={11} /> CHAOS</span>
         </div>
         <div className="maintenance-copy">
-          <p className="maintenance-kicker"><Sparkles size={13} /> THE SUPREME PAN REQUESTS A MOMENT</p>
-          <h1>{info.headline}</h1>
-          <p className="maintenance-message">{info.message}</p>
-          <blockquote className="maintenance-quote">“{info.star.line}” <cite>— {info.star.name}, holding the door</cite></blockquote>
-          <div className="maintenance-eta"><Clock3 size={14} />{info.eta}</div>
+          <p className="maintenance-kicker"><Sparkles size={13} /> PLEASE STAND BY</p>
+          <h1>System Under Maintenance.</h1>
+          <p className="maintenance-message">
+            The council servers are temporarily down while Penelope sorts things out. Your save data is safe.
+          </p>
+          <blockquote className="maintenance-quote">“{quotes[quoteIdx]}” <cite>— {info.star.name}</cite></blockquote>
           <div className="maintenance-actions">
-            <button className="primary-button" onClick={() => { setScared(true); scareAgain(); }}>
-              <Utensils size={16} />{scared ? "Penelope is still here" : "Check the door again"}
+            <button className="primary-button" onClick={() => { setScared(true); setQuoteIdx(i => (i + 1) % quotes.length); scareAgain(); }}>
+              <Utensils size={16} />{scared ? "Poke Penelope again" : "Check the door"}
             </button>
             <button className="secondary-button" onClick={onRetry ?? (() => window.location.reload())}>
               Reload the page <ArrowRight size={15} />
             </button>
           </div>
-          <p className="maintenance-safe"><ShieldCheck size={13} />Your save is untouched: levels, potential, pity and pull history all survive the smoke.</p>
+          <p className="maintenance-safe"><ShieldCheck size={13} />Your save is untouched.</p>
         </div>
       </div>
 
-      <div className="maintenance-notes">
-        <h2><Heart size={15} /> What is actually being patched</h2>
-        <ol>
-          {info.notes.map(note => <li key={note.title}>
-            <Check size={14} />
-            <div><strong>{note.title}</strong><p>{note.body}</p></div>
-          </li>)}
-        </ol>
-      </div>
-
       <footer className="maintenance-foot">
-        <span>GACHA DEBT · PREVIEW 0.1 → {info.patch}</span>
-        <span>NO GEMS WERE HARMED · THE KITCHEN WAS ALREADY ON FIRE</span>
+        <span>GACHA DEBT · MAINTENANCE</span>
+        <span>PENELOPE WAS HERE</span>
       </footer>
     </div>
   </div>;
