@@ -25,6 +25,7 @@ const JUMPSCARE_MS = 1500;
 export function MaintenanceScreen({ info, onRetry }: { info: MaintenanceInfo; onRetry?: () => void }) {
   const [phase, setPhase] = useState<"scare" | "notice">("scare");
   const [scared, setScared] = useState(false);
+  const [quoteIdx, setQuoteIdx] = useState(0);
   const audio = useRef<AudioContext | null>(null);
   const shake = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
