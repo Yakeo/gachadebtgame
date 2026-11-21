@@ -14,7 +14,7 @@ const cards = [
 ];
 
 export function LoadingScreen({ onComplete }: { onComplete: (next: "title" | "login" | "game") => void }) {
-  const { reducedMotion, setAccount, setGoogleEnabled, notify } = useGame();
+  const { reducedMotion, setAccount, setGoogleEnabled, setMaintenance, notify } = useGame();
   const [step, setStep] = useState(0);
   const [shown, setShown] = useState(true);
   const [serverReady, setServerReady] = useState(false);
@@ -34,30 +34,46 @@ export function LoadingScreen({ onComplete }: { onComplete: (next: "title" | "lo
       notify(authError === "google-not-configured" ? "Google sign-in needs server credentials. Email accounts are available now." : authError === "email-exists" ? "This email already has an account. Sign in with your password first, then connect Google." : "Google sign-in was interrupted. Please try again.", "error");
     }
     let stop = false;
+    const triggerMaintenance = async () => {
+      const status = await fetch("/api/status", { cache: "no-store" }).then(r => r.json()).catch(() => null);
+      if (stop) return;
+      setMaintenance(status ?? {
+        active: true,
+        patch: "0.2",
+        name: "SERVER CONNECTION LOST",
+        headline: "Penelope tripped over the power cord.",
+        message: "The council server is not responding right now. Penelope is holding the door (and a frying pan) while things get sorted out.",
+        eta: "Back as soon as the server wakes up",
+        startedAt: new Date().toISOString(),
+        notes: [
+          { title: "Your save is fine", body: "Levels, potential, pity counters and pull history are untouched." },
+        ],
+        star: { id: "penelope", name: "Penelope", line: "I didn’t break the server. I FIXED it. Loudly." },
+      });
+    };
     (async () => {
-      for (let i = 0; i < 40 && !stop; i++) {
-        try {
-          const [health, session, auth] = await Promise.all([
-            fetch("/api/health", { cache: "no-store" }),
-            fetch("/api/game", { cache: "no-store" }),
-            fetch("/api/auth", { cache: "no-store" }),
-          ]);
-          if (health.ok && session.ok) {
-            const save = await session.json() as { player: Player | null; state: import("@/lib/game-data").GameState | null };
-            const flags = await auth.json().catch(() => ({ googleEnabled: false }));
-            setGoogleEnabled(!!flags.googleEnabled);
-            if (save.player && save.state) setAccount(save.player, save.state);
-            if (signedIn && save.player) nextPhase.current = "game";
-            setServerReady(true);
-            return;
-          }
-        } catch { /* keep waiting for the server */ }
-        await new Promise(resolve => setTimeout(resolve, 700));
+      try {
+        const [health, session, auth] = await Promise.all([
+          fetch("/api/health", { cache: "no-store" }),
+          fetch("/api/game", { cache: "no-store" }),
+          fetch("/api/auth", { cache: "no-store" }),
+        ]);
+        if (health.ok && session.ok) {
+          const save = await session.json() as { player: Player | null; state: import("@/lib/game-data").GameState | null };
+          const flags = await auth.json().catch(() => ({ googleEnabled: false }));
+          setGoogleEnabled(!!flags.googleEnabled);
+          if (save.player && save.state) setAccount(save.player, save.state);
+          if (signedIn && save.player) nextPhase.current = "game";
+          setServerReady(true);
+          return;
+        }
+        await triggerMaintenance();
+      } catch {
+        await triggerMaintenance();
       }
-      if (!stop) setServerError(true);
     })();
     return () => { stop = true; };
-  }, [attempt, notify, setAccount, setGoogleEnabled]);
+  }, [attempt, notify, setAccount, setGoogleEnabled, setMaintenance]);
 
   useEffect(() => {
     if (serverError || done.current) return;
