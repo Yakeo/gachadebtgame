@@ -104,42 +104,42 @@ export function MaintenanceScreen({ info, onRetry }: { info: MaintenanceInfo; on
     "If you’re reading this, I’m currently holding the door shut with a frying pan.",
   ];
 
-  return <div className="maintenance-screen">
+  return <main className="maintenance-screen" aria-labelledby="maintenance-title">
     <div className="maintenance-stripes" aria-hidden="true" />
     <div className="maintenance-shell">
       <header className="maintenance-head">
-        <span className="maintenance-tape"><AlertTriangle size={12} /> SYSTEM UNDER MAINTENANCE</span>
-        <span className="maintenance-patch">503 · PENELOPE ON DUTY</span>
+        <span className="maintenance-tape"><AlertTriangle size={13} aria-hidden="true" /> 503 · SERVICE UNAVAILABLE</span>
+        <span className="maintenance-patch">TEMPORARY DOWNTIME</span>
       </header>
 
       <div className="maintenance-hero">
         <div className="maintenance-star">
-          <img src="/images/keyart-penelope.webp" alt="Penelope, holding a frying pan" draggable={false} />
-          <span className="maintenance-star-tag"><Flame size={11} /> CHAOS</span>
+          <img src="/images/keyart-penelope.webp" alt="Penelope holding a megaphone and frying pans" draggable={false} />
+          <span className="maintenance-star-tag"><Flame size={11} aria-hidden="true" /> ON DUTY</span>
         </div>
         <div className="maintenance-copy">
-          <p className="maintenance-kicker"><Sparkles size={13} /> PLEASE STAND BY</p>
-          <h1>System Under Maintenance.</h1>
+          <p className="maintenance-kicker"><Sparkles size={13} aria-hidden="true" /> SCHEDULED &amp; EMERGENCY MAINTENANCE</p>
+          <h1 id="maintenance-title">Temporarily Down for Maintenance.</h1>
           <p className="maintenance-message">
-            The council servers are temporarily down while Penelope sorts things out. Your save data is safe.
+            The Gacha Debt servers are temporarily unavailable (HTTP 503) while we apply updates and stabilize the connection. Please check back in a few minutes.
           </p>
-          <blockquote className="maintenance-quote">“{quotes[quoteIdx]}” <cite>— {info.star.name}</cite></blockquote>
+          <blockquote className="maintenance-quote" aria-live="polite">“{quotes[quoteIdx]}” <cite>— {info.star.name}, holding the door</cite></blockquote>
           <div className="maintenance-actions">
-            <button className="primary-button" onClick={() => { setScared(true); setQuoteIdx(i => (i + 1) % quotes.length); scareAgain(); }}>
-              <Utensils size={16} />{scared ? "Poke Penelope again" : "Check the door"}
+            <button className="primary-button" onClick={onRetry ?? (() => window.location.reload())}>
+              Reload Page <ArrowRight size={15} aria-hidden="true" />
             </button>
-            <button className="secondary-button" onClick={onRetry ?? (() => window.location.reload())}>
-              Reload the page <ArrowRight size={15} />
+            <button className="secondary-button" onClick={() => { setScared(true); setQuoteIdx(i => (i + 1) % quotes.length); scareAgain(); }}>
+              <Utensils size={16} aria-hidden="true" />{scared ? "Poke Penelope again" : "Check the door"}
             </button>
           </div>
-          <p className="maintenance-safe"><ShieldCheck size={13} />Your save is untouched.</p>
+          <p className="maintenance-safe"><ShieldCheck size={14} aria-hidden="true" />Your account, pulls, and save data are completely safe.</p>
         </div>
       </div>
 
       <footer className="maintenance-foot">
-        <span>GACHA DEBT · MAINTENANCE</span>
-        <span>PENELOPE WAS HERE</span>
+        <span>STATUS: 503 SERVICE UNAVAILABLE</span>
+        <span>GACHA DEBT · COUNCIL DESK</span>
       </footer>
     </div>
-  </div>;
+  </main>;
 }
