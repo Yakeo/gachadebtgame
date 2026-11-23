@@ -121,7 +121,7 @@ export function MaintenanceScreen({ info, onRetry }: { info: MaintenanceInfo; on
           <p className="maintenance-kicker"><Sparkles size={13} aria-hidden="true" /> SCHEDULED &amp; EMERGENCY MAINTENANCE</p>
           <h1 id="maintenance-title">Temporarily Down for Maintenance.</h1>
           <p className="maintenance-message">
-            The Gacha Debt servers are temporarily unavailable (HTTP 503) while we apply updates and stabilize the connection. Please check back in a few minutes.
+            The Gacha Debt servers are temporarily unavailable while we apply updates and stabilize the connection. Please check back in a few minutes.
           </p>
           <blockquote className="maintenance-quote" aria-live="polite">“{quotes[quoteIdx]}” <cite>— {info.star.name}, holding the door</cite></blockquote>
           <div className="maintenance-actions">
