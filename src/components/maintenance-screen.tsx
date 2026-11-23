@@ -56,6 +56,7 @@ export function MaintenanceScreen({ info, onRetry }: { info: MaintenanceInfo; on
   }, [shake]);
 
   useEffect(() => {
+    void fetch("/api/health", { cache: "no-store" }).catch(() => {});
     scream();
     const timer = setTimeout(() => setPhase("notice"), shake ? 250 : JUMPSCARE_MS);
     return () => clearTimeout(timer);
